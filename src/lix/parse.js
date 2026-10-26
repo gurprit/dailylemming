@@ -58,9 +58,10 @@ export function parseLix(source, { sourcePath = '' } = {}) {
       return;
     }
     if (line.startsWith('$')) {
-      const hit = line.match(/^\$([A-Z_]+)\s+(.*)$/);
+      const hit = line.match(/^\$([A-Z_]+)(?:\s+(.*))?$/);
       if (!hit) throw new Error('Malformed property on line ' + (idx + 1));
-      const [, key, value] = hit;
+      const [, key, rawValue] = hit;
+      const value = rawValue || '';
       if (key === 'AUTHOR') level.author = value;
       if (key === 'ENGLISH') level.title = value;
       if (key === 'BUILT') level.built = value;
