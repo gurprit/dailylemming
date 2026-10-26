@@ -162,12 +162,13 @@ export class Game {
     for (const unit of this.units) {
       if (unit.state !== 'lost' && unit.state !== 'safe') this.stepUnit(unit);
     }
-    if (this.saved >= this.level.required) this.finish(true);
-    else if (this.seconds >= this.level.limit
+    // Wait for the full group instead of ending as soon as the pass threshold is met.
+    // This preserves the chance to rescue 100% and score every survivor.
+    if (this.seconds >= this.level.limit
       || this.lost > this.level.total - this.level.required
       || (this.spawned === this.level.total
         && this.units.every(u => ['lost', 'safe', 'blocker'].includes(u.state))))
-      this.finish(false);
+      this.finish(this.saved >= this.level.required);
     else this.emit();
   }
   finish(won) {
