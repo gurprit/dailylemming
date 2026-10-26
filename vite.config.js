@@ -8,7 +8,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(process.cwd(), 'index.html'),
-        lab: resolve(process.cwd(), 'lab.html')
+        lab: resolve(process.cwd(), 'lab.html'),
+        playLix: resolve(process.cwd(), 'play-lix.html')
       }
     }
   }
