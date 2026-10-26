@@ -93,7 +93,7 @@ export class LixGameModel {
   inHazard(u) {
     return this.hazards.some(g => {
       const w = g.imageData.width, h = g.imageData.height;
-      if (g.image.endsWith('.W')) {
+      if (g.sourceImage.endsWith('.W')) {
         return u.x >= g.x && u.x < g.x + w && u.y >= g.y + 1 && u.y <= g.y + Math.max(h, 12);
       }
       // A provisional trap bounding box, pending Lix trigger-area metadata.
