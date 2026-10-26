@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101728">
+  <title>Lix Level Lab | Daily Lemming</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <style>
+    .lab{max-width:1190px;margin:0 auto;padding:24px}.lab h1{font:700 clamp(28px,5vw,48px)/1.1 system-ui}.lab p{color:#b8c7db;line-height:1.65;max-width:820px}.lab .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:25px 0}.lab select,.lab input{background:#27354c;color:white;padding:12px;border:1px solid #526783;border-radius:9px;max-width:100%}.lab select{min-width:260px;flex:1}.lab .preview{background:#111d32;border:1px solid #455973;overflow:auto;max-height:60vh;border-radius:15px;min-height:240px}.lab canvas{display:block;image-rendering:auto}.lab .detail{border:1px solid #43546b;background:#1a2941;border-radius:12px;padding:20px;margin:20px 0;line-height:1.7}.lab .notice{border-left:3px solid #eecf86;padding-left:16px}.lab .back{display:inline-block;margin-top:15px;font-weight:700}.lab .meta{display:flex;flex-wrap:wrap;gap:20px;color:#d0d8e5}.lab small{color:#a3b5ce}
+  </style>
+  <script type="module" src="/src/lix/lab.js"></script>
+</head>
+<body>
+  <main class="lab">
+    <a class="back" href="/">← Daily Lemming</a>
+    <h1>🧪 Lix Level Lab</h1>
+    <p>Inspect 30 real, community-made <a href="https://www.lixgame.com/">Lix</a> puzzle sources imported under CC0. Their original terrain artwork loads from a pinned upstream source. This preview is a diagnostic aid: the game physics and advanced Lix mechanics have <strong>not</strong> been ported.</p>
+    <div class="bar">
+      <label for="chooser">Source puzzle</label>
+      <select id="chooser"></select>
+      <label for="zoom">Zoom</label>
+      <input id="zoom" type="range" min="35" max="175" step="5" value="100">
+      <output id="zoom-value" for="zoom">100%</output>
+    </div>
+    <p id="status" role="status">Loading puzzle…</p>
+    <div class="preview" id="preview"><canvas id="map" width="880" height="360" aria-label="Approximate Lix level terrain preview"></canvas></div>
+    <div class="detail">
+      <h2 id="title">Puzzle</h2>
+      <div id="metadata" class="meta"></div>
+      <p id="flags"></p>
+      <p><a id="original" href="https://github.com/SimonN/LixD">Open original level source</a></p>
+      <p class="notice"><strong>Not playable or verified yet.</strong> Tile-group transforms, moving goals, sprite animation, collision masks and trap activation may be approximate or absent. This page must never be mistaken for a completed game engine.</p>
+    </div>
+    <small>Artwork and levels © their original creators, dedicated to the public domain under CC0-1.0. This is an independent game-development experiment.</small>
+  </main>
+</body>
+</html>
