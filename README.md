@@ -56,13 +56,14 @@ This is the first browser adapter that:
 - simulates one walking creature, stair-building assignments, death/water, and exit rescue in a deterministic fixed-timestep loop;
 - supports click/touch, pause-to-plan, speed and restart without touching daily records.
 
-**Not verified:** it is not a port of the original Lix physics, skill duration and collision rules are approximations, trigger placements need comparison against original game metadata, and we have **not** proved a human can complete the original puzzle in this adapter. The artwork currently loads over the network from a pinned GitHub revision; there is no offline bundle. Please report any mismatch between screenshots, impossible jumps or unresponsive skill assignments. **It is not yet in the daily puzzle rotation.**
+**Not verified:** it is not a port of the original Lix physics, skill duration and collision rules are approximations, trigger placements need comparison against original game metadata, and we have **not** proved a human can complete the original puzzle in this adapter. For reliable offline-compatible assets after installation, run `npm run lix:vendor:first` to download just the 11 required CC0 images; GitHub Pages builds run the same command and bundle these images. A pinned remote fallback remains for local dev when images are missing. Please report any mismatch between screenshots, impossible jumps or unresponsive skill assignments. **It is not yet in the daily puzzle rotation.**
 
 To try locally:
 
 ```bash
 git switch feat/first-lix-playable
 npm install
+npm run lix:vendor:first
 npm test
 npm run dev
 ```
