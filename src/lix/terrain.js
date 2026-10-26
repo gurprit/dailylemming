@@ -110,7 +110,14 @@ export function composeLixLevel(level, images) {
     const sprite = images.get(tile.image + '.png');
     if (!sprite) throw new Error('Missing required Lix image ' + tile.image + '.png');
     if (tile.kind === 'terrain' || tile.kind === 'steel') terrain.stamp(tile, sprite.data, { steel: tile.kind === 'steel' });
-    else gadgets.push({ ...tile, imageData: sprite.data, image: sprite.canvas });
+    else gadgets.push({
+      ...tile,
+      // A drawable Image/Canvas is not a string resource identifier.
+      // Retain the Lix gadget asset name for water/trap classification.
+      sourceImage: tile.image,
+      imageData: sprite.data,
+      image: sprite.canvas
+    });
   }
   return { terrain, gadgets };
 }
