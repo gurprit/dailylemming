@@ -205,13 +205,16 @@ window.addEventListener('keydown', event => {
   if (event.key.toLowerCase() === 'r') restart();
 });
 window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
-try {
-  spriteCache = await loadArt();
-  model = new LixGameModel(level, spriteCache);
-  el('loading').hidden = true;
-  updateHud(); draw();
-  animation = requestAnimationFrame(loop);
-} catch (error) {
-  el('loading').textContent = 'Unable to load this level: ' + (error?.message || String(error))
-    + '. Please check your internet connection or try again.';
+async function boot() {
+  try {
+    spriteCache = await loadArt();
+    model = new LixGameModel(level, spriteCache);
+    el('loading').hidden = true;
+    updateHud(); draw();
+    animation = requestAnimationFrame(loop);
+  } catch (error) {
+    el('loading').textContent = 'Unable to load this level: ' + (error?.message || String(error))
+      + '. Please check your internet connection or try again.';
+  }
 }
+boot();
