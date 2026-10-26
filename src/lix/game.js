@@ -158,7 +158,7 @@ export class LixGameModel {
     this.ticks++;
     // Lix timing approximation: convert ~50 source frames to 30Hz simulation.
     const interval = Math.max(1, Math.round((this.level.numeric.SPAWN_INTERVAL || 30) * 30 / 60));
-    if (this.spawned < this.initial && this.ticks % interval === 1) this.spawn();
+    if (this.spawned < this.initial && (this.ticks - 1) % interval === 0) this.spawn();
     for (const u of this.units) {
       if (u.state === 'lost' || u.state === 'saved') continue;
       if (u.state === 'builder') this.stepBuilder(u);
