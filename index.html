@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101728">
+  <meta name="description" content="A new creature-rescue puzzle every day. Five minutes to save the wanderers.">
+  <title>Daily Lemming | One puzzle. Every day.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <div class="site">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Daily Lemming home"><span class="brand-symbol">✳</span> DAILY<span>LEMMING</span><span class="brand-dot">.</span></a>
+      <div class="topbar-right">
+        <span class="pill" id="today-label">UTC DAILY CHALLENGE</span>
+        <span class="streak"><span aria-hidden="true">🔥</span> <strong id="streak">0</strong> day streak</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow"><span class="live-dot"></span> ONE LEVEL. ONE DAY. EVERYONE.</div>
+        <h1>Little legs.<br><em>Big decisions.</em></h1>
+        <p>A fresh five-minute escape puzzle every day. Guide your tiny wanderers home, one ridiculous solution at a time.</p>
+      </section>
+      <section class="game-shell" aria-label="Today's escape puzzle">
+        <div class="game-head">
+          <div>
+            <div class="chapter" id="chapter">TODAY'S ESCAPE · #1</div>
+            <h2 id="level-title">Bridge at Dusk</h2>
+            <p id="level-subtitle">Mind the gap. A builder can make a path.</p>
+          </div>
+          <div class="difficulty" id="difficulty">EASY</div>
+        </div>
+        <div class="game-stats">
+          <div><small>RESCUED</small><strong><span id="saved">0</span><span class="stat-secondary" id="total">/8</span></strong></div>
+          <div><small>TO PASS</small><strong id="required">6</strong></div>
+          <div><small>TIME LEFT</small><strong id="time">02:30</strong></div>
+          <div><small>SKILLS USED</small><strong id="used">0</strong></div>
+        </div>
+        <div class="viewport">
+          <canvas id="game" width="880" height="360" role="img" aria-label="Side-scrolling rescue game: tap a moving creature to assign the selected skill"></canvas>
+          <span class="game-label">DAY <span id="day-tag">001</span></span>
+          <span class="build-label">PLAYABLE ALPHA</span>
+        </div>
+        <div class="landscape-tip" aria-live="polite">📱 For easier aiming, rotate your phone to landscape. You can pause while assigning skills.</div>
+        <div class="tools">
+          <div class="tools-top"><span>GIVE THEM A SKILL</span><small>Choose a skill, then tap a wanderer</small></div>
+          <div id="skills" class="skill-grid" aria-label="Available rescue skills"></div>
+          <div class="play-actions">
+            <button type="button" id="pause" class="play-button">⏸ Pause</button>
+            <button type="button" id="speed" class="play-button">⏩ 1× Speed</button>
+            <button type="button" id="restart" class="play-button">↻ Restart</button>
+          </div>
+          <p class="message" id="message" role="status">Get your little wanderers home!</p>
+        </div>
+      </section>
+      <section class="below-game">
+        <div class="below-card">
+          <div class="tiny-heading">🏆 YOUR DAILY RECORD</div>
+          <h3 id="record-title">A fresh start</h3>
+          <p id="record-copy">Your first completed run counts as today's first attempt. Replay as often as you like to improve your best.</p>
+        </div>
+        <div class="below-card">
+          <div class="tiny-heading">🕛 THE DAILY RESET</div>
+          <h3>Same puzzle. Every player.</h3>
+          <p>Today's challenge is the same for everyone and changes at 00:00 UTC. Come back tomorrow for another rescue.</p>
+        </div>
+      </section>
+      <div class="credits">An independently made Lemmings-inspired experiment. Original placeholder artwork and levels. No official affiliation with the Lemmings game or its owners. <a href="https://github.com/gurprit/dailylemming">Source on GitHub</a>.</div>
+    </main>
+  </div>
+  <div class="overlay" id="result-overlay" hidden>
+    <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+      <div class="result-symbol" id="result-symbol">✦</div>
+      <div class="eyebrow">TODAY'S ESCAPE</div>
+      <h2 id="result-title">They made it!</h2>
+      <p id="result-description"></p>
+      <div class="result-metrics"><div><small>RESCUED</small><strong id="result-saved">0/8</strong></div><div><small>SKILLS</small><strong id="result-used">0</strong></div><div><small>TIME</small><strong id="result-time">0s</strong></div></div>
+      <button id="share" class="primary-action">Share your result ↗</button>
+      <button id="again" class="secondary-action">Play again · Practice mode</button>
+      <button id="close" class="secondary-action">Close</button>
+    </div>
+  </div>
+</body>
+</html>
