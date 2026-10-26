@@ -15,6 +15,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm test
       - run: npm run lix:audit
+      - run: npm run lix:vendor:first
       - uses: actions/upload-artifact@v4
         with:
           name: lix-level-audit
