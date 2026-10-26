@@ -34,3 +34,13 @@ Progress currently uses browser localStorage; it is not suitable for trusted wor
 ## Hosting
 
 GitHub Actions tests and builds each change. The Pages workflow deploys `master`, if GitHub Pages is configured to use **GitHub Actions** as its source in repository Settings → Pages. Preview locally with `npm run dev`; no server/database credentials are required.
+
+## Lix community-level integration (in progress)
+
+30 unmodified CC0 source levels from Lix's Lovely pack, their official order, and a tested level parser are included at `content/lix/lovely/`. These are **candidates, not playable daily puzzles yet**: the original Lix mechanics and pixel terrain are not supported by the temporary engine. Their authors, metadata, skill requirements and image dependencies are preserved.
+
+Run `npm run lix:audit` to inspect the 30 candidate levels. The audit outputs `generated/lix/catalogue.json` and `generated/lix/audit.md`. Run `npm run lix:assets` to optionally cache the upstream CC0 image library.
+
+Open `/lab.html` on the local dev server for an **approximate terrain inspection page**. Artwork loads from the pinned upstream Lix repository, so an internet connection is currently required. It is an internal developer aid, **not a playable level**.
+
+See [Lix integration notes](docs/lix-integration.md) for licence detail and what's left to build before these puzzles can enter the daily queue.
