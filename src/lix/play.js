@@ -52,8 +52,15 @@ async function decodePng(path) {
         resolve({ canvas: off, data: rgba });
       } catch (error) { reject(new Error('Unable to decode ' + path + ': ' + error)); }
     };
-    img.onerror = () => reject(new Error('Image could not load: ' + path));
-    img.src = url;
+    // Prefer local, bundled CC0 art. Vite dev falls back to remote upstream
+    // until npm run lix:vendor:first has populated the local public folder.
+    const local = import.meta.env.BASE_URL + 'lix/images/'
+      + path.split('/').map(encodeURIComponent).join('/');
+    img.onerror = () => {
+      if (img.src !== url) img.src = url;
+      else reject(new Error('Image could not load: ' + path));
+    };
+    img.src = local;
   });
 }
 async function loadArt() {
