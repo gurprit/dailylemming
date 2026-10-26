@@ -48,3 +48,15 @@ test('terrain compositing excludes decorative goals from collision', () => {
   assert.equal(composed.terrain.solid(1, 1), true);
   assert.equal(composed.gadgets.length, 1);
 });
+
+test('composited gadgets preserve their Lix asset names alongside drawable images', () => {
+  const drawable = { width: 10, height: 12 };
+  const imageData = { width: 10, height: 12, data: new Uint8ClampedArray(10 * 12 * 4) };
+  const level = { numeric: { SIZE_X: 30, SIZE_Y: 30 }, groups: {},
+    tiles: [{ image: 'matt/water.W', kind: 'hazard', x: 0, y: 0, flags: '' }] };
+  const composed = composeLixLevel(level, new Map([
+    ['matt/water.W.png', { data: imageData, canvas: drawable }]
+  ]));
+  assert.equal(composed.gadgets[0].sourceImage, 'matt/water.W');
+  assert.equal(composed.gadgets[0].image, drawable);
+});
