@@ -27,6 +27,7 @@ const skillList = [
 let selected = skillList.find(s => level.skills[s.id] > 0)?.id || 'builder';
 let finalResult = null;
 let instance;
+let lastSkillSignature = '';
 
 function message(value) { byId('message').textContent = value; }
 function renderRecord() {
@@ -42,6 +43,11 @@ function renderRecord() {
   }
 }
 function showSkills(state) {
+  // Replacing buttons every physics tick swallowed clicks during normal play.
+  // Rebuild only when available skills or the selection actually changes.
+  const signature = selected + '|' + skillList.map(s => state.skills[s.id]).join('|');
+  if (signature === lastSkillSignature) return;
+  lastSkillSignature = signature;
   const parent = byId('skills');
   parent.replaceChildren();
   for (const skill of skillList) {
@@ -73,7 +79,8 @@ function update(state) {
   byId('saved').textContent = state.saved;
   byId('time').textContent = fmt(state.limit - state.seconds);
   byId('used').textContent = String(state.used);
-  byId('pause').textContent = state.paused && !state.done ? '▶ Resume' : '⏸ Pause';
+  byId('pause').textContent = !state.started ? '▶ Start game'
+    : state.paused && !state.done ? '▶ Resume' : '⏸ Pause';
   byId('speed').textContent = '⏩ ' + state.speed + '× Speed';
   if (!state.skills[selected]) {
     selected = skillList.find(skill => state.skills[skill.id] > 0)?.id || selected;
