@@ -1,6 +1,15 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // GitHub Pages project sites are served at /dailylemming/, not at /.
-  base: process.env.DAILY_LEMMING_BASE || '/'
+  // GitHub Pages project sites are served at /dailylemming/, not /.
+  base: process.env.DAILY_LEMMING_BASE || '/',
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(process.cwd(), 'index.html'),
+        lab: resolve(process.cwd(), 'lab.html')
+      }
+    }
+  }
 });
