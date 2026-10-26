@@ -78,3 +78,18 @@ test('falling creatures can be lost; failed run cannot increment daily results',
   assert.equal(game.lost, 1);
   assert.equal(game.won, false);
 });
+
+// Regression: a gadget's .image is a drawable canvas, not its source path.
+test('hazard checks use source filename instead of calling string methods on canvas', () => {
+  const { level, images } = sample();
+  level.tiles.push(item('water.W', 'hazard', 40, 185));
+  const water = tile(32, 24);
+  water.canvas = { width: 32, height: 24 }; // Canvas-like drawable, not a string
+  images.set('water.W.png', water);
+  const model = new LixGameModel(level, images);
+
+  assert.equal(typeof model.hazards[0].image, 'object');
+  assert.equal(model.hazards[0].sourceImage, 'water.W');
+  assert.equal(model.inHazard({ x: 50, y: 198 }), true);
+  assert.equal(model.inHazard({ x: 20, y: 198 }), false);
+});
