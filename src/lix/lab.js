@@ -83,9 +83,14 @@ function render(level, images) {
   paintItems(ctx, level.tiles.filter(t => ['hatch','goal','hazard'].includes(t.kind)), level, images);
 }
 function scaleCanvas() {
-  const n = Number(zoom.value) / 100;
-  canvas.style.width = Math.round(canvas.width * n) + 'px';
-  canvas.style.height = Math.round(canvas.height * n) + 'px';
+  // 100% is "fit map to the preview", not 100 CSS pixels per image pixel.
+  // A 640px-wide map should not leave a huge empty column on desktop.
+  const preview = document.querySelector('#preview');
+  const viewportWidth = Math.max(200, preview.clientWidth - 2);
+  const fit = viewportWidth / canvas.width;
+  const factor = fit * Number(zoom.value) / 100;
+  canvas.style.width = Math.round(canvas.width * factor) + 'px';
+  canvas.style.height = Math.round(canvas.height * factor) + 'px';
   document.querySelector('#zoom-value').textContent = zoom.value + '%';
 }
 function showDetails(level, name) {
@@ -135,4 +140,8 @@ for (const name of names) {
 chooser.value = 'pipedream.txt';
 chooser.addEventListener('change', pick);
 zoom.addEventListener('input', scaleCanvas);
+if (typeof ResizeObserver !== 'undefined') {
+  const observer = new ResizeObserver(scaleCanvas);
+  observer.observe(document.querySelector('#preview'));
+} else window.addEventListener('resize', scaleCanvas);
 pick();
