@@ -28,7 +28,7 @@ export class LixGameModel {
     this.hazards = this.baseGadgets.filter(g => g.kind === 'hazard');
     if (this.hatches.length < 1 || this.goals.length < 1)
       throw new Error('A level requires at least one hatch and one goal');
-    if (!PLAYABLE_SKILLS.some(skill => (level.skills[skill.toUpperCase()] || 0) > 0))
+    if (!PLAYABLE_SKILLS.some(skill => (level.skills[skill.toUpperCase()] || 0) !== 0))
       throw new Error('This experiment requires at least one supported skill');
     this.reset();
   }
