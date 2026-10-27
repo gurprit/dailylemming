@@ -20,7 +20,7 @@ import lixWalkersTurn from '../../content/lix/tutorial/walkers-turn.txt?raw';
 import lixClimbersFloaters from '../../content/lix/tutorial/climbers-floaters.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
 import { parseLix, sourceAssets } from './parse.js';
-import { LixGameModel, TICK_MS } from './game.js';
+import { LixGameModel, TICK_MS, PHYSICS_HZ } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
 import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
@@ -76,7 +76,8 @@ const SKILL_LABELS = {
   builder: '🧱 Builder', blocker: '🛑 Blocker',
   basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner',
   walker: '↩ Walker', runner: '🏃 Runner', climber: '🧗 Climber',
-  floater: '🪂 Floater', platformer: '🪵 Platformer', jumper: '↗ Jumper'
+  floater: '🪂 Floater', platformer: '🪵 Platformer', jumper: '↗ Jumper',
+  exploder: '💣 Exploder'
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
@@ -354,6 +355,29 @@ function draw() {
     paintCharacter(u);
   }
   dirt.draw(ctx);
+  // Classic five-to-one countdown follows each armed Lix, even while it walks.
+  for (const unit of model.units) {
+    if (!(unit.fuseTicks > 0) || ['saved','lost','exiting'].includes(unit.state)) continue;
+    const number = Math.ceil(unit.fuseTicks / PHYSICS_HZ);
+    const x = Math.round(unit.x), y = Math.round(unit.y - 33);
+    ctx.save();
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = '#161b2a'; ctx.lineWidth = 3;
+    ctx.fillStyle = number < 3 ? '#ff754f' : '#fff6ae';
+    ctx.strokeText(String(number), x, y);
+    ctx.fillText(String(number), x, y);
+    ctx.restore();
+  }
+  for (const event of model.events.slice(-24)) {
+    const age = model.ticks - event.tick;
+    if (event.type !== 'exploded' || age < 0 || age > 5) continue;
+    ctx.save();
+    ctx.strokeStyle = age < 2 ? '#fff8b7' : '#ff9b43';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(event.x,event.y-9,4+age*4,0,Math.PI*2);
+    ctx.stroke(); ctx.restore();
+  }
   const hovered = pointerPosition && !model.done
     ? unitAtPoint(model.units, pointerPosition.x, pointerPosition.y,
       selectedSkill, model.remaining, pointerPosition.radius)
@@ -451,6 +475,11 @@ function loop(now) {
       const event = model.events[processedEvents++];
       // Excavation and debris are intentionally separate. Miner physics cuts
       // every few ticks, but debris only flies when the pick strikes terrain.
+      if (event.type === 'exploded') {
+        dirt.burst('exploded', event.x, event.y);
+        say('BOOM! A crater has opened. Beware of nearby Lix!');
+      }
+      if (event.type === 'armed') say('Five seconds to BOOM! Watch the countdown. 💣');
       if (event.type === 'dug' || event.type === 'bashed'
           || (event.type === 'mined' && event.detail === 'impact')) {
         const unit = model.units.find(u => Math.abs(u.x - event.x) < 9
@@ -559,7 +588,8 @@ canvas.addEventListener('pointerdown', event => {
       climber: 'Climber can scale obstacles!',
       floater: 'Floater parachutes through long drops!',
       platformer: 'Platformer builds a flat bridge!',
-      jumper: 'Jumper leaps over gaps!'
+      jumper: 'Jumper leaps over gaps!',
+      exploder: 'Exploder armed! Countdown above the moving Lix.'
     };
     say(message[selectedSkill]);
   } else {
