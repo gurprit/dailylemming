@@ -1,6 +1,7 @@
 import rawLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
+import { detectLixFrames, cutLixFrame } from './frames.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -35,21 +36,26 @@ async function decodePng(path) {
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
-        const off = document.createElement('canvas');
-        off.width = img.naturalWidth; off.height = img.naturalHeight;
-        const c = off.getContext('2d', { willReadFrequently: true });
-        c.drawImage(img, 0, 0);
-        const rgba = c.getImageData(0, 0, off.width, off.height);
-        // Transparent colour-key removal. The original Lix tile files use
-        // #ff00ff markers that the browser otherwise renders as bright pink.
-        const d = rgba.data;
-        for (let i = 0; i < d.length; i += 4) {
-          if (d[i] >= 250 && d[i + 1] <= 6 && d[i + 2] >= 250) {
-            d[i] = 0; d[i + 1] = 0; d[i + 2] = 0; d[i + 3] = 0;
-          }
+        const raw = document.createElement('canvas');
+        raw.width = img.naturalWidth;
+        raw.height = img.naturalHeight;
+        const rawCtx = raw.getContext('2d', { willReadFrequently: true });
+        rawCtx.drawImage(img, 0, 0);
+        const bitmap = rawCtx.getImageData(0, 0, raw.width, raw.height);
+        // Lix sprites are frame grids, not one giant gadget. The sprite
+        // metadata must be calculated before key-colour transparency.
+        const layout = detectLixFrames(bitmap);
+        const frames = [];
+        for (let i = 0; i < layout.columns * layout.rows; i++) {
+          const clipped = cutLixFrame(bitmap, layout, i);
+          const off = document.createElement('canvas');
+          off.width = clipped.width;
+          off.height = clipped.height;
+          off.getContext('2d').putImageData(
+            new ImageData(clipped.data, clipped.width, clipped.height), 0, 0);
+          frames.push({ data: clipped, canvas: off });
         }
-        c.putImageData(rgba, 0, 0);
-        resolve({ canvas: off, data: rgba });
+        resolve({ ...frames[0], frames, layout });
       } catch (error) { reject(new Error('Unable to decode ' + path + ': ' + error)); }
     };
     // Prefer local, bundled CC0 art. Vite dev falls back to remote upstream
@@ -108,7 +114,12 @@ function draw() {
   ctx.drawImage(ground, 0, 0);
   for (const g of model.baseGadgets) {
     if (!g.image) continue;
-    ctx.drawImage(g.image, g.x, g.y);
+    // Animated hatches and liquids cycle through their clipped Cutbit frames.
+    const frames = g.frames || [];
+    const frame = frames.length > 1
+      ? frames[Math.floor(model.ticks / 5) % frames.length].canvas
+      : g.image;
+    ctx.drawImage(frame, g.x, g.y);
     if (g.kind === 'goal') {
       ctx.fillStyle = '#98f4b6';
       ctx.font = 'bold 11px system-ui';
