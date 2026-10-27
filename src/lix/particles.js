@@ -9,15 +9,15 @@ export class DirtParticles {
   }
   clear() { this.items.length = 0; }
   burst(type, x, y, facing = 1) {
-    if (type !== 'dug' && type !== 'mined') return;
-    const count = type === 'dug' ? 9 : 11;
+    if (!['dug','mined','bashed'].includes(type)) return;
+    const count = type === 'dug' ? 8 : type === 'mined' ? 10 : 8;
     for (let n = 0; n < count; n++) {
       const r = this.random, sideways = r() * 2 - 1;
-      const backward = type === 'mined' ? -Math.sign(facing || 1) : 0;
+      const backward = type === 'mined' ? -Math.sign(facing || 1) : type === 'bashed' ? -Math.sign(facing || 1) * .6 : 0;
       this.items.push({
-        x: x + (r() - .5) * 8, y: y + (type === 'dug' ? 0 : -5),
-        vx: (sideways * 26 + backward * (18 + r() * 45)),
-        vy: -(42 + r() * 70),
+        x: x + (r() - .5) * 8, y: y + (type === 'dug' ? 0 : type === 'bashed' ? -10 : -5),
+        vx: (sideways * (type === 'bashed' ? 36 : 26) + backward * (18 + r() * 45)),
+        vy: -(type === 'bashed' ? 24 + r() * 60 : 42 + r() * 70),
         life: .30 + r() * .30, maxLife: .6,
         size: r() < .65 ? 2 : 3,
         color: EARTH[Math.floor(r() * EARTH.length)]
