@@ -16,6 +16,7 @@ import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
 import { unitAtPoint, drawUnitTarget } from './targeting.js';
+import { DirtParticles } from './particles.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -47,6 +48,7 @@ const SKILL_LABELS = {
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
 let pointerPosition = null;
+const dirt = new DirtParticles();
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
 const ground = document.createElement('canvas');
@@ -289,6 +291,7 @@ function draw() {
     obstacle ||= drawBuilderPreview(u);
     paintCharacter(u);
   }
+  dirt.draw(ctx);
   const hovered = pointerPosition && !model.done
     ? unitAtPoint(model.units, pointerPosition.x, pointerPosition.y,
       selectedSkill, model.remaining, pointerPosition.radius)
@@ -374,6 +377,11 @@ function loop(now) {
     // Event-based hints surface physics changes without interrupting gameplay.
     while (processedEvents < model.events.length) {
       const event = model.events[processedEvents++];
+      if (event.type === 'dug' || event.type === 'mined') {
+        const unit = model.units.find(u => Math.abs(u.x - event.x) < 9
+          && Math.abs(u.y - event.y) < 9);
+        dirt.burst(event.type, event.x, event.y, unit?.vx || 1);
+      }
       if (event.type === 'landed') say('Landed safely. Tap the walker to build a bridge.');
       if (event.type === 'builder-finished') say('Staircase finished. Another builder can be assigned.');
       if (event.type === 'builder-continued') say('Queued builder activated, staircase continuing!');
@@ -393,6 +401,7 @@ function loop(now) {
       }
       if (event.type === 'miner-steel') say('The Miner cannot dig through steel.');
     }
+    if (!model.paused && !model.done) dirt.update(Math.min(.04, dt / 1000));
     updateHud();
     draw();
     if (model.done) finish();
@@ -415,6 +424,7 @@ function restart() {
   model.reset();
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
+  dirt.clear();
   pointerPosition = null;
   canvas.style.cursor = 'crosshair';
   el('result').hidden = true;
@@ -485,6 +495,7 @@ function undo() {
   if (!model?.undoBuilder()) return;
   ended = false;
   processedEvents = model.events.length;
+  dirt.clear();
   accumulator = 0;
   last = 0;
   el('result').hidden = true;
