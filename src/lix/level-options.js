@@ -95,7 +95,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using builder and basher. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by Proxima, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/pipedream.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'pipedream'
   },
   'lovely-beneaththelab': {
@@ -103,7 +103,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using builder, platformer and miner. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by geoo, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/beneaththelab.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'beneaththelab'
   },
   'lovely-climbtofreedom': {
@@ -111,7 +111,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using climber, builder and digger. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by mobius, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/climbtofreedom.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'climbtofreedom'
   },
   'lovely-everylix': {
@@ -119,7 +119,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using walker, climber, floater and jumper. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by geoo, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/everylix.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'everylix'
   },
   'lovely-escapethepit': {
@@ -127,7 +127,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using climber, floater, exploder, blocker, builder, platformer and digger. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by mobius/Nepster, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/escapethepit.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'escapethepit'
   },
   'lovely-pitfall': {
@@ -135,7 +135,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using climber, floater, exploder, blocker, builder, basher, miner and digger. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by Insane Steve, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/pitfall.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'pitfall'
   },
   'lovely-putyourlix': {
@@ -143,7 +143,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using climber, platformer, miner and jumper. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by Proxima, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/putyourlix.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'putyourlix'
   },
   'lovely-solareclipse': {
@@ -151,7 +151,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using climber, jumper, builder, platformer, blocker, exploder, basher, miner and digger. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by geoo, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/solareclipse.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'solareclipse'
   },
   'lovely-alternative': {
@@ -159,7 +159,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using walker, runner, climber, floater, exploder, blocker, builder, platformer, basher, miner, digger and jumper. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by Insane Steve, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/alternative.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'alternative'
   },
   'lovely-anecklaceofraindrops': {
@@ -167,7 +167,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: "A genuine Lovely community level using walker, builder, platformer, basher, miner, digger and jumper. Solve it your way, just as if you'd dropped into the middle of a classic Lix level pack.",
     credit: "Original Lix community puzzle by Proxima, dedicated to the public domain (CC0).",
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/anecklaceofraindrops.txt',
-    hint: 'No walkthrough today. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
+    hint: 'Unverified community challenge. Study the terrain, choose your skills and rescue enough Lix. Browser physics remain an approximation.',
     communityFile: 'anecklaceofraindrops'
   },
   'little-bridge': {
