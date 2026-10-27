@@ -158,3 +158,30 @@ test('a builder places no more than 12 short steps and rises 2px per brick', () 
   assert.equal(bricks.at(-1).y, Math.round(startY - 24));
   assert.equal(model.assigned, 1);
 });
+
+test('frame stepping progresses one fixed Lix physics update while remaining paused', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  assert.equal(model.paused, true);
+  assert.equal(model.stepOnce(), true);
+  assert.equal(model.ticks, 1);
+  assert.equal(model.spawned, 1);
+  assert.equal(model.started, true);
+  assert.equal(model.paused, true);
+  assert.equal(model.stepOnce(), true);
+  assert.equal(model.ticks, 2);
+  model.togglePause();
+  assert.equal(model.stepOnce(), false, 'frame stepping disabled during live play');
+});
+test('grounded walker can queue a builder assignment while paused', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 15; i++) model.tick();
+  model.togglePause();
+  assert.equal(model.paused, true);
+  assert.equal(model.units[0].state, 'walking');
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.paused, true);
+  assert.equal(model.remaining.builder, 4);
+});
