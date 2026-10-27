@@ -284,3 +284,24 @@ npm test
 npm run test:official-tutorials
 npm run dev
 ```
+
+
+## Update: authentic multi-skill mysteries and classic walking bombs
+
+The main `/` now starts in **Today's Mystery** mode. Instead of a series of training stages, each visitor receives the same randomly shuffled **original Lix Lovely community level** for their UTC day. The ten community sources are Pipe Dream (Proxima), Beneath the Lab (geoo), Climb to Freedom! (mobius), Every Lix for Herself! (geoo), Escape the Pit (mobius/Nepster), Pitfall (Insane Steve), Put Your Lix on Ice (Proxima), Solar Eclipse (geoo), Alternative Route Recommended (Insane Steve), and A Necklace of Raindrops (Proxima). Each has at least two non-zero abilities; several have eight or more. The original files are preserved in `content/lix/lovely/`, and corresponding genuine CC0 art is bundled at build time. Their creator/source credits remain visible.
+
+A date-seeded Fisher–Yates shuffle produces a new nonrepeating order for each ten-day block. The main home page defaults to a **shared mystery**, not the tutorial chooser. Optional level browsing and the separately **verified daily challenge** are behind a collapsed Explore control. The unverified native Lix puzzles are **NOT** silently mixed into scored daily results or streaks. All ten pass source parsing, available-inventory, real PNG collision map, gadget and spawning smoke tests, but **complete winning routes with the browser's approximate physics have not been demonstrated yet**.
+
+A classic **Exploder** can be assigned to an active Lix without interrupting its walking or other job. A visible 5, 4, 3, 2, 1 countdown appears above the character. After five seconds, a circular explosion cuts away non-steel pixels, removes the armed Lix and can affect nearby Lix. An expanding flash and orange/yellow pixel debris complete the blast. Undo restores the terrain and inventories. The additional community abilities **Batter** (launch nearby Lix) and **Cuber** (make solid terrain by sacrificing one Lix) now have functioning browser-adapter physics, original character animation rows and dedicated skill buttons. Their behaviour is simplified versus native Lix and needs compatibility/solution testing.
+
+```bash
+git switch master
+git pull --ff-only origin master
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:mystery-levels
+npm run dev
+```
+
+Open `/` for a mystery puzzle. Use the Explore disclosure for individual community levels or the verified daily streak challenge.
