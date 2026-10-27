@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fitMapScale, mapTouchGeometry, zoomMapAtFingers, MAX_MAP_SCALE } from '../src/lix/map-zoom.js';
+import { fitMapScale, coverMapScale, mapTouchGeometry, zoomMapAtFingers, MAX_MAP_SCALE } from '../src/lix/map-zoom.js';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 
@@ -36,6 +36,24 @@ test('mobile canvas handles its own touch gestures without zooming the entire pa
   assert.match(player, /canvas\.addEventListener\('pointerup'/);
   assert.match(player, /canvas\.addEventListener\('pointercancel'/);
   assert.match(player, /tapCandidate = null/);
+});
+
+test('portrait map fills the available height instead of leaving a blank strip', () => {
+  // Screenshot case: the 512x288 artwork used to render at 288px high
+  // inside a 460px-tall viewport. Cover mode fills that full height.
+  const cover = coverMapScale(512, 288, 374, 460);
+  assert.ok(Math.abs(288 * cover - 460) < 0.001);
+  assert.ok(512 * cover > 374, 'horizontal cropping is intentional; pan to see the rest');
+  // With a tall map, the width may become the limiting dimension.
+  assert.equal(coverMapScale(512, 800, 374, 460), 374 / 512);
+  assert.equal(coverMapScale(512, 80, 374, 460), MAX_MAP_SCALE);
+  const html = read('index.html'), player = read('src/lix/play.js');
+  assert.match(html, /height:min\(58vh,460px,var\(--map-height,460px\)\)/);
+  assert.match(html, /\.experiment-view\{min-height:0/);
+  assert.match(player, /let mapScale = mobileMap\.matches \? coverScale\(\) : 1/);
+  assert.match(player, /landscape\.height \* mapScale/);
+  assert.match(player, /viewport\.style\.setProperty\('--map-height'/);
+  assert.match(player, /mapScale = mapScale > fit \+ 0\.02 \? fit : coverScale\(\)/);
 });
 
 test('pinch zoom holds the world point under the fingers', () => {
