@@ -1,6 +1,7 @@
 // Experimental Lix gameplay adapter. Original CC0 map and pixel terrain;
 // character timings are provisional and still require comparison with Lix replays.
 import { composeLixLevel } from './terrain.js';
+import { gadgetTrigger, insideTrigger } from './gadgets.js';
 
 export const TICK_MS = 1000 / 30;
 const clamp = (n, low, high) => Math.max(low, Math.min(high, n));
@@ -60,20 +61,20 @@ export class LixGameModel {
   }
   spawn() {
     const hatch = this.hatches[0];
-    const w = hatch.imageData.width;
-    const h = hatch.imageData.height;
-    const u = {
-      x: hatch.x + Math.round(w / 2),
-      y: hatch.y + h - 2,
-      vx: 1,
+    // Hatch placement is based on Lix's per-frame trigger, never the whole PNG
+    // (which often contains many animation frames).
+    const point = gadgetTrigger(hatch);
+    this.units.push({
+      x: point.x,
+      y: point.y,
+      vx: hatch.flags?.includes('r') ? -1 : 1,
       vy: 0,
       fall: 0,
       grounded: false,
-      state: 'walking',
+      state: 'spawning',
       buildTicks: 0,
       buildSteps: 0
-    };
-    this.units.push(u);
+    });
     this.spawned++;
   }
   // Avoid falling through one-pixel bridges by sweeping across the whole foot path.
@@ -84,22 +85,12 @@ export class LixGameModel {
     return null;
   }
   inGoal(u) {
-    return this.goals.some(g => {
-      const w = g.imageData.width, h = g.imageData.height;
-      return u.x >= g.x + 2 && u.x <= g.x + w - 2
-        && u.y >= g.y && u.y <= g.y + Math.max(h, 50) + 4;
-    });
+    const foot = { x: u.x, y: u.y };
+    return this.goals.some(g => insideTrigger(foot, gadgetTrigger(g), 1));
   }
   inHazard(u) {
-    return this.hazards.some(g => {
-      const w = g.imageData.width, h = g.imageData.height;
-      if (g.sourceImage.endsWith('.W')) {
-        return u.x >= g.x && u.x < g.x + w && u.y >= g.y + 1 && u.y <= g.y + Math.max(h, 12);
-      }
-      // A provisional trap bounding box, pending Lix trigger-area metadata.
-      return u.x >= g.x + 4 && u.x < g.x + Math.max(8, w - 4)
-        && u.y >= g.y + 4 && u.y <= g.y + Math.max(8, h - 4);
-    });
+    const foot = { x: u.x, y: u.y };
+    return this.hazards.some(g => insideTrigger(foot, gadgetTrigger(g)));
   }
   stepBuilder(u) {
     if (++u.buildTicks % 5 !== 0) return;
@@ -113,7 +104,9 @@ export class LixGameModel {
     if (++u.buildSteps === 12 || nx < 2 || nx >= this.width - 2) u.state = 'walking';
   }
   stepWalker(u) {
-    const candidateX = u.x + u.vx * 1.3;
+    // Newly spawned Lix drop vertically out of the hatch before walking.
+    // Previous code moved sideways during the initial drop, off the start.
+    const candidateX = u.x + (u.state === 'spawning' ? 0 : u.vx * 1.3);
     if (candidateX < 1 || candidateX >= this.width - 1) {
       u.vx *= -1;
     } else {
@@ -133,6 +126,7 @@ export class LixGameModel {
     }
     if (this.terrain.solid(u.x, u.y + 1)) {
       u.vy = 0; u.fall = 0; u.grounded = true;
+      if (u.state === 'spawning') u.state = 'walking';
       return;
     }
     // Step down small changes in terrain without bouncing.
@@ -149,6 +143,7 @@ export class LixGameModel {
     const landing = this.landingY(u.x, oldY + 1, nextY);
     if (landing !== null) {
       u.fall = 0; u.vy = 0; u.grounded = true; u.y = landing;
+      if (u.state === 'spawning') u.state = 'walking';
     } else {
       u.y = nextY; u.fall += u.vy; u.grounded = false;
     }
