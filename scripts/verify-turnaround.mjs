@@ -30,7 +30,7 @@ function simulate(at=null){
 }
 const trials=[];
 for(let at=250;at>=200;at-=2)trials.push(simulate(at));
-const successes=trials.filter(x=>x.won&&x.saved>=2&&x.used===1&&x.blocks>=2);
+const successes=trials.filter(x=>x.won&&x.saved>=2&&x.used===1&&x.blocks>=2&&x.seconds<60);
 const idle=simulate();
 const report={title:level.title,successes,trials,withoutBlocker:idle};
 await mkdir(path.join(root,'generated/lix'),{recursive:true});
