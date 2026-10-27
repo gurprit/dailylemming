@@ -400,7 +400,10 @@ function loop(now) {
     // Event-based hints surface physics changes without interrupting gameplay.
     while (processedEvents < model.events.length) {
       const event = model.events[processedEvents++];
-      if (event.type === 'dug' || event.type === 'mined') {
+      // Excavation and debris are intentionally separate. Miner physics cuts
+      // every few ticks, but debris only flies when the pick strikes terrain.
+      if (event.type === 'dug' || event.type === 'bashed'
+          || (event.type === 'mined' && event.detail === 'impact')) {
         const unit = model.units.find(u => Math.abs(u.x - event.x) < 9
           && Math.abs(u.y - event.y) < 9);
         dirt.burst(event.type, event.x, event.y, unit?.vx || 1);
