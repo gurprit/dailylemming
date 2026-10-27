@@ -156,7 +156,7 @@ function draw() {
   ctx.drawImage(ground, 0, 0);
   // A forgiving visual cue for the first puzzle; old community map has none.
   if (levelId === 'little-bridge') {
-    const x = 166, y = 203;
+    const x = 232, y = 203;
     ctx.save();
     ctx.fillStyle = '#b1ffd1';
     ctx.font = 'bold 11px system-ui';
