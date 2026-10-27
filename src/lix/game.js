@@ -242,9 +242,9 @@ export class LixGameModel {
       else if (this.terrain.solid(xx, yy)) ground = true;
     }
     if (steel || !ground) {
-      u.state = ground ? 'walking' : 'falling';
-      u.grounded = Boolean(ground);
-      u.vy = ground ? 0 : 4;
+      u.state = steel ? 'walking' : 'falling';
+      u.grounded = Boolean(steel);
+      u.vy = steel ? 0 : 4;
       this.emit(steel ? 'digger-steel' : 'digger-finished', u);
       return;
     }
