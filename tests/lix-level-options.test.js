@@ -61,6 +61,10 @@ test('mystery picks are date-deterministic and nonrepeating within each rotation
   assert.deepEqual(new Set(nextBlock),new Set(FEATURED_COMMUNITY_LEVELS));
   assert.notDeepEqual(ids,nextBlock,'blocks should shuffle differently');
 });
+test('October 27 mystery is the compact three-skill Beneath the Lab, not Solar Eclipse',()=>{
+  assert.equal(mysteryLevel('2026-10-27').levelId,'lovely-beneaththelab');
+  assert.notEqual(mysteryLevel('2026-10-27').levelId,'lovely-solareclipse');
+});
 test('homepage offers one mystery, a separate verified daily, and only curated community levels',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const ids=[...html.matchAll(/<option value="(lovely-[^"]+)"/g)].map(m=>m[1]);
