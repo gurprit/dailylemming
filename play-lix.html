@@ -26,6 +26,10 @@
  .experiment-buttons{display:flex;flex-wrap:wrap;gap:12px}
  .experiment-buttons button{min-height:50px;padding:12px 16px;border-radius:10px;border:1px solid #53647f;background:#273852;color:#f0f7ff;font-weight:700;flex:1;cursor:pointer}
  .experiment-buttons button[aria-pressed="true"]{background:#224f43;border:2px solid #8cebb1}
+ .experiment-buttons button[hidden]{display:none}
+ .experiment-buttons .skill-action{flex:1 1 140px;min-width:110px}
+ .experiment-buttons .skill-action[aria-pressed="true"]{background:#2d6651;border:2px solid #8cebb1}
+ .experiment-buttons .skill-action:disabled{opacity:.4}
  .experiment-buttons button:disabled{opacity:.55;cursor:not-allowed}
  .experiment-buttons button.primary{background:#86e7ae;color:#123448;border:0}
  .experiment-buttons button:focus-visible{outline:3px solid #c3f9d5;outline-offset:3px}
@@ -79,7 +83,7 @@
  <section aria-label="Playable puzzle">
   <div class="experiment-stats">
    <div><span>RESCUED</span><b id="saved">0/1</b></div>
-   <div><span>BUILDERS</span><b id="builders">3</b></div>
+   <div><span>SKILLS LEFT</span><b id="builders">3</b></div>
    <div><span>TIME</span><b id="timer">00:00</b></div>
    <div><span>STATE</span><b id="state">READY</b></div>
   </div>
@@ -89,10 +93,13 @@
   </div>
   <div class="experiment-actions">
    <div class="experiment-buttons">
-    <button id="builder" type="button" aria-pressed="true">🧱 Builder · <span id="count">3</span></button>
+    <button id="skill-builder" class="skill-action" type="button" aria-pressed="true">🧱 Builder · 3</button>
+    <button id="skill-blocker" class="skill-action" type="button" hidden>🛑 Blocker</button>
+    <button id="skill-basher" class="skill-action" type="button" hidden>⛏️ Basher</button>
+    <button id="skill-digger" class="skill-action" type="button" hidden>🕳️ Digger</button>
     <button id="pause" class="primary" type="button">▶ Start</button>
     <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
-    <button id="undo" type="button" disabled title="Restore terrain and position before your last builder assignment">↶ Undo builder</button>
+    <button id="undo" type="button" disabled title="Restore terrain and position before your last skill assignment">↶ Undo skill</button>
     <button id="speed" type="button">⏩ 1× speed</button>
     <button id="restart" type="button">↻ Restart</button>
    </div>
@@ -102,8 +109,8 @@
  </section>
  <div class="experiment-help">
   <article><h2>🏆 Level practice record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
-  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. You get three builders, and Undo (Ctrl/Cmd+Z) lets you retry. Press Space to pause, or R to restart.</p></article>
-  <article><h2>About this experiment</h2><p>Little Bridge and Double Trouble are verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because their full original skill sets are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. On community levels, select Builder, Blocker, Basher or Digger and tap a grounded creature. Undo (Ctrl/Cmd+Z) restores the last skill. When a Lix reaches the exit, watch its escape animation before results appear. Press Space to pause, or R to restart.</p></article>
+  <article><h2>About this experiment</h2><p>Little Bridge and Double Trouble are verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because some original skills and precise physics are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
  <p style="font-size:13px;color:#b5c6dd;margin:20px 0 5px"><span id="art-status">Loading Lix character sprites…</span> · <a href="./sprites.html">View all character animations</a></p>
  <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>
