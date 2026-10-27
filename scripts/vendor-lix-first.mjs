@@ -51,3 +51,33 @@ if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
 }
+
+
+// Lix's official animated character atlas is separate from terrain sprites.
+const charactersFile = path.join(root, 'public/lix/characters/lixsprites.png');
+try {
+  let present = false;
+  try {
+    await access(charactersFile);
+    const { stat } = await import('node:fs/promises');
+    present = (await stat(charactersFile)).size > 3000;
+  } catch {}
+  if (!present) {
+    const charUrl = 'https://raw.githubusercontent.com/SimonN/LixD/'
+      + 'f1e805048fe439a4a0e9cc650c613713ababac8b/data/images/lixsprites.png';
+    const response = await fetch(charUrl, { signal: AbortSignal.timeout(20000) });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length < 3000 || bytes.length > 2_000_000
+        || bytes.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a')
+      throw new Error('Unexpected Lix character PNG');
+    await mkdir(path.dirname(charactersFile), { recursive: true });
+    await writeFile(charactersFile, bytes);
+    console.log('Vendored CC0 Lix character atlas (' + bytes.length + ' bytes).');
+  } else {
+    console.log('Lix character atlas already cached.');
+  }
+} catch (error) {
+  console.error('Lix character atlas download failed: ' + error.message);
+  process.exitCode = 1;
+}
