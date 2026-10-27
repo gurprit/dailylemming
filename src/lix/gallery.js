@@ -59,18 +59,21 @@ toggle.addEventListener('click', () => {
   toggle.setAttribute('aria-pressed', String(!playing));
 });
 if (!playing) toggle.textContent = '▶ Play animation';
-try {
-  atlas = await loadCharacterAtlas();
-  for (const activity of CHARACTER_ACTIVITIES) {
-    const row = atlas.rows.get(activity.key);
-    if (row) createPreview(row);
+async function boot() {
+  try {
+    atlas = await loadCharacterAtlas();
+    for (const activity of CHARACTER_ACTIVITIES) {
+      const row = atlas.rows.get(activity.key);
+      if (row) createPreview(row);
+    }
+    status.textContent = previews.length + ' action cycles · '
+      + atlas.layout.width + '×' + atlas.layout.height + 'px frames · original CC0';
+    gallery.setAttribute('aria-busy', 'false');
+    requestAnimationFrame(animate);
+  } catch (error) {
+    gallery.setAttribute('aria-busy', 'false');
+    status.textContent = 'The Lix character sheet could not be loaded: ' + error.message;
+    console.error(error);
   }
-  status.textContent = previews.length + ' action cycles · '
-    + atlas.layout.width + '×' + atlas.layout.height + 'px frames · original CC0';
-  gallery.setAttribute('aria-busy', 'false');
-  requestAnimationFrame(animate);
-} catch (error) {
-  gallery.setAttribute('aria-busy', 'false');
-  status.textContent = 'The Lix character sheet could not be loaded: ' + error.message;
-  console.error(error);
 }
+boot();
