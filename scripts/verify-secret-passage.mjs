@@ -37,7 +37,7 @@ function run(mineAt,bashAt){
     sampleEvents:model.events.filter(e=>['miner-finished','miner-steel','basher-finished','basher-steel','turned','landed','saved'].includes(e.type)).slice(-10)};
 }
 const wins=[], failures=[];
-for(let mine=132;mine<=228;mine+=12)for(let bash=384;bash<=414;bash+=6){
+for(let mine=132;mine<=228;mine+=12)for(let bash=418;bash<=428;bash+=2){
   const r=run(mine,bash);
   if(r.won&&r.used===2&&r.mines>0&&r.bashes>0)wins.push({mine,bash,...r});
   else failures.push({mine,bash,...r});
@@ -50,7 +50,7 @@ await mkdir(path.join(root,'generated/lix'),{recursive:true});
 await writeFile(path.join(root,'generated/lix/secret-passage-proof.json'),JSON.stringify(report,null,2)+'\n');
 console.log('Secret Passage two-skill real-PNG proof:',JSON.stringify({
   winningStarts:report.winningStarts,first:wins[0]||null,noSkillsWon:noSkills.won,
-  minerOnlyWon:minerOnly.won, exampleFailure:failures.find(x=>x.mine===168&&x.bash===402),
+  minerOnlyWon:minerOnly.won, exampleFailure:failures.find(x=>x.mine===168&&x.bash===422),
   deepest:failures.filter(x=>x.mined).sort((a,b)=>a.endY-b.endY).at(-1)}));
 if(wins.length<3||noSkills.won||minerOnly.won)
   throw new Error('Secret Passage must be reliably solvable with Miner + Basher but not without both');
