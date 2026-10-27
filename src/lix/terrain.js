@@ -116,7 +116,8 @@ export function composeLixLevel(level, images) {
       // Retain the Lix gadget asset name for water/trap classification.
       sourceImage: tile.image,
       imageData: sprite.data,
-      image: sprite.canvas
+      image: sprite.canvas,
+      frames: sprite.frames?.map(frame => frame.canvas) || [sprite.canvas]
     });
   }
   return { terrain, gadgets };
