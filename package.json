@@ -19,7 +19,8 @@
     "test:tunnel-time": "node scripts/verify-tunnel-time.mjs",
     "test:dig-for-freedom": "node scripts/verify-dig-for-freedom.mjs",
     "test:secret-passage": "node scripts/verify-secret-passage.mjs",
-    "test:turnaround": "node scripts/verify-turnaround.mjs"
+    "test:turnaround": "node scripts/verify-turnaround.mjs",
+    "test:bridge-brigade": "node scripts/verify-bridge-brigade.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",
