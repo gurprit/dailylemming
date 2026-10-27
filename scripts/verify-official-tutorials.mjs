@@ -9,7 +9,8 @@ import {detectLixFrames,cutLixFrame} from '../src/lix/frames.js';
 import {LixGameModel} from '../src/lix/game.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const tutorials=['builders','bashers','diggers','miners','blockers'];
+const tutorials=['builders','bashers','diggers','miners','blockers',
+  'platformers','jumpers','runners','walkers-turn','climbers-floaters'];
 for(const name of tutorials){
   const level=parseLix(await readFile(path.join(root,'content/lix/tutorial',name+'.txt'),'utf8'));
   const assets=new Map();
@@ -25,10 +26,19 @@ for(const name of tutorials){
   for(let i=0;i<90&&!model.done;i++)model.tick();
   if(model.spawned<1||model.units.length<1)
     throw Error(name+': Lix never spawned');
+  const skills=Object.entries(level.skills).filter(([skill,quantity])=>quantity!==0);
+  for(const [skill,quantity] of skills) {
+    if(skill === 'EXPLODER2') continue;
+    if(!Object.hasOwn(model.remaining,skill.toLowerCase()))
+      throw Error(name+': missing required playable skill '+skill);
+    if(model.remaining[skill.toLowerCase()] !== quantity)
+      throw Error(name+': incorrect stock for '+skill);
+  }
   console.log(JSON.stringify({
     nativeTutorial:name,title:level.title,author:level.author,
     sprites:assets.size,placements:level.tiles.length,
     hatchCount:model.hatches.length,spawned:model.spawned,
-    saved:model.saved,verifiedPlayable:false
+    saved:model.saved,skills:Object.fromEntries(skills),
+    verifiedPlayable:false
   }));
 }
