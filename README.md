@@ -227,3 +227,23 @@ npm run dev
 ```
 
 Open `/play-lix.html?level=turnaround` or `/play-lix.html?level=bridge-brigade`. To see the dirt particles, replay Dig for Freedom or Secret Passage.
+
+
+## Main site and original Lix basic tutorials (October 2026)
+
+The main `/index.html` now opens the Lix-art puzzle engine directly. `/play-lix.html` redirects to the new homepage, preserving `?level=...` bookmarks. The older standalone daily challenge prototype is retained as `/daily.html`. Vite builds all three entry points.
+
+The main level menu now leads with original **Lix Basic Tutorial** maps: Builders, Bashers, Diggers, Miners, and Blockers, from the pinned CC0 [SimonN/LixD tutorial collection](https://github.com/SimonN/LixD/tree/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic). These are authentic preserved map files, with attribution to Simon and Simon/Wuzzy as appropriate. The five maps have original artwork vendored and undergo CI loading, terrain/collision and spawn smoke tests. The browser engine now supports round-robin spawning from multiple entrances, which the native Diggers tutorial uses. **Full winning routes are not verified for these native tutorials**; do not treat them as completed or include them in a public daily rotation until replay-tested. The previously verified original Daily Lemming practice stages remain accessible as safe alternatives.
+
+Basher excavation now emits a handful of short-lived soil chips. Miners still excavate at their established physics rhythm, but decorative debris is emitted only on every fourth carving stroke, synchronized to the pickaxe's selected impact phase, instead of gushing continuously. This is a visual adjustment only and does not alter winning routes.
+
+```bash
+git switch master
+git pull --ff-only origin master
+npm install
+npm run lix:vendor:first
+npm run test:official-tutorials
+npm run dev
+```
+
+Open `http://localhost:5173/` (or the Vite port) to see the new main game. `/daily.html` contains the earlier prototype.
