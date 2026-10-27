@@ -7,7 +7,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Bridge over obstacles using the original Lix Builders training map. This authentic tutorial is in browser-compatibility testing.',
     credit: 'Original Lix tutorial by Simon, distributed under CC0.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/builders.txt',
-    hint: 'Official Lix tutorial: choose Builder, then tap a grounded Lix. Some original physics are still being adapted.',
+    hint: 'Official Lix tutorial: choose Builder, then tap a grounded Lix. Not yet certified solvable with our adapted browser physics.',
     tutorialFile: 'builders'
   },
   'lix-bashers': {
@@ -15,7 +15,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Tunnel through sandstone using the original Lix Bashers training map. This authentic tutorial is in browser-compatibility testing.',
     credit: 'Original Lix tutorial by Simon, distributed under CC0.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/bashers.txt',
-    hint: 'Official Lix tutorial: choose Basher, then tap a grounded Lix. Some original physics are still being adapted.',
+    hint: 'Official Lix tutorial: choose Basher, then tap a grounded Lix. Not yet certified solvable with our adapted browser physics.',
     tutorialFile: 'bashers'
   },
   'lix-diggers': {
@@ -23,7 +23,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Dig through the floor in the original Lix Diggers training map. This authentic tutorial is in browser-compatibility testing.',
     credit: 'Original Lix tutorial by Simon, distributed under CC0.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/diggers.txt',
-    hint: 'Official Lix tutorial: choose Digger, then tap a grounded Lix. Some original physics are still being adapted.',
+    hint: 'Official Lix tutorial: choose Digger, then tap a grounded Lix. Not yet certified solvable with our adapted browser physics.',
     tutorialFile: 'diggers'
   },
   'lix-miners': {
@@ -31,7 +31,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Mine sloping tunnels in the original Lix Miners training map. This authentic tutorial is in browser-compatibility testing.',
     credit: 'Original Lix tutorial by Simon/Wuzzy, distributed under CC0.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/miners.txt',
-    hint: 'Official Lix tutorial: choose Miner, then tap a grounded Lix. Some original physics are still being adapted.',
+    hint: 'Official Lix tutorial: choose Miner, then tap a grounded Lix. Not yet certified solvable with our adapted browser physics.',
     tutorialFile: 'miners'
   },
   'lix-blockers': {
@@ -39,7 +39,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Redirect crowds with the original Lix Blockers training map. This authentic tutorial is in browser-compatibility testing.',
     credit: 'Original Lix tutorial by Simon, distributed under CC0.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/blockers.txt',
-    hint: 'Official Lix tutorial: choose Blocker, then tap a grounded Lix. Some original physics are still being adapted.',
+    hint: 'Official Lix tutorial: choose Blocker, then tap a grounded Lix. Not yet certified solvable with our adapted browser physics.',
     tutorialFile: 'blockers'
   },
 
