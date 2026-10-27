@@ -20,7 +20,8 @@
     "test:dig-for-freedom": "node scripts/verify-dig-for-freedom.mjs",
     "test:secret-passage": "node scripts/verify-secret-passage.mjs",
     "test:turnaround": "node scripts/verify-turnaround.mjs",
-    "test:bridge-brigade": "node scripts/verify-bridge-brigade.mjs"
+    "test:bridge-brigade": "node scripts/verify-bridge-brigade.mjs",
+    "test:official-tutorials": "node scripts/verify-official-tutorials.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",
