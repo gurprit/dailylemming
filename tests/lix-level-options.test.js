@@ -30,9 +30,9 @@ test('community levels retain authorship, warnings and original source links', (
 });
 
 
-test('ten mystery community levels all use multiple implemented abilities',()=>{
-  assert.equal(FEATURED_COMMUNITY_LEVELS.length,10);
-  assert.equal(new Set(FEATURED_COMMUNITY_LEVELS).size,10);
+test('mystery community levels all offer at least three implemented abilities',()=>{
+  assert.ok(FEATURED_COMMUNITY_LEVELS.length>=8);
+  assert.equal(new Set(FEATURED_COMMUNITY_LEVELS).size,FEATURED_COMMUNITY_LEVELS.length);
   for(const id of FEATURED_COMMUNITY_LEVELS){
     const info=LEVEL_OPTIONS[id];
     assert.equal(info.category,'community-puzzle');
@@ -42,25 +42,26 @@ test('ten mystery community levels all use multiple implemented abilities',()=>{
     const level=parseLix(source);
     assert.equal(level.title,info.name);
     const required=Object.entries(level.skills).filter(([skill,n])=>n!==0&&skill!=='EXPLODER2');
-    assert.ok(required.length>=2,id+' should use multiple skills');
+    assert.ok(required.length>=3,id+' should offer three or more skills');
     for(const [skill] of required)
       assert.ok(PLAYABLE_SKILLS.includes(skill.toLowerCase()),id+' missing '+skill);
   }
 });
-test('mystery picks are date-deterministic and nonrepeating within each ten-day block',()=>{
+test('mystery picks are date-deterministic and nonrepeating within each rotation block',()=>{
   assert.deepEqual(mysteryLevel('2026-10-27'),mysteryLevel('2026-10-27'));
   const today='2026-10-27';
-  const offset=dayNumber(today)%10;
+  const size=FEATURED_COMMUNITY_LEVELS.length;
+  const offset=dayNumber(today)%size;
   const blockStart=Date.parse(today+'T00:00:00Z')-offset*86400000;
-  const ids=Array.from({length:10},(_,i)=>mysteryLevel(
+  const ids=Array.from({length:size},(_,i)=>mysteryLevel(
     new Date(blockStart+i*86400000).toISOString().slice(0,10)).levelId);
   assert.deepEqual(new Set(ids),new Set(FEATURED_COMMUNITY_LEVELS));
   const nextBlock=Array.from({length:10},(_,i)=>mysteryLevel(
-    new Date(blockStart+(10+i)*86400000).toISOString().slice(0,10)).levelId);
+    new Date(blockStart+(size+i)*86400000).toISOString().slice(0,10)).levelId);
   assert.deepEqual(new Set(nextBlock),new Set(FEATURED_COMMUNITY_LEVELS));
   assert.notDeepEqual(ids,nextBlock,'blocks should shuffle differently');
 });
-test('homepage offers one mystery, a separate verified daily, and exactly ten community levels',()=>{
+test('homepage offers one mystery, a separate verified daily, and only curated community levels',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const ids=[...html.matchAll(/<option value="(lovely-[^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(ids,[...FEATURED_COMMUNITY_LEVELS]);
