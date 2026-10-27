@@ -12,6 +12,7 @@ const levelFiles = [
   'content/lix/lovely/6gaps.txt',
   'content/original/little-bridge.txt',
   'content/original/double-trouble.txt',
+  'content/original/tunnel-time.txt',
   'content/lix/lovely/pitfall.txt',
   'content/lix/lovely/buildingblock.txt'
 ];
