@@ -1,6 +1,7 @@
 import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
+import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -21,11 +22,11 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
 const sourcePath = config.verified
-  ? 'content/original/' + (levelId === 'double-trouble' ? 'double-trouble' : 'little-bridge') + '.txt'
+  ? 'content/original/' + levelId + '.txt'
   : 'levels/single/lemforum/Lovely/' + ({
     '6gaps': '6gaps', pitfall: 'pitfall', 'building-block-maze': 'buildingblock'
   }[levelId]) + '.txt';
@@ -196,7 +197,7 @@ function draw() {
   if (config.verified) drawWaterline(ctx, model.baseGadgets,
     model.ticks, canvas.width, canvas.height);
   // A forgiving visual cue for the first puzzle; old community map has none.
-  if (config.verified) {
+  if (config.verified && levelId !== 'tunnel-time') {
     const x = 232, y = 203;
     ctx.save();
     ctx.fillStyle = '#b1ffd1';
@@ -226,6 +227,17 @@ function draw() {
       ctx.fill();
       ctx.restore();
     }
+  }
+  if (levelId === 'tunnel-time') {
+    ctx.save();
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = '#b1ffd1';
+    ctx.textAlign = 'center';
+    ctx.fillText('BASH HERE', 292, 185);
+    ctx.fillRect(291, 191, 2, 12);
+    ctx.beginPath();
+    ctx.moveTo(287, 200); ctx.lineTo(292, 206); ctx.lineTo(297, 200); ctx.fill();
+    ctx.restore();
   }
   for (const g of model.baseGadgets) {
     if (!g.image || (config.verified && g.sourceImage?.endsWith('.W'))) continue;
@@ -271,7 +283,7 @@ function updateHud() {
     const btn = el('skill-' + skill);
     const count = state.skills?.[skill] || 0;
     if (!btn) continue;
-    btn.hidden = !count && skill !== 'builder' && !(level.skills[skill.toUpperCase()] > 0);
+    btn.hidden = !count && !(level.skills[skill.toUpperCase()] > 0);
     btn.disabled = !count || state.done;
     btn.setAttribute('aria-pressed', String(selectedSkill === skill));
     btn.textContent = SKILL_LABELS[skill] + ' · ' + count;
@@ -294,7 +306,11 @@ function finish() {
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' skill assignments.'
     + (practice.improved ? ' New practice personal best! ✨'
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
-  el('result-next').hidden = !(snap.won && levelId === 'little-bridge');
+  const next = levelId === 'little-bridge' ? 'double-trouble'
+    : levelId === 'double-trouble' ? 'tunnel-time' : null;
+  el('result-next').hidden = !(snap.won && next);
+  el('result-next').textContent = next
+    ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
   el('result').hidden = false;
   (el('result-next').hidden ? el('result-retry') : el('result-next')).focus();
 }
@@ -420,7 +436,9 @@ el('speed').addEventListener('click', () => {
   updateHud();
 });
 el('result-next').addEventListener('click', () => {
-  window.location.href = './play-lix.html?level=double-trouble';
+  const next = levelId === 'little-bridge' ? 'double-trouble'
+    : levelId === 'double-trouble' ? 'tunnel-time' : null;
+  if (next) window.location.href = './play-lix.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
