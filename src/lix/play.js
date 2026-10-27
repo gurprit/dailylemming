@@ -13,6 +13,11 @@ import lixBashers from '../../content/lix/tutorial/bashers.txt?raw';
 import lixDiggers from '../../content/lix/tutorial/diggers.txt?raw';
 import lixMiners from '../../content/lix/tutorial/miners.txt?raw';
 import lixBlockers from '../../content/lix/tutorial/blockers.txt?raw';
+import lixPlatformers from '../../content/lix/tutorial/platformers.txt?raw';
+import lixJumpers from '../../content/lix/tutorial/jumpers.txt?raw';
+import lixRunners from '../../content/lix/tutorial/runners.txt?raw';
+import lixWalkersTurn from '../../content/lix/tutorial/walkers-turn.txt?raw';
+import lixClimbersFloaters from '../../content/lix/tutorial/climbers-floaters.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
@@ -37,12 +42,21 @@ const dailyMode = !params.has('level') || params.get('mode') === 'daily';
 const daily = dailyChallenge(utcDay());
 const levelId = dailyMode ? daily.levelId : resolveLevelId(params.get('level'));
 const config = LEVEL_OPTIONS[levelId];
+const DEMO_TUTORIAL_SKILL = {
+  'lix-builders':'builder','lix-bashers':'basher','lix-diggers':'digger',
+  'lix-miners':'miner','lix-blockers':'blocker','lix-platformers':'platformer',
+  'lix-jumpers':'jumper','lix-runners':'runner',
+  'lix-walkers-turn':'walker','lix-climbers-floaters':'climber'
+};
 const source = {
   'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, turnaround: turnaroundLevel,
   'bridge-brigade': bridgeBrigadeLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel,
   'lix-builders': lixBuilders, 'lix-bashers': lixBashers,
-  'lix-diggers': lixDiggers, 'lix-miners': lixMiners, 'lix-blockers': lixBlockers
+  'lix-diggers': lixDiggers, 'lix-miners': lixMiners, 'lix-blockers': lixBlockers,
+  'lix-platformers': lixPlatformers, 'lix-jumpers': lixJumpers,
+  'lix-runners': lixRunners, 'lix-walkers-turn': lixWalkersTurn,
+  'lix-climbers-floaters': lixClimbersFloaters
 }[levelId];
 const sourcePath = config.category === 'official-tutorial'
   ? 'levels/tutorial/basic/' + config.tutorialFile + '.txt'
@@ -488,9 +502,10 @@ function loop(now) {
 function restart() {
   if (!model) return;
   model.reset();
-  selectedSkill = ['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
+  selectedSkill = DEMO_TUTORIAL_SKILL[levelId]
+    || (['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
     : levelId === 'secret-passage' ? 'miner'
-    : Object.keys(SKILL_LABELS).find(skill => model.remaining[skill] > 0) || 'builder';
+    : Object.keys(SKILL_LABELS).find(skill => model.hasSkill(skill)) || 'builder');
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
   dirt.clear();
@@ -655,10 +670,11 @@ async function boot() {
     spriteCache = terrainImages;
     characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
-    selectedSkill = ['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
+    selectedSkill = DEMO_TUTORIAL_SKILL[levelId]
+      || (['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
       : levelId === 'secret-passage' ? 'miner'
       : Object.keys(SKILL_LABELS)
-        .find(skill => model.remaining[skill] > 0) || 'builder';
+        .find(skill => model.hasSkill(skill)) || 'builder');
     el('art-status').textContent = characterAtlas
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
