@@ -5,6 +5,8 @@ export function selectableUnit(unit, skill, remaining = {}) {
   if (!unit || !remaining || remaining[skill] === 0 || remaining[skill] === undefined) return false;
   if (['runner','climber','floater'].includes(skill))
     return !unit[skill] && !['saved','lost','exiting','blocker'].includes(unit.state);
+  if (skill === 'exploder')
+    return !unit.fuseTicks && !['saved','lost','exiting'].includes(unit.state);
   if (skill === 'walker')
     return ['walking','blocker','runner'].includes(unit.state);
   if (skill === 'builder' && unit.state === 'builder') return true;
