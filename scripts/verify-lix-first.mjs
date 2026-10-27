@@ -85,6 +85,7 @@ for (const asset of friendlyAssets)
   if (!assets.has(asset)) throw new Error('Tutorial asset missing from local vendor pack: ' + asset);
 const attempted = [];
 let solution = null;
+const wins = [];
 for (let builderX = 132; builderX <= 184; builderX += 2) {
   const attempt = new LixGameModel(friendly, assets);
   attempt.togglePause();
@@ -100,15 +101,16 @@ for (let builderX = 132; builderX <= 184; builderX += 2) {
   const result = attempt.snapshot();
   attempted.push({ builderX, assigned, result });
   if (result.won) {
-    solution = { builderX, result, finalX: attempt.units[0]?.x,
+    const proof = { builderX, result, finalX: attempt.units[0]?.x,
       events: attempt.events.filter(e => ['assigned', 'brick', 'landed', 'saved'].includes(e.type)) };
-    break;
+    if (!solution) solution = proof;
+    wins.push(builderX);
   }
 }
 await writeFile(path.join(root, 'generated/lix/little-bridge-proof.json'),
-  JSON.stringify({ level: friendly.title, solution, attempted }, null, 2) + '\n');
+  JSON.stringify({ level: friendly.title, solution, winningBuilderX: wins, attempted }, null, 2) + '\n');
 console.log('Friendly tutorial real-assets win check: ' + JSON.stringify({
-  tested: attempted.length, won: !!solution, solution: solution && {
+  tested: attempted.length, winningBuilderX: wins, won: !!solution, solution: solution && {
     builderX: solution.builderX, saved: solution.result.saved,
     skills: solution.result.used, seconds: solution.result.seconds
   }
