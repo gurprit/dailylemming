@@ -9,6 +9,13 @@ export const LEVEL_OPTIONS = Object.freeze({
     source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt',
     hint: 'Press Start, then tap the Lix near BUILD HERE. Just one staircase needed.'
   },
+  'double-trouble': {
+    name: 'Double Trouble', category: 'intermediate', verified: true,
+    intro: 'Two little gaps and two builder assignments. Just the right step up after Little Bridge.',
+    credit: 'Original Daily Lemming intermediate level using CC0 Lix artwork.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-sprite-water-levels/content/original/double-trouble.txt',
+    hint: 'Two gaps! Build near the first marker, then assign another builder near the second.'
+  },
   pitfall: {
     name: 'Pitfall', category: 'community', verified: false,
     intro: 'An original Lix puzzle by Insane Steve. Real map and terrain, but many original skills are not implemented yet.',
