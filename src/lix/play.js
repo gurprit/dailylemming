@@ -3,6 +3,7 @@ import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
 import digForFreedomLevel from '../../content/original/dig-for-freedom.txt?raw';
+import secretPassageLevel from '../../content/original/secret-passage.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -24,7 +25,7 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
 const sourcePath = config.verified
@@ -231,6 +232,26 @@ function draw() {
       ctx.restore();
     }
   }
+  if (levelId === 'secret-passage') {
+    ctx.save();
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = '#b1ffd1';
+    ctx.textAlign = 'center';
+    const hints = [
+      {label: 'MINE HERE', x: 180, y: 114},
+      {label: 'BASH HERE', x: 424, y: 209}
+    ];
+    for (const h of hints) {
+      ctx.fillText(h.label, h.x, h.y);
+      ctx.fillRect(h.x - 1, h.y + 6, 2, 10);
+      ctx.beginPath();
+      ctx.moveTo(h.x - 5, h.y + 14);
+      ctx.lineTo(h.x, h.y + 20);
+      ctx.lineTo(h.x + 5, h.y + 14);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   if (levelId === 'dig-for-freedom') {
     ctx.save();
     ctx.font = 'bold 11px system-ui';
@@ -328,7 +349,8 @@ function finish() {
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
-    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
+    : levelId === 'tunnel-time' ? 'dig-for-freedom'
+    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
   el('result-next').hidden = !(snap.won && next);
   el('result-next').textContent = next
     ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
@@ -363,7 +385,12 @@ function loop(now) {
         say('That steel cannot be cut. Try another route.');
       if (event.type === 'basher-finished') say('The Basher has finished tunnelling.');
       if (event.type === 'digger-finished') say('The Digger has reached open space.');
-      if (event.type === 'miner-finished') say('The Miner broke through to open space!');
+      if (event.type === 'miner-finished') {
+        if (levelId === 'secret-passage' && model.remaining.basher > 0) {
+          selectedSkill = 'basher';
+          say('The Miner broke through! Basher selected next. Tap your Lix at BASH HERE.');
+        } else say('The Miner broke through to open space!');
+      }
       if (event.type === 'miner-steel') say('The Miner cannot dig through steel.');
     }
     updateHud();
@@ -476,7 +503,8 @@ el('speed').addEventListener('click', () => {
 el('result-next').addEventListener('click', () => {
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
-    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
+    : levelId === 'tunnel-time' ? 'dig-for-freedom'
+    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
   if (next) window.location.href = './play-lix.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
@@ -508,8 +536,9 @@ async function boot() {
     spriteCache = terrainImages;
     characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
-    selectedSkill = Object.keys(SKILL_LABELS)
-      .find(skill => model.remaining[skill] > 0) || 'builder';
+    selectedSkill = levelId === 'secret-passage' ? 'miner'
+      : Object.keys(SKILL_LABELS)
+        .find(skill => model.remaining[skill] > 0) || 'builder';
     el('art-status').textContent = characterAtlas
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
