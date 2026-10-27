@@ -7,6 +7,7 @@ import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
+import { drawWaterBackdrop } from './water.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -156,6 +157,8 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!model) return;
   freshGround();
+  if (levelId === 'little-bridge') drawWaterBackdrop(ctx, model.baseGadgets, model.ticks,
+    canvas.width, canvas.height);
   ctx.drawImage(ground, 0, 0);
   // A forgiving visual cue for the first puzzle; old community map has none.
   if (levelId === 'little-bridge') {
@@ -175,7 +178,7 @@ function draw() {
     ctx.restore();
   }
   for (const g of model.baseGadgets) {
-    if (!g.image) continue;
+    if (!g.image || (levelId === 'little-bridge' && g.sourceImage?.endsWith('.W'))) continue;
     // Animated hatches and liquids cycle through their clipped Cutbit frames.
     ctx.drawImage(gadgetDrawable(g, model.ticks), g.x, g.y);
     if (g.kind === 'goal') {
