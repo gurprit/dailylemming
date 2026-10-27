@@ -12,14 +12,13 @@ $HINT_ENGLISH Block the first Lix to turn friends toward safety, then build over
 #BUILDER 2
 
 :simon/hatch001.H: 240 128 r
-:simon/tapir/goal.G: 568 176
+:simon/tapir/goal.G: 590 176
 
 :simon/tapir/064h: 192 224
 :simon/tapir/064h: 256 224
 :simon/tapir/064h: 320 224
 :simon/tapir/064h: 384 224
 :simon/tapir/064h: 448 224
-:simon/tapir/064h: 544 224
 :simon/tapir/064h: 608 224
 
 :matt/water.W: 500 256
