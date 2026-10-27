@@ -4,12 +4,13 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { PNG } from 'pngjs';
 import { detectLixFrames, cutLixFrame } from '../src/lix/frames.js';
-import { frameIsPresent } from '../src/lix/characters.js';
+import { frameIsPresent, inspectCharacterAtlas } from '../src/lix/characters.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const asset = path.join(root, 'public/lix/characters/lixsprites.png');
 const raw = PNG.sync.read(await readFile(asset));
-const layout = detectLixFrames(raw);
+const verifiedAtlas = inspectCharacterAtlas(raw);
+const layout = verifiedAtlas.layout;
 const activityNames = [
   'nothing','faller','tumbler','stunner','lander','splatter',
   'burner','drowner','exiter','walker','runner','climber',
@@ -36,7 +37,7 @@ for (let row = 0; row < layout.rows; row++) {
     counts: frames.map(f => f.visiblePixels)
   });
 }
-const report = { upstream: 'SimonN/LixD', sheet: 'data/images/lixsprites.png',
+const report = { playableActivityNames: [...verifiedAtlas.rows.keys()], upstream: 'SimonN/LixD', sheet: 'data/images/lixsprites.png',
   layout, width: raw.width, height: raw.height, rows };
 console.log('Lix animation atlas geometry: ' + JSON.stringify({
   width: raw.width, height: raw.height, layout,
