@@ -31,6 +31,26 @@ The initial implementation uses Vite and plain JavaScript without any external g
 
 Progress currently uses browser localStorage; it is not suitable for trusted worldwide leaderboards. The UTC challenge changes when you reload the page after midnight.
 
+## Cloudflare Workers and mobile preview
+
+The modern Lix-art game can be published as a **Cloudflare Worker with Static
+Assets**. No database is needed. The mobile playfield has a native-pixel zoom,
+full-map overview and touch-safe two-axis panning.
+
+```bash
+git pull origin master
+npm install
+npx wrangler login
+npm run deploy
+```
+
+The Worker is named `daily-lemming`. Wrangler prints the **actual**
+`*.workers.dev` URL on successful publication. The game is **not** live on
+Cloudflare merely because these deployment files are checked in.
+
+See [Cloudflare deployment and mobile testing](docs/cloudflare-deployment.md)
+for optional automatic deployment and phone QA.
+
 ## Hosting
 
 GitHub Actions tests and builds each change. The Pages workflow deploys `master`, if GitHub Pages is configured to use **GitHub Actions** as its source in repository Settings → Pages. Preview locally with `npm run dev`; no server/database credentials are required.
