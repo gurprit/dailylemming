@@ -17,7 +17,9 @@ export const CHARACTER_ACTIVITIES = Object.freeze([
   { key: 'basher', row: 21, label: 'Bashing', playable: false },
   { key: 'miner', row: 22, label: 'Mining', playable: false },
   { key: 'digger', row: 23, label: 'Digging', playable: false },
-  { key: 'jumper', row: 24, label: 'Jumping', playable: false }
+  { key: 'jumper', row: 24, label: 'Jumping', playable: false },
+  { key: 'batter', row: 25, label: 'Batting', playable: true },
+  { key: 'cuber', row: 26, label: 'Cubic construction', playable: true }
 ]);
 export const CHARACTER_ATLAS_URL = 'lix/characters/lixsprites.png';
 const PINNED_SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
@@ -41,7 +43,7 @@ export function frameIsPresent(source, layout, col, row) {
 
 export function inspectCharacterAtlas(source) {
   const layout = detectLixFrames(source);
-  if (!layout.grid || layout.rows < 25 || layout.columns < 8)
+  if (!layout.grid || layout.rows < 27 || layout.columns < 8)
     throw new Error('The Lix character sheet does not have its expected frame grid');
   const rows = new Map();
   for (const activity of CHARACTER_ACTIVITIES) {
@@ -99,6 +101,8 @@ export function activityForUnit(unit) {
   if (unit.state === 'builder') return 'builder';
   if (unit.state === 'platformer') return 'platformer';
   if (unit.state === 'jumping') return 'jumper';
+  if (unit.state === 'batter') return 'batter';
+  if (unit.state === 'cuber') return 'cuber';
   if (unit.state === 'climbing') return 'climber';
   if (unit.state === 'walking') return unit.runner ? 'runner' : 'walker';
   if (unit.state === 'falling' || unit.state === 'spawning')
@@ -116,7 +120,7 @@ export function frameColumnForUnit(unit, tick, indices) {
   const offset = unit.state === 'exiting'
     ? Math.min(indices.length - 1, Math.floor((unit.exitTicks || 0) * indices.length / 18))
     : unit.state === 'builder' ? (unit.buildTicks || 0) + 5
-    : unit.state === 'basher' || unit.state === 'digger' || unit.state === 'miner' ? (unit.actionTicks || 0)
+    : unit.state === 'basher' || unit.state === 'digger' || unit.state === 'miner' || unit.state === 'batter' || unit.state === 'cuber' ? (unit.actionTicks || 0)
     : Math.floor(Math.max(0, tick));
   return indices[((offset % indices.length) + indices.length) % indices.length];
 }
