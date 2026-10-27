@@ -60,7 +60,9 @@ let characterAtlas = null;
 let selectedSkill = 'builder';
 const SKILL_LABELS = {
   builder: '🧱 Builder', blocker: '🛑 Blocker',
-  basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner'
+  basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner',
+  walker: '↩ Walker', runner: '🏃 Runner', climber: '🧗 Climber',
+  floater: '🪂 Floater', platformer: '🪵 Platformer', jumper: '↗ Jumper'
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
@@ -373,10 +375,11 @@ function updateHud() {
     const btn = el('skill-' + skill);
     const count = state.skills?.[skill] || 0;
     if (!btn) continue;
-    btn.hidden = !count && !(level.skills[skill.toUpperCase()] > 0);
-    btn.disabled = !count || state.done;
+    btn.hidden = count === 0 && !(level.skills[skill.toUpperCase()] !== undefined
+      && level.skills[skill.toUpperCase()] !== 0);
+    btn.disabled = count === 0 || state.done;
     btn.setAttribute('aria-pressed', String(selectedSkill === skill));
-    btn.textContent = SKILL_LABELS[skill] + ' · ' + count;
+    btn.textContent = SKILL_LABELS[skill] + ' · ' + (count < 0 ? '∞' : count);
   }
   el('pause').disabled = state.done;
   el('speed').textContent = '⏩ ' + speed + '× speed';
@@ -535,7 +538,13 @@ canvas.addEventListener('pointerdown', event => {
       blocker: 'Blocker assigned. Approaching Lix will turn around!',
       basher: 'Basher assigned. Cutting a horizontal tunnel!',
       digger: 'Digger assigned. Digging a shaft down!',
-      miner: 'Miner assigned. Carving a diagonal tunnel!'
+      miner: 'Miner assigned. Carving a diagonal tunnel!',
+      walker: 'Walker turns around or releases a blocker.',
+      runner: 'Runner moves faster!',
+      climber: 'Climber can scale obstacles!',
+      floater: 'Floater parachutes through long drops!',
+      platformer: 'Platformer builds a flat bridge!',
+      jumper: 'Jumper leaps over gaps!'
     };
     say(message[selectedSkill]);
   } else {
@@ -546,7 +555,7 @@ canvas.addEventListener('pointerdown', event => {
 for (const skill of Object.keys(SKILL_LABELS)) {
   const btn = el('skill-' + skill);
   btn.addEventListener('click', () => {
-    if (!model || !model.remaining[skill]) return;
+    if (!model || !model.hasSkill(skill)) return;
     selectedSkill = skill;
     say(skill === 'builder' ? 'Tap a grounded Lix to build stairs.'
       : 'Selected ' + skill + '. Tap a grounded Lix to assign it.');
