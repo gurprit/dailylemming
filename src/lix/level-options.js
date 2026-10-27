@@ -1,6 +1,13 @@
-// Keep two verified practice puzzles separate from imported community experiments.
-// Imported original levels require more original-Lix skills than our current
-// browser adapter implements; don't silently claim they are solvable.
+// Ten authentic Lix tutorials form the curated original-level showcase.
+// No official popularity-count ranking is available, so these are deliberately
+// called curated picks, not "the ten most popular".
+// Only levels proven to be solvable by our approximate browser engine can be
+// promoted into the shared daily challenge.
+export const FEATURED_LIX_LEVELS = Object.freeze([
+  'lix-builders','lix-bashers','lix-diggers','lix-miners','lix-blockers',
+  'lix-platformers','lix-jumpers','lix-runners','lix-walkers-turn',
+  'lix-climbers-floaters'
+]);
 export const LEVEL_OPTIONS = Object.freeze({
   'lix-builders': {
     name: 'Builders', category: 'official-tutorial', verified: false,
