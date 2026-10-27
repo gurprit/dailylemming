@@ -401,3 +401,25 @@ test('blocker frame count starts at assignment and advances while stationary', (
   assert.equal(u.x, x);
   assert.equal(u.y, y);
 });
+
+test('two original Lix hatches alternate entrants deterministically', () => {
+  const {level,images}=sample();
+  level.numeric.INITIAL=4;
+  level.numeric.REQUIRED=1;
+  level.numeric.SPAWN_INTERVAL=1;
+  const extra={...item('hatch.H','hatch',160,160),flags:'r'};
+  level.tiles.push(extra);
+  const model=new LixGameModel(level,images);
+  model.togglePause();
+  for(let i=0;i<15&&model.spawned<4;i++)model.tick();
+  assert.equal(model.spawned,4);
+  const starts=model.events.filter(x=>x.type==='spawn').map(x=>x.x);
+  assert.equal(starts.length,4);
+  assert.equal(starts[0],starts[2]);
+  assert.equal(starts[1],starts[3]);
+  assert.notEqual(starts[0],starts[1]);
+  model.reset();
+  model.togglePause();
+  for(let i=0;i<15&&model.spawned<2;i++)model.tick();
+  assert.deepEqual(model.events.filter(x=>x.type==='spawn').map(x=>x.x),starts.slice(0,2));
+});
