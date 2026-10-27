@@ -30,3 +30,13 @@ test('invalid localStorage does not crash practice game', () => {
     getItem: () => null, setItem() { throw Error('blocked'); }
   }).wins, 1);
 });
+
+test('easy and original hard levels keep independent practice scores', () => {
+  const store = storage();
+  savePractice({ won: true, used: 1, seconds: 24 }, store, 'little-bridge');
+  savePractice({ won: false, used: 5, seconds: 90 }, store, '6gaps');
+  assert.equal(getPractice(store, 'little-bridge').wins, 1);
+  assert.deepEqual(getPractice(store, 'little-bridge').best, { used: 1, seconds: 24 });
+  assert.equal(getPractice(store, '6gaps').wins, 0);
+  assert.equal(getPractice(store, '6gaps').best, null);
+});
