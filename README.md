@@ -125,3 +125,29 @@ npm run dev
 ```
 
 Open `http://localhost:5173/sprites.html` (or the local Vite port). Click back to Little Bridge and test the walking/falling/building transitions in `/play-lix.html`. This is the next **visual** milestone before extending the gameplay with blocker/basher/digger actions.
+
+
+## v0.6: Sprite transparency, full-width water and more levels
+
+- **Original Lix characters:** black background is now flood-filled away *inside each 34×34 frame*; connected exterior black pixels become transparent, while isolated black details remain. The original Lix character gallery uses this loader too. `npm run lix:inspect:characters` confirms that the real PNG contains background pixels eligible for removal.
+- **Water:** Little Bridge and Double Trouble repeat the genuine animated water tiles across the complete playfield, behind land and in a shallow bottom-edge waterline, instead of showing one odd blue rectangle.
+- **Verified progression:** Little Bridge (one gap, one builder) now leads to **Double Trouble**, an original two-gap, two-builder practice level. The latter passed **64 different two-builder starting combinations** in automated simulation with original CC0 graphics and fails without builder assignments. The former retains its existing proof.
+- **Imported original Lix community puzzles:** **Pitfall** (Insane Steve) and **Building Block Maze** (Insane Steve) can be selected alongside 6 Gaps, 5 Builders (mobius). These retain their original level files and their source links. Asset loading, sprite decoding, actual terrain collision and creature spawning are CI-tested. **They are not verified solvable**: our adapter still only supports the Builder skill; original skills like climbing, bashing, mining, digging, platforming, blockers and their interactions are still missing. They are presented explicitly as experimental gameplay previews, not part of the shared daily rotation.
+- **Practice isolation:** each level has its own local practice record; none affects the shared daily result/streak.
+
+Run locally:
+
+```bash
+git fetch origin
+git switch feat/lix-sprite-water-levels
+git pull --ff-only
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:real-lix
+npm run test:double-trouble
+npm run test:community-lix
+npm run dev
+```
+
+Open `/play-lix.html` and use **Choose a level**, or follow the next-level action after rescuing Little Bridge. For actual community source artwork previews, `/lab.html` remains available.
