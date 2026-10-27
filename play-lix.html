@@ -28,6 +28,11 @@
  .experiment-buttons button[aria-pressed="true"]{background:#224f43;border:2px solid #8cebb1}
  .experiment-buttons button:disabled{opacity:.55;cursor:not-allowed}
  .experiment-buttons button.primary{background:#86e7ae;color:#123448;border:0}
+ .experiment-buttons button:focus-visible{outline:3px solid #c3f9d5;outline-offset:3px}
+ .experiment-view canvas{user-select:none;-webkit-user-select:none}
+ .experiment-buttons button#step{border-color:#89aeac;background:#21433f;color:#ddfff0}
+ .experiment-hint{min-height:22px}
+ @media(max-width:660px){.experiment-buttons button{flex:1 1 42%}.experiment-buttons button#restart{flex:1 1 100%}}
  .experiment-hint{font-size:13px;line-height:1.6;color:#bccde4;margin:13px 3px 0}
  .experiment-help{margin-top:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
  .experiment-help article{background:#1a273f;border:1px solid #3f4f6e;border-radius:12px;padding:16px}
@@ -67,15 +72,16 @@
    <div class="experiment-buttons">
     <button id="builder" type="button" aria-pressed="true">🧱 Builder · <span id="count">5</span></button>
     <button id="pause" class="primary" type="button">▶ Start</button>
+    <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
     <button id="speed" type="button">⏩ 1× speed</button>
     <button id="restart" type="button">↻ Restart</button>
    </div>
-   <p id="message" class="experiment-hint" role="status">Choose Builder, then tap the little walker when you need to span a gap. You can pause to plan.</p>
+   <p id="message" class="experiment-hint" role="status">Choose Builder, then tap the little walker when you need to span a gap. Pause to preview your 12-step staircase, assign a builder on solid ground, or step one frame at a time.</p>
   </div>
  </section>
  <div class="experiment-help">
-  <article><h2>How to play</h2><p>Start the run. Tap the moving green-haired creature to assign a builder. Each builder lays a rising staircase. Press Space to pause or R to restart. Touch works too.</p></article>
-  <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Physics, trigger positions and skill timing are provisional, and completion has not yet been confirmed against a Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+  <article><h2>How to play</h2><p>Start the run. Tap the moving green-haired creature to assign a builder. Each builder lays a rising staircase. Press Space to pause, period (.) to advance one frame, or R to restart. The ghost staircase appears while paused so you can plan. Larger touch targets work on phones too.</p></article>
+  <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
  <p class="credits">Source: <a href="https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/6gaps.txt">Lix: 6 Gaps, 5 Builders by mobius</a>. Level and artwork made available under CC0.</p>
 </main>
