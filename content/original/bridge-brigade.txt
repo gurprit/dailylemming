@@ -1,0 +1,25 @@
+// Beginner two-skill crowd puzzle. One Blocker protects the group while
+// the second Lix builds a safe route over a little gap.
+$AUTHOR Daily Lemming
+$ENGLISH Bridge Brigade
+$HINT_ENGLISH Block the first Lix to turn friends toward safety, then build over the gap.
+#SIZE_X 640
+#SIZE_Y 288
+#INITIAL 3
+#REQUIRED 2
+#SPAWN_INTERVAL 240
+#BLOCKER 1
+#BUILDER 2
+
+:simon/hatch001.H: 240 128 r
+:simon/tapir/goal.G: 568 176
+
+:simon/tapir/064h: 192 224
+:simon/tapir/064h: 256 224
+:simon/tapir/064h: 320 224
+:simon/tapir/064h: 384 224
+:simon/tapir/064h: 448 224
+:simon/tapir/064h: 532 224
+:simon/tapir/064h: 596 224
+
+:matt/water.W: 500 256
