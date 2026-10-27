@@ -16,6 +16,13 @@ export const LEVEL_OPTIONS = Object.freeze({
     source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-sprite-water-levels/content/original/double-trouble.txt',
     hint: 'Two gaps! Build near the first marker, then assign another builder near the second.'
   },
+  'tunnel-time': {
+    name: 'Tunnel Time', category: 'intermediate', verified: true,
+    intro: 'Meet the Basher! One sandstone wall stands between your Lix and freedom. Tunnel through it.',
+    credit: 'Original Daily Lemming Basher tutorial using CC0 Lix artwork.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-skills-and-exit/content/original/tunnel-time.txt',
+    hint: 'Select Basher (⛏️), then tap the Lix just before the BASH HERE marker at the wall.'
+  },
   pitfall: {
     name: 'Pitfall', category: 'community', verified: false,
     intro: 'An original Lix puzzle by Insane Steve. Real map and terrain, but many original skills are not implemented yet.',
