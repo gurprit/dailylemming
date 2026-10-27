@@ -1,4 +1,14 @@
 import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
+import lovely_pipedream from '../../content/lix/lovely/pipedream.txt?raw';
+import lovely_beneaththelab from '../../content/lix/lovely/beneaththelab.txt?raw';
+import lovely_climbtofreedom from '../../content/lix/lovely/climbtofreedom.txt?raw';
+import lovely_everylix from '../../content/lix/lovely/everylix.txt?raw';
+import lovely_escapethepit from '../../content/lix/lovely/escapethepit.txt?raw';
+import lovely_pitfall from '../../content/lix/lovely/pitfall.txt?raw';
+import lovely_putyourlix from '../../content/lix/lovely/putyourlix.txt?raw';
+import lovely_solareclipse from '../../content/lix/lovely/solareclipse.txt?raw';
+import lovely_alternative from '../../content/lix/lovely/alternative.txt?raw';
+import lovely_anecklaceofraindrops from '../../content/lix/lovely/anecklaceofraindrops.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
@@ -31,6 +41,7 @@ import { unitAtPoint, drawUnitTarget } from './targeting.js';
 import { DirtParticles } from './particles.js';
 import { utcDay } from '../daily.js';
 import { dailyChallenge, dailyStreak, readDaily, saveDaily, dailyResultText } from './daily-challenge.js';
+import { mysteryLevel } from './featured-levels.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -38,9 +49,12 @@ const el = id => document.getElementById(id);
 const canvas = el('playfield');
 const ctx = canvas.getContext('2d');
 const params = new URLSearchParams(location.search);
-const dailyMode = !params.has('level') || params.get('mode') === 'daily';
+const dailyMode = params.get('mode') === 'daily';
+const mysteryMode = !dailyMode && !params.has('level');
 const daily = dailyChallenge(utcDay());
-const levelId = dailyMode ? daily.levelId : resolveLevelId(params.get('level'));
+const mystery = mysteryLevel(utcDay());
+const levelId = dailyMode ? daily.levelId
+  : mysteryMode ? mystery.levelId : resolveLevelId(params.get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const DEMO_TUTORIAL_SKILL = {
   'lix-builders':'builder','lix-bashers':'basher','lix-diggers':'digger',
@@ -56,9 +70,21 @@ const source = {
   'lix-diggers': lixDiggers, 'lix-miners': lixMiners, 'lix-blockers': lixBlockers,
   'lix-platformers': lixPlatformers, 'lix-jumpers': lixJumpers,
   'lix-runners': lixRunners, 'lix-walkers-turn': lixWalkersTurn,
-  'lix-climbers-floaters': lixClimbersFloaters
+  'lix-climbers-floaters': lixClimbersFloaters,
+  'lovely-pipedream': lovely_pipedream,
+  'lovely-beneaththelab': lovely_beneaththelab,
+  'lovely-climbtofreedom': lovely_climbtofreedom,
+  'lovely-everylix': lovely_everylix,
+  'lovely-escapethepit': lovely_escapethepit,
+  'lovely-pitfall': lovely_pitfall,
+  'lovely-putyourlix': lovely_putyourlix,
+  'lovely-solareclipse': lovely_solareclipse,
+  'lovely-alternative': lovely_alternative,
+  'lovely-anecklaceofraindrops': lovely_anecklaceofraindrops
 }[levelId];
-const sourcePath = config.category === 'official-tutorial'
+const sourcePath = config.category === 'community-puzzle'
+  ? 'levels/single/lemforum/Lovely/' + config.communityFile + '.txt'
+  : config.category === 'official-tutorial'
   ? 'levels/tutorial/basic/' + config.tutorialFile + '.txt'
   : config.verified
   ? 'content/original/' + levelId + '.txt'
@@ -608,10 +634,10 @@ for (const skill of Object.keys(SKILL_LABELS)) {
   });
 }
 el('level-picker').addEventListener('change', event => {
-  const id = event.target.value === '__daily__'
-    ? '__daily__' : resolveLevelId(event.target.value);
-  window.location.href = id === '__daily__' ? './index.html'
-    : './index.html?level=' + encodeURIComponent(id);
+  const id = event.target.value;
+  window.location.href = id === '__mystery__' ? './index.html'
+    : id === '__daily__' ? './index.html?mode=daily'
+    : './index.html?level=' + encodeURIComponent(resolveLevelId(id));
 });
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
@@ -714,8 +740,10 @@ async function boot() {
       el('daily-date').textContent = daily.day + ' · UTC · DAY ' + String(daily.number).padStart(3,'0');
     }
     el('result-share').hidden = true;
-    el('mode-tag').textContent = dailyMode
-      ? '✳ TODAY\'S SHARED CHALLENGE · ' + config.name.toUpperCase()
+    el('mode-tag').textContent = mysteryMode
+      ? '🎲 TODAY\'S MYSTERY · REAL LIX COMMUNITY PUZZLE'
+      : dailyMode
+      ? '✳ VERIFIED DAILY CHALLENGE · ' + config.name.toUpperCase()
       : config.verified
       ? '🌿 VERIFIED PRACTICE · ' + config.name.toUpperCase()
       : config.category === 'official-tutorial'
@@ -724,7 +752,8 @@ async function boot() {
     el('level-intro').textContent = config.intro;
     el('credit').textContent = config.credit;
     el('source-link').href = config.source;
-    el('level-picker').value = dailyMode ? '__daily__' : levelId;
+    el('level-picker').value = mysteryMode ? '__mystery__'
+      : dailyMode ? '__daily__' : levelId;
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
