@@ -28,8 +28,8 @@ export class LixGameModel {
     this.hazards = this.baseGadgets.filter(g => g.kind === 'hazard');
     if (this.hatches.length !== 1 || this.goals.length < 1)
       throw new Error('This experiment requires exactly one hatch and at least one goal');
-    if (!Number.isInteger(level.skills.BUILDER) || level.skills.BUILDER < 1)
-      throw new Error('This experiment requires at least one builder');
+    if (!PLAYABLE_SKILLS.some(skill => (level.skills[skill.toUpperCase()] || 0) > 0))
+      throw new Error('This experiment requires at least one supported skill');
     this.reset();
   }
 
@@ -211,7 +211,7 @@ export class LixGameModel {
     const x = Math.round(u.x + direction * 6);
     const left = direction > 0 ? x : x - 11;
     let removable = false, steel = false;
-    for (let yy = Math.round(u.y) - 15; yy < u.y; yy++) {
+    for (let yy = Math.round(u.y) - 25; yy < u.y; yy++) {
       for (let xx = left; xx < left + 12; xx++) {
         const i = this.terrain.index(xx, yy);
         if (i < 0) continue;
@@ -225,7 +225,7 @@ export class LixGameModel {
       this.emit(steel ? 'basher-steel' : 'basher-finished', u);
       return;
     }
-    this.terrain.digRect(left, Math.round(u.y) - 15, 12, 15);
+    this.terrain.digRect(left, Math.round(u.y) - 25, 12, 25);
     this.changed = true;
     u.x = clamp(u.x + direction * 2, 1, this.width - 2);
     this.emit('bashed', u);
