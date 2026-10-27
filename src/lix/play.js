@@ -35,6 +35,11 @@ document.body.classList.toggle('community-mode', !config.verified);
 let model = null;
 let spriteCache = null;
 let characterAtlas = null;
+let selectedSkill = 'builder';
+const SKILL_LABELS = {
+  builder: '🧱 Builder', blocker: '🛑 Blocker',
+  basher: '⛏️ Basher', digger: '🕳️ Digger'
+};
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
@@ -114,7 +119,7 @@ async function loadArt() {
   return result;
 }
 function drawBuilderPreview(u) {
-  if (!model.paused || !model.remaining.builder ||
+  if (selectedSkill !== 'builder' || !model.paused || !model.remaining.builder ||
     !['walking', 'builder'].includes(u.state)) return null;
   if (u.state === 'walking' && !u.grounded) return null;
   const projection = projectBuilder(model.terrain, u);
@@ -144,7 +149,22 @@ function drawBuilderPreview(u) {
 }
 function paintCharacter(u) {
   if (['lost', 'saved'].includes(u.state)) return;
-  if (drawCharacterSprite(ctx, characterAtlas, u, model?.ticks || 0)) return;
+  const spriteDrawn = drawCharacterSprite(ctx, characterAtlas, u, model?.ticks || 0);
+  if (u.state === 'exiting') {
+    // A restrained sparkle burst to accompany the native exiter jump.
+    const phase = Math.min(1, (u.exitTicks || 0) / 18);
+    ctx.save();
+    ctx.fillStyle = '#a6f8bb';
+    for (let i = 0; i < 5; i++) {
+      const angle = i * Math.PI * 2 / 5;
+      const radius = 4 + phase * 16;
+      ctx.globalAlpha = 1 - phase * .9;
+      ctx.fillRect(Math.round(u.x + Math.cos(angle) * radius),
+        Math.round(u.y - 14 + Math.sin(angle) * radius - phase * 12), 2, 2);
+    }
+    ctx.restore();
+  }
+  if (spriteDrawn) return;
   const x = Math.round(u.x), y = Math.round(u.y);
   ctx.save();
   ctx.translate(x, y);
@@ -248,12 +268,20 @@ function updateHud() {
   el('state').textContent = state.done ? (state.won ? 'SAVED!' : 'FAILED')
     : state.paused ? (state.started ? 'PAUSED' : 'READY') : 'RUNNING';
   el('pause').textContent = state.started ? (state.paused ? '▶ Resume' : '⏸ Pause') : '▶ Start';
-  el('builder').disabled = state.builder < 1 || state.done;
+  for (const skill of Object.keys(SKILL_LABELS)) {
+    const btn = el('skill-' + skill);
+    const count = state.skills?.[skill] || 0;
+    if (!btn) continue;
+    btn.hidden = !count && skill !== 'builder' && !(level.skills[skill.toUpperCase()] > 0);
+    btn.disabled = !count || state.done;
+    btn.setAttribute('aria-pressed', String(selectedSkill === skill));
+    btn.textContent = SKILL_LABELS[skill] + ' · ' + count;
+  }
   el('pause').disabled = state.done;
   el('speed').textContent = '⏩ ' + speed + '× speed';
   el('step').disabled = !state.paused || state.done;
   el('undo').disabled = !model.undoAvailable;
-  el('builder').setAttribute('aria-pressed', String(state.builder > 0));
+  el('builder').setAttribute('aria-pressed', String(selectedSkill === 'builder'));
 }
 function finish() {
   if (ended) return;
@@ -264,7 +292,7 @@ function finish() {
   el('result-icon').textContent = snap.won ? '✦' : '↻';
   el('result-heading').textContent = snap.won ? 'You did it!' : 'One more try?';
   el('result-summary').textContent = 'Saved ' + snap.saved + '/' + snap.total
-    + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' builder assignments.'
+    + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' skill assignments.'
     + (practice.improved ? ' New practice personal best! ✨'
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   el('result-next').hidden = !(snap.won && levelId === 'little-bridge');
@@ -293,6 +321,12 @@ function loop(now) {
       if (event.type === 'builder-continued') say('Queued builder activated, staircase continuing!');
       if (event.type === 'builder-blocked') say('Builder hit an obstacle and turned around.');
       if (event.type === 'drowned') say('The wanderer fell into danger. Try another route!');
+      if (event.type === 'exit-started') say('Freedom! ✨ Watch your Lix leap through the exit…');
+      if (event.type === 'blocked') say('The Blocker turned another Lix around!');
+      if (event.type === 'basher-steel' || event.type === 'digger-steel')
+        say('That steel cannot be cut. Try another route.');
+      if (event.type === 'basher-finished') say('The Basher has finished tunnelling.');
+      if (event.type === 'digger-finished') say('The Digger has reached open space.');
     }
     updateHud();
     draw();
@@ -328,23 +362,39 @@ canvas.addEventListener('pointerdown', event => {
   const y = (event.clientY - rect.top) * canvas.height / rect.height;
   // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
   const radius = Math.max(27, 40 * canvas.width / rect.width);
-  const index = model.units.findIndex(u => ['walking', 'builder'].includes(u.state)
+  const index = model.units.findIndex(u =>
+    (u.state === 'walking' || (selectedSkill === 'builder' && u.state === 'builder'))
     && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
   if (index < 0) {
     say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
   }
   const wasBuilding = model.units[index]?.state === 'builder';
-  if (model.assignBuilder(index)) {
-    say(wasBuilding
-      ? 'Another builder queued! The staircase will continue without stopping.'
-      : 'Builder assigned! A staircase is being constructed.');
+  if (model.assignSkill(selectedSkill, index)) {
+    const message = {
+      builder: wasBuilding
+        ? 'Another Builder queued. The staircase will continue!'
+        : 'Builder assigned. Your Lix is laying stairs!',
+      blocker: 'Blocker assigned. Approaching Lix will turn around!',
+      basher: 'Basher assigned. Cutting a horizontal tunnel!',
+      digger: 'Digger assigned. Digging a shaft down!'
+    };
+    say(message[selectedSkill]);
   } else {
-    say('Start builders on solid ground, or tap an active builder to queue another staircase.');
+    say('Choose an available skill and tap a Lix standing on solid ground.');
   }
   updateHud();
 });
-el('builder').addEventListener('click', () => say('Builder selected: tap a grounded Lix to build stairs.'));
+for (const skill of Object.keys(SKILL_LABELS)) {
+  const btn = el('skill-' + skill);
+  btn.addEventListener('click', () => {
+    if (!model || !model.remaining[skill]) return;
+    selectedSkill = skill;
+    say(skill === 'builder' ? 'Tap a grounded Lix to build stairs.'
+      : 'Selected ' + skill + '. Tap a grounded Lix to assign it.');
+    updateHud();
+  });
+}
 el('level-picker').addEventListener('change', event => {
   const id = resolveLevelId(event.target.value);
   window.location.href = './play-lix.html' + (id === 'little-bridge' ? '' : '?level=' + encodeURIComponent(id));
@@ -358,7 +408,7 @@ function undo() {
   accumulator = 0;
   last = 0;
   el('result').hidden = true;
-  say('Last builder undone. Skill, position and terrain restored. Press Resume when ready.');
+  say('Last skill undone. Inventory, position and terrain restored. Press Resume when ready.');
   updateHud();
   draw();
 }
@@ -402,6 +452,8 @@ async function boot() {
     spriteCache = terrainImages;
     characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
+    selectedSkill = Object.keys(SKILL_LABELS)
+      .find(skill => model.remaining[skill] > 0) || 'builder';
     el('art-status').textContent = characterAtlas
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
@@ -416,7 +468,7 @@ async function boot() {
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
-      : 'This imported level is a work-in-progress compatibility preview. Only Builder is playable; other original Lix skills are unavailable and a win is not guaranteed.';
+      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher and Digger now work, but other original Lix skills and exact physics are still unavailable. A win is not guaranteed.';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
