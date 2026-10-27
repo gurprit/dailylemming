@@ -24,13 +24,18 @@ import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
 import { unitAtPoint, drawUnitTarget } from './targeting.js';
 import { DirtParticles } from './particles.js';
+import { utcDay } from '../daily.js';
+import { dailyChallenge, dailyStreak, readDaily, saveDaily, dailyResultText } from './daily-challenge.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
 const el = id => document.getElementById(id);
 const canvas = el('playfield');
 const ctx = canvas.getContext('2d');
-const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
+const params = new URLSearchParams(location.search);
+const dailyMode = !params.has('level') || params.get('mode') === 'daily';
+const daily = dailyChallenge(utcDay());
+const levelId = dailyMode ? daily.levelId : resolveLevelId(params.get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
   'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, turnaround: turnaroundLevel,
@@ -72,7 +77,18 @@ function fmt(s) {
 }
 function say(s) { el('message').textContent = s; }
 function showPractice(record = getPractice(undefined, levelId)) {
-  el('practice-best').textContent = practiceLabel(record);
+  if (dailyMode) {
+    const current = readDaily()[daily.day];
+    el('practice-best').textContent = current
+      ? 'First: ' + current.first.saved + '/' + current.first.total + ' saved. '
+        + 'Best: ' + current.best.saved + '/' + current.best.total
+        + ' with ' + current.best.used + ' skills in ' + fmt(current.best.seconds)
+        + '. ' + current.attempts + ' attempts.'
+      : 'Your first daily rescue awaits!';
+    el('daily-streak').textContent = String(dailyStreak(daily.day));
+  } else {
+    el('practice-best').textContent = practiceLabel(record);
+  }
 }
 function freshGround() {
   if (!model?.changed) return;
@@ -372,21 +388,28 @@ function finish() {
   if (ended) return;
   ended = true;
   const snap = model.snapshot();
-  const practice = savePractice(snap, undefined, levelId);
+  const staleDaily = dailyMode && utcDay() !== daily.day;
+  if (staleDaily) {
+    say('The UTC daily challenge changed while you played. Refresh for the new puzzle.');
+  }
+  const practice = dailyMode
+    ? (staleDaily ? null : saveDaily(daily.day, levelId, snap))
+    : savePractice(snap, undefined, levelId);
   showPractice(practice);
   el('result-icon').textContent = snap.won ? '✦' : '↻';
   el('result-heading').textContent = snap.won ? 'You did it!' : 'One more try?';
   el('result-summary').textContent = 'Saved ' + snap.saved + '/' + snap.total
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' skill assignments.'
-    + (practice.improved ? ' New practice personal best! ✨'
-      : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
+    + (!dailyMode && practice?.improved ? ' New practice personal best! ✨'
+      : snap.won ? ' Great work!' : ' Experiment with a different skill or timing.');
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
     : levelId === 'tunnel-time' ? 'dig-for-freedom'
     : levelId === 'dig-for-freedom' ? 'secret-passage'
     : levelId === 'secret-passage' ? 'turnaround'
     : levelId === 'turnaround' ? 'bridge-brigade' : null;
-  el('result-next').hidden = !(snap.won && next);
+  el('result-next').hidden = dailyMode || !(snap.won && next);
+  el('result-share').hidden = !dailyMode || staleDaily;
   el('result-next').textContent = next
     ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
   el('result').hidden = false;
@@ -471,6 +494,7 @@ function restart() {
   pointerPosition = null;
   canvas.style.cursor = 'crosshair';
   el('result').hidden = true;
+  el('result-share').hidden = true;
   say(config.hint);
   updateHud();
   draw();
@@ -530,7 +554,8 @@ for (const skill of Object.keys(SKILL_LABELS)) {
 }
 el('level-picker').addEventListener('change', event => {
   const id = resolveLevelId(event.target.value);
-  window.location.href = './index.html' + (id === 'little-bridge' ? '' : '?level=' + encodeURIComponent(id));
+  window.location.href = id === '__daily__' ? './index.html'
+    : './index.html?level=' + encodeURIComponent(id);
 });
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
@@ -562,6 +587,21 @@ el('result-next').addEventListener('click', () => {
     : levelId === 'secret-passage' ? 'turnaround'
     : levelId === 'turnaround' ? 'bridge-brigade' : null;
   if (next) window.location.href = './index.html?level=' + next;
+});
+el('result-share').addEventListener('click', async () => {
+  if (!dailyMode || utcDay() !== daily.day) return;
+  const record = readDaily()[daily.day];
+  if (!record) return;
+  const text = dailyResultText(daily.day, record);
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      el('result-share').textContent = 'Copied! ✓';
+    } else say(text);
+  } catch (error) {
+    if (error?.name !== 'AbortError') say('Sharing is unavailable on this device.');
+  }
 });
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
@@ -600,7 +640,14 @@ async function boot() {
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
     el('level-title').textContent = level.title;
-    el('mode-tag').textContent = config.verified
+    el('daily-bar').hidden = !dailyMode;
+    if (dailyMode) {
+      el('daily-date').textContent = daily.day + ' · UTC · DAY ' + String(daily.number).padStart(3,'0');
+    }
+    el('result-share').hidden = true;
+    el('mode-tag').textContent = dailyMode
+      ? '✳ TODAY\'S SHARED CHALLENGE · ' + config.name.toUpperCase()
+      : config.verified
       ? '🌿 VERIFIED PRACTICE · ' + config.name.toUpperCase()
       : config.category === 'official-tutorial'
         ? '🟢 ORIGINAL LIX BASIC TUTORIAL · ' + config.name.toUpperCase()
@@ -608,7 +655,7 @@ async function boot() {
     el('level-intro').textContent = config.intro;
     el('credit').textContent = config.credit;
     el('source-link').href = config.source;
-    el('level-picker').value = levelId;
+    el('level-picker').value = dailyMode ? '__daily__' : levelId;
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
