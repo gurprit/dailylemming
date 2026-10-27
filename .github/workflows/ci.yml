@@ -18,6 +18,7 @@ jobs:
       - run: npm run lix:vendor:first
       - run: npm run lix:inspect:characters
       - run: npm run test:real-lix
+      - run: npm run test:community-lix
       - run: npm run lix:search
       - uses: actions/upload-artifact@v4
         with:
