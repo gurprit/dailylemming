@@ -521,7 +521,7 @@ for (const skill of Object.keys(SKILL_LABELS)) {
 }
 el('level-picker').addEventListener('change', event => {
   const id = resolveLevelId(event.target.value);
-  window.location.href = './play-lix.html' + (id === 'little-bridge' ? '' : '?level=' + encodeURIComponent(id));
+  window.location.href = './index.html' + (id === 'little-bridge' ? '' : '?level=' + encodeURIComponent(id));
 });
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
@@ -552,7 +552,7 @@ el('result-next').addEventListener('click', () => {
     : levelId === 'dig-for-freedom' ? 'secret-passage'
     : levelId === 'secret-passage' ? 'turnaround'
     : levelId === 'turnaround' ? 'bridge-brigade' : null;
-  if (next) window.location.href = './play-lix.html?level=' + next;
+  if (next) window.location.href = './index.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
