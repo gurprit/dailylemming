@@ -161,7 +161,7 @@ When a Lix enters its exit, it now spends **18 physics updates** in an `exiting`
 
 ### Third verified practice level: Tunnel Time
 
-`/play-lix.html?level=tunnel-time` introduces the Basher with a sandstone obstacle and a clear "BASH HERE" marker. The real-asset test `npm run test:tunnel-time` found **eight one-Basher winning positions** (x=284..298 in 2-pixel increments), rescuing one Lix in about 26–27 simulated seconds. A no-skill run cannot win. The victory flow offers **Little Bridge → Double Trouble → Tunnel Time**.
+`/play-lix.html?level=tunnel-time` introduces the Basher with a sandstone obstacle and a clear "BASH HERE" marker. The real-asset test `npm run test:tunnel-time` found **eight one-Basher winning positions** (x=284..298 in 2-pixel increments), rescuing one Lix in about 26–27 simulated seconds. A no-skill run cannot win. The victory flow offers **Little Bridge → Double Trouble → Tunnel Time → Dig for Freedom**.
 
 The two imported community level experiments still are **not certified solvable**. Although Builder, Blocker, Basher and Digger are now present, other original Lix mechanics and precise interaction semantics remain unsupported. Scores stay independent of the shared daily challenge.
 
@@ -179,3 +179,7 @@ npm run dev
 ```
 
 Try `/play-lix.html` and watch the character jump into the exit *before* results appear.
+
+### Fourth verified practice level: Dig for Freedom
+
+`/play-lix.html?level=dig-for-freedom` has a full-length upper sandstone platform and a lower exit corridor. A Lix must use the **Digger** skill to tunnel downward, fall safely to the lower passage, and walk to its exit. The test `npm run test:dig-for-freedom` solved this stage with **20 different one-Digger starting positions**, each around 26 simulated seconds; no-skill play cannot win. This completes our first four verified practice puzzles: Little Bridge → Double Trouble → Tunnel Time → Dig for Freedom. They use CC0 Lix tiles with original Daily Lemming-authored layouts.
