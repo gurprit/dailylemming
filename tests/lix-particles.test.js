@@ -37,3 +37,12 @@ test('draw emits squares but does not alter canvas state', () => {
   assert.equal(actions.at(-1),'restore');
   assert.equal(actions.filter(Array.isArray).length,9);
 });
+
+test('Basher throws a short backward debris burst', () => {
+  const p = new DirtParticles(() => .5);
+  p.burst('bashed', 50, 90, 1);
+  assert.equal(p.items.length, 8);
+  assert.ok(p.items.every(chip => chip.vx < 0 && chip.vy < 0));
+  p.update(.05);
+  assert.ok(p.items.some(chip => chip.y < 90));
+});
