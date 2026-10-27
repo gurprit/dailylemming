@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101728">
 <meta name="description" content="Play a real community-made Lix puzzle with Daily Lemming's experimental browser engine.">
-<title>6 Gaps, 5 Builders | Daily Lemming experimental level</title>
+<title>Little Bridge | Daily Lemming</title>
 <link rel="stylesheet" href="/src/styles.css">
 <style>
  .experiment{max-width:1050px;margin:0 auto;padding:20px 20px 55px}
@@ -55,25 +55,25 @@
 <main class="experiment">
  <nav class="experiment-nav">
   <a href="./index.html">← Daily Lemming</a>
-  <small>Independent community-level engineering experiment</small>
+  <small><a href="./play-lix.html">Easy level</a> · <a href="./play-lix.html?level=6gaps">Original hard level</a></small>
  </nav>
- <div class="tag">🧪 REAL LIX LEVEL · EXPERIMENTAL ENGINE</div>
- <h1>6 Gaps, 5 Builders</h1>
- <p class="lead">Save one wanderer using just five builders. Original CC0 level by <strong>mobius</strong>. Place steps carefully and find a route to the exit.</p>
+ <div class="tag">🟢 ONE HAPPY LITTLE LEVEL · PIXEL TERRAIN ENGINE</div>
+ <h1 id="level-title">Little Bridge</h1>
+ <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
  <section aria-label="Playable puzzle">
   <div class="experiment-stats">
    <div><span>RESCUED</span><b id="saved">0/1</b></div>
-   <div><span>BUILDERS</span><b id="builders">5</b></div>
+   <div><span>BUILDERS</span><b id="builders">3</b></div>
    <div><span>TIME</span><b id="timer">00:00</b></div>
    <div><span>STATE</span><b id="state">READY</b></div>
   </div>
   <div class="experiment-view">
-   <canvas id="playfield" width="512" height="288" role="img" aria-label="One walking creature, terrain, five builder skills and exit"></canvas>
+   <canvas id="playfield" width="512" height="288" role="img" aria-label="A walking creature, one small gap, a builder skill and exit"></canvas>
    <div class="busy" id="loading" role="status">Loading original CC0 level graphics and building terrain collision map…</div>
   </div>
   <div class="experiment-actions">
    <div class="experiment-buttons">
-    <button id="builder" type="button" aria-pressed="true">🧱 Builder · <span id="count">5</span></button>
+    <button id="builder" type="button" aria-pressed="true">🧱 Builder · <span id="count">3</span></button>
     <button id="pause" class="primary" type="button">▶ Start</button>
     <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
     <button id="undo" type="button" disabled title="Restore terrain and position before your last builder assignment">↶ Undo builder</button>
@@ -81,15 +81,15 @@
     <button id="restart" type="button">↻ Restart</button>
    </div>
    <p id="preview-warning" class="experiment-warning" role="status" hidden></p>
-   <p id="message" class="experiment-hint" role="status">Choose Builder, then tap the little walker when you need to span a gap. Pause to preview the 12-step staircase, tap again while building to queue more steps, or advance one frame at a time.</p>
+   <p id="message" class="experiment-hint" role="status">Press Start, then tap your Lemming near the BUILD HERE arrow. One little bridge is all you need!</p>
   </div>
  </section>
  <div class="experiment-help">
   <article><h2>🏆 Practice personal best</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
-  <article><h2>How to play</h2><p>Start the run. Tap the green-haired creature to assign a builder, or tap an active builder again to queue another staircase. Avoid chaining every builder when the stairs approach the steel ceiling; you may turn back. Each builder lays a rising staircase. Press Space to pause, period (.) to advance one frame, or R to restart. The ghost staircase appears while paused so you can plan; chain more than 12 steps by queuing a second builder. Use Undo builder (Ctrl/Cmd+Z) to restore a mistimed assignment. Larger touch targets work on phones too.</p></article>
+  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. You get three builders, and Undo (Ctrl/Cmd+Z) lets you retry. Press Space to pause, or R to restart.</p></article>
   <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
- <p class="credits">Source: <a href="https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/6gaps.txt">Lix: 6 Gaps, 5 Builders by mobius</a>. Level and artwork made available under CC0.</p>
+ <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>
 </main>
 <div id="result" class="experiment-result" hidden>
  <div role="dialog" aria-modal="true" aria-labelledby="result-heading">
