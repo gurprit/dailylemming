@@ -267,8 +267,9 @@ function finish() {
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' builder assignments.'
     + (practice.improved ? ' New practice personal best! ✨'
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
+  el('result-next').hidden = !(snap.won && levelId === 'little-bridge');
   el('result').hidden = false;
-  el('result-retry').focus();
+  (el('result-next').hidden ? el('result-retry') : el('result-next')).focus();
 }
 function loop(now) {
   if (!model) return;
@@ -368,6 +369,9 @@ el('step').addEventListener('click', () => {
 el('speed').addEventListener('click', () => {
   speed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
   updateHud();
+});
+el('result-next').addEventListener('click', () => {
+  window.location.href = './play-lix.html?level=double-trouble';
 });
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
