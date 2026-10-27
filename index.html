@@ -78,27 +78,19 @@
  <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
  <label class="level-select" for="level-picker">
   <span>Choose a puzzle</span>
-  <select id="level-picker" aria-label="Choose an easy Lix puzzle or basic tutorial">
-   <optgroup label="One shared level each day · verified">
-    <option value="__daily__">✳ Today's Daily Challenge · UTC</option>
-   </optgroup>
-    <optgroup label="Start here · verified easy puzzle">
-    <option value="little-bridge">🌱 Little Bridge · verified, easy</option>
-   </optgroup>
-   <optgroup label="Original Lix beginner tutorials · CC0">
-    <option value="lix-builders">🧱 Builders · official Lix tutorial</option>
-    <option value="lix-bashers">⛏️ Bashers · official Lix tutorial</option>
-    <option value="lix-diggers">🕳️ Diggers · official Lix tutorial</option>
-    <option value="lix-miners">⛏ Miners · official Lix tutorial</option>
-    <option value="lix-blockers">🛑 Blockers · official Lix tutorial</option>
-   </optgroup>
-   <optgroup label="Previous verified practice puzzles">
-    <option value="double-trouble">Double Trouble</option>
-    <option value="tunnel-time">Tunnel Time</option>
-    <option value="dig-for-freedom">Dig for Freedom</option>
-    <option value="secret-passage">Secret Passage</option>
-    <option value="turnaround">Turnaround</option>
-    <option value="bridge-brigade">Bridge Brigade</option>
+  <select id="level-picker" aria-label="Choose from ten curated original Lix levels">
+   <option value="__daily__">✳ Today's Daily Challenge · verified rotation</option>
+   <optgroup label="10 original Lix picks · skill tutorials">
+    <option value="lix-builders">01 · Builders</option>
+    <option value="lix-bashers">02 · Bashers</option>
+    <option value="lix-diggers">03 · Diggers</option>
+    <option value="lix-miners">04 · Miners</option>
+    <option value="lix-blockers">05 · Blockers</option>
+    <option value="lix-platformers">06 · Platformers</option>
+    <option value="lix-jumpers">07 · Jumpers</option>
+    <option value="lix-runners">08 · Runners</option>
+    <option value="lix-walkers-turn">09 · Walkers Turn</option>
+    <option value="lix-climbers-floaters">10 · Climbers and Floaters</option>
    </optgroup>
   </select>
  </label>
@@ -121,6 +113,12 @@
     <button id="skill-basher" class="skill-action" type="button" hidden>⛏️ Basher</button>
     <button id="skill-digger" class="skill-action" type="button" hidden>🕳️ Digger</button>
     <button id="skill-miner" class="skill-action" type="button" hidden>⛏ Miner</button>
+    <button id="skill-platformer" class="skill-action" type="button" hidden>🪵 Platformer</button>
+    <button id="skill-jumper" class="skill-action" type="button" hidden>↗ Jumper</button>
+    <button id="skill-walker" class="skill-action" type="button" hidden>↩ Walker</button>
+    <button id="skill-runner" class="skill-action" type="button" hidden>🏃 Runner</button>
+    <button id="skill-climber" class="skill-action" type="button" hidden>🧗 Climber</button>
+    <button id="skill-floater" class="skill-action" type="button" hidden>🪂 Floater</button>
     <button id="pause" class="primary" type="button">▶ Start</button>
     <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
     <button id="undo" type="button" disabled title="Restore terrain and position before your last skill assignment">↶ Undo skill</button>
@@ -133,8 +131,8 @@
  </section>
  <div class="experiment-help">
   <article><h2>🏆 Your daily or practice record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer skills, then finishing faster. Your results are saved for this level on this device.</p></article>
-  <article><h2>How to play</h2><p>Press Start. Choose a skill, then tap a grounded Lix to assign it. Use Undo (Ctrl/Cmd+Z) to try a different moment, and pause whenever you need more time to aim. Native Lix tutorials may contain mechanics still being adapted, while the verified practice puzzles have tested solutions.</p></article>
-  <article><h2>About the levels</h2><p>Our main collection now features original CC0 Lix basic tutorials by Simon and Wuzzy. Those native maps are still being checked against our browser physics, so they are clearly labelled as compatibility previews. Little Bridge remains a verified easy introduction, and previously verified Daily Lemming puzzles remain available below the tutorials. Source art comes from Lix, not from the original commercial Lemmings game. Your old daily prototype is preserved separately.</p></article>
+  <article><h2>How to play</h2><p>Press Start. Choose a skill, then tap a grounded Lix to assign it. Use Undo (Ctrl/Cmd+Z) to try a different moment, and pause whenever you need more time to aim. All skill buttons present in these ten maps are now implemented in the browser adapter, including Runner, Climber, Floater, Jumper and Platformer. Original Lix physics parity and winning solutions still need verification.</p></article>
+  <article><h2>About the levels</h2><p>This curated set of ten original CC0 Lix basic tutorials by their credited creators spans eleven skill types. Lix does not publish a reliable most-played ranking, so this is a practical showcase rather than a claimed popularity top ten. Those native maps are still being checked against our browser physics, so they are clearly labelled as compatibility previews. Little Bridge remains a verified easy introduction, and previously verified Daily Lemming puzzles remain available below the tutorials. Source art comes from Lix, not from the original commercial Lemmings game. Your old daily prototype is preserved separately.</p></article>
  </div>
  <p style="font-size:13px;color:#b5c6dd;margin:20px 0 5px"><span id="art-status">Loading Lix character sprites…</span> · <a href="./sprites.html">View all character animations</a></p>
  <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>
