@@ -13,6 +13,7 @@ const level = parseLix(rawLevel, { sourcePath: 'levels/single/lemforum/Lovely/6g
 let model = null;
 let spriteCache = null;
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
+let processedEvents = 0;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
 const ground = document.createElement('canvas');
@@ -86,6 +87,24 @@ async function loadArt() {
   await Promise.all(Array.from({ length: Math.min(6, assets.length) }, worker));
   return result;
 }
+function drawBuilderPreview(u) {
+  if (!u.grounded || u.state !== 'walking' || !model.remaining.builder || !model.paused) return;
+  ctx.save();
+  ctx.globalAlpha = 0.32;
+  ctx.fillStyle = '#ffdd93';
+  ctx.strokeStyle = '#fdf8cb';
+  ctx.setLineDash([3, 4]);
+  ctx.beginPath();
+  ctx.arc(u.x, u.y - 10, 18, 0, Math.PI * 2);
+  ctx.stroke();
+  // Projection follows the 12-step builder profile, not the old giant slope.
+  for (let step = 0; step < 12; step++) {
+    const x = u.x + u.vx * step * 4;
+    const y = u.y - step * 2 + 2;
+    ctx.fillRect(u.vx > 0 ? x : x - 10, y, 12, 2);
+  }
+  ctx.restore();
+}
 function paintCharacter(u) {
   if (['lost', 'saved'].includes(u.state)) return;
   const x = Math.round(u.x), y = Math.round(u.y);
@@ -123,7 +142,10 @@ function draw() {
       ctx.fillText('EXIT', g.x + 4, Math.max(12, g.y - 7));
     }
   }
-  for (const u of model.units) paintCharacter(u);
+  for (const u of model.units) {
+    drawBuilderPreview(u);
+    paintCharacter(u);
+  }
   if (model.paused && !model.done) {
     ctx.fillStyle = 'rgba(12,22,42,.56)';
     ctx.fillRect(0, 0, canvas.width, 46);
@@ -148,6 +170,8 @@ function updateHud() {
   el('builder').disabled = state.builder < 1 || state.done;
   el('pause').disabled = state.done;
   el('speed').textContent = '⏩ ' + speed + '× speed';
+  el('step').disabled = !state.paused || state.done;
+  el('builder').setAttribute('aria-pressed', String(state.builder > 0));
 }
 function finish() {
   if (ended) return;
@@ -175,6 +199,14 @@ function loop(now) {
         accumulator -= TICK_MS;
       }
     }
+    // Event-based hints surface physics changes without interrupting gameplay.
+    while (processedEvents < model.events.length) {
+      const event = model.events[processedEvents++];
+      if (event.type === 'landed') say('Landed safely. Tap the walker to build a bridge.');
+      if (event.type === 'builder-finished') say('Staircase finished. Another builder can be assigned.');
+      if (event.type === 'builder-blocked') say('Builder hit an obstacle and turned around.');
+      if (event.type === 'drowned') say('The wanderer fell into danger. Try another route!');
+    }
     updateHud();
     draw();
     if (model.done) finish();
@@ -196,6 +228,7 @@ function restart() {
   if (!model) return;
   model.reset();
   accumulator = 0; last = 0; speed = 1; ended = false;
+  processedEvents = 0;
   el('result').hidden = true;
   say('Five builders. Six gaps. One tiny walker. Can you find the route?');
   updateHud();
@@ -206,23 +239,31 @@ canvas.addEventListener('pointerdown', event => {
   const rect = canvas.getBoundingClientRect();
   const x = (event.clientX - rect.left) * canvas.width / rect.width;
   const y = (event.clientY - rect.top) * canvas.height / rect.height;
-  const index = model.units.findIndex(u => ['walking', 'builder'].includes(u.state)
-    && Math.hypot(x - u.x, y - (u.y - 10)) < 27);
+  // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
+  const radius = Math.max(27, 40 * canvas.width / rect.width);
+  const index = model.units.findIndex(u => u.state === 'walking'
+    && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
   if (index < 0) {
-    say('Tap the moving green-haired walker to assign a builder.');
+    say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
   }
   if (model.assignBuilder(index)) {
     say('Builder assigned! A staircase is being constructed.');
   } else {
-    say('That walker is already building, or you have no builders remaining.');
+    say('Builders can only start from solid ground, not during a fall or another build.');
   }
   updateHud();
 });
 el('builder').addEventListener('click', () => say('Builder selected: tap the little walker to create stairs.'));
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
-el('speed').addEventListener('click', () => { speed = speed === 1 ? 2 : 1; updateHud(); });
+el('step').addEventListener('click', () => {
+  if (model?.stepOnce()) { updateHud(); draw(); }
+});
+el('speed').addEventListener('click', () => {
+  speed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
+  updateHud();
+});
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
 window.addEventListener('keydown', event => {
@@ -231,6 +272,7 @@ window.addEventListener('keydown', event => {
   if (!el('result').hidden) return;
   if (event.code === 'Space') { event.preventDefault(); model.togglePause(); updateHud(); }
   if (event.key.toLowerCase() === 'r') restart();
+  if (event.key === '.' && model?.stepOnce()) { updateHud(); draw(); }
 });
 window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
 async function boot() {
