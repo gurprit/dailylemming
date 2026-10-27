@@ -2,6 +2,7 @@
 // Activities/row indices mirror SimonN/LixD src/net/ac.d (Ac enum).
 // Sprite coordinates and foot anchor mirror src/physics/lixxie/lixxie.d.
 import { detectLixFrames } from './frames.js';
+import { keyBlackBackground } from './key-black.js';
 
 export const CHARACTER_ACTIVITIES = Object.freeze([
   { key: 'faller', row: 1, label: 'Falling', playable: true },
@@ -126,6 +127,9 @@ export async function loadCharacterAtlas({
   context.drawImage(image, 0, 0);
   const raw = context.getImageData(0, 0, canvas.width, canvas.height);
   const { layout, rows } = inspectCharacterAtlas(raw);
+  // Lix's sprite atlas uses black behind the characters. Flood-fill only
+  // near-black pixels connected to each frame's border, protecting dark eyes.
+  keyBlackBackground(raw, layout);
   // Decode the colour key after reading frame-grid metadata.
   for (let i = 0; i < raw.data.length; i += 4) {
     if (raw.data[i] >= 250 && raw.data[i + 1] <= 6 && raw.data[i + 2] >= 250)

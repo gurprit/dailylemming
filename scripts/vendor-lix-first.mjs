@@ -6,10 +6,20 @@ import { fileURLToPath } from 'node:url';
 import { parseLix, sourceAssets } from '../src/lix/parse.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const level = parseLix(await readFile(path.join(root, 'content/lix/lovely/6gaps.txt'), 'utf8'));
+// Ship the artwork used by the tutorial and the two optional, experimental
+// community stages; avoid downloading all 30 community puzzle packs.
+const levelFiles = [
+  'content/lix/lovely/6gaps.txt',
+  'content/original/little-bridge.txt',
+  'content/original/double-trouble.txt',
+  'content/lix/lovely/pitfall.txt',
+  'content/lix/lovely/buildingblock.txt'
+];
+const levels = await Promise.all(levelFiles.map(async file =>
+  parseLix(await readFile(path.join(root, file), 'utf8'))));
 const source = 'https://raw.githubusercontent.com/SimonN/LixD/f1e805048fe439a4a0e9cc650c613713ababac8b/images/';
 const dir = path.join(root, 'public/lix/images');
-const names = sourceAssets(level);
+const names = [...new Set(levels.flatMap(sourceAssets))].sort();
 let index = 0, fetched = 0, existed = 0;
 const errors = [];
 
@@ -45,7 +55,7 @@ async function worker() {
   }
 }
 await Promise.all(Array.from({ length: 4 }, worker));
-console.log('Lix experimental level: ' + names.length + ' PNG assets, '
+console.log('Lix tutorial and selected community levels: ' + names.length + ' PNG assets, '
   + fetched + ' downloaded, ' + existed + ' cached, ' + errors.length + ' errors.');
 if (errors.length) {
   console.error(errors.join('\n'));

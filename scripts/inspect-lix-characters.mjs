@@ -5,12 +5,17 @@ import path from 'node:path';
 import { PNG } from 'pngjs';
 import { detectLixFrames, cutLixFrame } from '../src/lix/frames.js';
 import { frameIsPresent, inspectCharacterAtlas } from '../src/lix/characters.js';
+import { keyBlackBackground } from '../src/lix/key-black.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const asset = path.join(root, 'public/lix/characters/lixsprites.png');
 const raw = PNG.sync.read(await readFile(asset));
 const verifiedAtlas = inspectCharacterAtlas(raw);
 const layout = verifiedAtlas.layout;
+const keyed = keyBlackBackground({ width: raw.width, height: raw.height,
+  data: raw.data.slice() }, layout);
+console.log('Original Lix atlas exterior black pixels made transparent: ' + keyed);
+if (keyed < 50) throw new Error('Expected opaque black character backgrounds in original atlas');
 const activityNames = [
   'nothing','faller','tumbler','stunner','lander','splatter',
   'burner','drowner','exiter','walker','runner','climber',

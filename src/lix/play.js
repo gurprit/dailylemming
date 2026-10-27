@@ -1,5 +1,9 @@
 import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
+import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
+import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
+import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
+import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
@@ -7,18 +11,27 @@ import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
+import { drawWaterBackdrop, drawWaterline } from './water.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
 const el = id => document.getElementById(id);
 const canvas = el('playfield');
 const ctx = canvas.getContext('2d');
-const levelId = new URLSearchParams(location.search).get('level') === '6gaps'
-  ? '6gaps' : 'little-bridge';
-const level = levelId === '6gaps'
-  ? parseLix(trickyLevel, { sourcePath: 'levels/single/lemforum/Lovely/6gaps.txt' })
-  : parseLix(friendlyLevel, { sourcePath: 'content/original/little-bridge.txt' });
-document.body.classList.toggle('easy-mode', levelId === 'little-bridge');
+const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
+const config = LEVEL_OPTIONS[levelId];
+const source = {
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, '6gaps': trickyLevel,
+  pitfall: pitfallLevel, 'building-block-maze': mazeLevel
+}[levelId];
+const sourcePath = config.verified
+  ? 'content/original/' + (levelId === 'double-trouble' ? 'double-trouble' : 'little-bridge') + '.txt'
+  : 'levels/single/lemforum/Lovely/' + ({
+    '6gaps': '6gaps', pitfall: 'pitfall', 'building-block-maze': 'buildingblock'
+  }[levelId]) + '.txt';
+const level = parseLix(source, { sourcePath });
+document.body.classList.toggle('easy-mode', config.verified);
+document.body.classList.toggle('community-mode', !config.verified);
 let model = null;
 let spriteCache = null;
 let characterAtlas = null;
@@ -156,9 +169,14 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!model) return;
   freshGround();
+  if (config.verified) drawWaterBackdrop(ctx, model.baseGadgets, model.ticks,
+    canvas.width, canvas.height);
   ctx.drawImage(ground, 0, 0);
+  // Show continuous animated water at the bottom edge, not a lone tile.
+  if (config.verified) drawWaterline(ctx, model.baseGadgets,
+    model.ticks, canvas.width, canvas.height);
   // A forgiving visual cue for the first puzzle; old community map has none.
-  if (levelId === 'little-bridge') {
+  if (config.verified) {
     const x = 232, y = 203;
     ctx.save();
     ctx.fillStyle = '#b1ffd1';
@@ -173,9 +191,24 @@ function draw() {
     ctx.lineTo(x + 5, y - 6);
     ctx.fill();
     ctx.restore();
+    if (levelId === 'double-trouble') {
+      const x2 = 444, y2 = 203;
+      ctx.save();
+      ctx.fillStyle = '#b1ffd1';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('BUILD AGAIN', x2, y2 - 21);
+      ctx.fillRect(x2 - 1, y2 - 15, 2, 12);
+      ctx.beginPath();
+      ctx.moveTo(x2 - 5, y2 - 6);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x2 + 5, y2 - 6);
+      ctx.fill();
+      ctx.restore();
+    }
   }
   for (const g of model.baseGadgets) {
-    if (!g.image) continue;
+    if (!g.image || (config.verified && g.sourceImage?.endsWith('.W'))) continue;
     // Animated hatches and liquids cycle through their clipped Cutbit frames.
     ctx.drawImage(gadgetDrawable(g, model.ticks), g.x, g.y);
     if (g.kind === 'goal') {
@@ -234,8 +267,9 @@ function finish() {
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' builder assignments.'
     + (practice.improved ? ' New practice personal best! ✨'
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
+  el('result-next').hidden = !(snap.won && levelId === 'little-bridge');
   el('result').hidden = false;
-  el('result-retry').focus();
+  (el('result-next').hidden ? el('result-retry') : el('result-next')).focus();
 }
 function loop(now) {
   if (!model) return;
@@ -283,9 +317,7 @@ function restart() {
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
   el('result').hidden = true;
-  say(levelId === 'little-bridge'
-    ? 'Just one gap. Tap the walker near the BUILD HERE arrow to make a little bridge.'
-    : 'Five builders. Six gaps. One tiny walker. Can you find the route?');
+  say(config.hint);
   updateHud();
   draw();
 }
@@ -312,7 +344,11 @@ canvas.addEventListener('pointerdown', event => {
   }
   updateHud();
 });
-el('builder').addEventListener('click', () => say('Builder selected: tap the little walker to create stairs.'));
+el('builder').addEventListener('click', () => say('Builder selected: tap a grounded Lix to build stairs.'));
+el('level-picker').addEventListener('change', event => {
+  const id = resolveLevelId(event.target.value);
+  window.location.href = './play-lix.html' + (id === 'little-bridge' ? '' : '?level=' + encodeURIComponent(id));
+});
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
 function undo() {
@@ -333,6 +369,9 @@ el('step').addEventListener('click', () => {
 el('speed').addEventListener('click', () => {
   speed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
   updateHud();
+});
+el('result-next').addEventListener('click', () => {
+  window.location.href = './play-lix.html?level=double-trouble';
 });
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
@@ -367,22 +406,19 @@ async function boot() {
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
     el('level-title').textContent = level.title;
-    el('mode-tag').textContent = levelId === 'little-bridge'
-      ? '🌿 EASY PRACTICE · ONE LITTLE BRIDGE'
-      : '🧪 HARD PRACTICE · ORIGINAL LIX COMMUNITY LEVEL';
-    el('level-intro').textContent = levelId === 'little-bridge'
-      ? 'A single small gap, three builders and no nasty steel ceilings. Follow the BUILD HERE arrow to cross safely.'
-      : 'The original CC0 puzzle by mobius: six gaps, five builders, and a much trickier route.';
-    el('credit').textContent = levelId === 'little-bridge'
-      ? 'Original introductory level by Daily Lemming. CC0 artwork from Lix.'
-      : 'Original Lix level by mobius. Level and artwork made available under CC0.';
-    el('source-link').href = levelId === 'little-bridge'
-      ? 'https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt'
-      : 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/6gaps.txt';
+    el('mode-tag').textContent = config.verified
+      ? '🌿 VERIFIED PRACTICE · ' + config.name.toUpperCase()
+      : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
+    el('level-intro').textContent = config.intro;
+    el('credit').textContent = config.credit;
+    el('source-link').href = config.source;
+    el('level-picker').value = levelId;
+    const warning = el('compat-warning');
+    warning.hidden = config.verified;
+    warning.textContent = config.verified ? ''
+      : 'This imported level is a work-in-progress compatibility preview. Only Builder is playable; other original Lix skills are unavailable and a win is not guaranteed.';
     document.title = level.title + ' | Daily Lemming';
-    say(levelId === 'little-bridge'
-      ? 'Press Start, then assign a builder near the BUILD HERE arrow. You have three attempts.'
-      : 'Five builders. Six gaps. One tiny walker. Can you find the route?');
+    say(config.hint);
     el('loading').hidden = true;
     showPractice();
     updateHud(); draw();
