@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { PNG } from 'pngjs';
 import { detectLixFrames, cutLixFrame } from '../src/lix/frames.js';
-import { frameIsPresent, inspectCharacterAtlas } from '../src/lix/characters.js';
+import { frameIsPresent, inspectCharacterAtlas, frameColumnForActivity } from '../src/lix/characters.js';
 import { keyBlackBackground } from '../src/lix/key-black.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -12,6 +12,16 @@ const asset = path.join(root, 'public/lix/characters/lixsprites.png');
 const raw = PNG.sync.read(await readFile(asset));
 const verifiedAtlas = inspectCharacterAtlas(raw);
 const layout = verifiedAtlas.layout;
+const nativeBlocker = verifiedAtlas.rows.get('blocker');
+if (!nativeBlocker?.indices.every(Number.isInteger)
+  || !Array.from({ length: 20 }, (_, i) => i).every(i => nativeBlocker.indices.includes(i)))
+  throw new Error('Original Lix blocker frames 0..19 are missing');
+const blockerCycle = Array.from({ length: 100 }, (_, tick) =>
+  frameColumnForActivity('blocker', tick, nativeBlocker.indices));
+if (blockerCycle.some(frame => frame < 0 || frame > 19)
+  || blockerCycle[19] !== 19 || blockerCycle[20] !== 4 || blockerCycle[36] !== 4)
+  throw new Error('Invalid Lix blocker animation, empty tail frames may flash');
+console.log('Lix Blocker cycle verified: 0..19 intro, 4..19 looping; unused tail frames excluded.');
 const keyed = keyBlackBackground({ width: raw.width, height: raw.height,
   data: raw.data.slice() }, layout);
 console.log('Original Lix atlas exterior black pixels made transparent: ' + keyed);
