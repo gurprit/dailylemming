@@ -10,7 +10,9 @@ export const PHYSICS_HZ = 15;
 export const TICK_MS = 1000 / PHYSICS_HZ;
 export const BUILDER_STEPS = 12;
 export const EXIT_ANIMATION_TICKS = 14;
-export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger', 'miner', 'platformer', 'jumper', 'walker', 'runner', 'climber', 'floater']);
+export const EXPLODER_FUSE_TICKS = 5 * PHYSICS_HZ;
+export const EXPLODER_RADIUS = 22;
+export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger', 'miner', 'platformer', 'jumper', 'walker', 'runner', 'climber', 'floater', 'exploder']);
 const STEP_TICKS = 16;
 const MAX_SAFE_FALL = 126;
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -123,6 +125,17 @@ export class LixGameModel {
       this.assigned++;
       u.queuedBuilders = (u.queuedBuilders || 0) + 1;
       this.emit('queued', u, String(u.queuedBuilders));
+      return true;
+    }
+    // The classic countdown bomb can be attached to a moving, falling,
+    // mining, or blocking Lix without interrupting its existing job.
+    if (skill === 'exploder') {
+      if (['saved', 'lost', 'exiting'].includes(u.state) || u.fuseTicks > 0) return false;
+      this.saveCheckpoint();
+      this.useSkill(skill);
+      this.assigned++;
+      u.fuseTicks = EXPLODER_FUSE_TICKS;
+      this.emit('armed', u);
       return true;
     }
     // Persistent traits are assigned to active Lix, even during a fall.
@@ -284,6 +297,24 @@ export class LixGameModel {
     this.changed = true;
     u.y += 2;
     this.emit('dug', u);
+  }
+  explode(u) {
+    u.fuseTicks = 0;
+    const removed = this.terrain.digCircle(Math.round(u.x), Math.round(u.y - 9), EXPLODER_RADIUS);
+    if (removed > 0) this.changed = true;
+    u.state = 'lost';
+    this.lost++;
+    this.emit('exploded', u, String(removed));
+    // Blast radius also affects nearby, still-active Lix. Their inventories
+    // and health aren't fake: they become lost just like the exploding Lix.
+    for (const other of this.units) {
+      if (other === u || ['saved','lost','exiting'].includes(other.state)) continue;
+      if (Math.hypot(other.x - u.x, (other.y - 9) - (u.y - 9)) > EXPLODER_RADIUS * 0.6) continue;
+      other.state = 'lost';
+      other.fuseTicks = 0;
+      this.lost++;
+      this.emit('blast-victim', other);
+    }
   }
   stepExiting(u) {
     // Keep the creature visible for the authentic 14-tick Lix exiter cycle.
@@ -469,6 +500,10 @@ export class LixGameModel {
     if (this.spawned < this.initial && (this.ticks - 1) % interval === 0) this.spawn();
     for (const u of this.units) {
       if (u.state === 'saved' || u.state === 'lost') continue;
+      if (u.fuseTicks > 0) {
+        u.fuseTicks--;
+        if (u.fuseTicks === 0) { this.explode(u); continue; }
+      }
       if (u.state === 'exiting') { this.stepExiting(u); continue; }
       if (u.state === 'builder') this.stepBuilder(u);
       else if (u.state === 'blocker') this.stepBlocker(u);
