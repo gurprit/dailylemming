@@ -1,4 +1,4 @@
-// Cache only the assets used by the first experimental playable Lix level.
+// Cache artwork for the playable puzzles and original Lix tutorial imports.
 // Run before build for a self-contained deploy, or locally for offline repeat play.
 import { readFile, mkdir, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
@@ -18,7 +18,12 @@ const levelFiles = [
   'content/original/turnaround.txt',
   'content/original/bridge-brigade.txt',
   'content/lix/lovely/pitfall.txt',
-  'content/lix/lovely/buildingblock.txt'
+  'content/lix/lovely/buildingblock.txt',
+  'content/lix/tutorial/builders.txt',
+  'content/lix/tutorial/bashers.txt',
+  'content/lix/tutorial/diggers.txt',
+  'content/lix/tutorial/miners.txt',
+  'content/lix/tutorial/blockers.txt'
 ];
 const levels = await Promise.all(levelFiles.map(async file =>
   parseLix(await readFile(path.join(root, file), 'utf8'))));
