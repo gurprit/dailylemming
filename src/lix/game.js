@@ -26,8 +26,8 @@ export class LixGameModel {
     this.hatches = this.baseGadgets.filter(g => g.kind === 'hatch');
     this.goals = this.baseGadgets.filter(g => g.kind === 'goal');
     this.hazards = this.baseGadgets.filter(g => g.kind === 'hazard');
-    if (this.hatches.length !== 1 || this.goals.length < 1)
-      throw new Error('This experiment requires exactly one hatch and at least one goal');
+    if (this.hatches.length < 1 || this.goals.length < 1)
+      throw new Error('A level requires at least one hatch and one goal');
     if (!PLAYABLE_SKILLS.some(skill => (level.skills[skill.toUpperCase()] || 0) > 0))
       throw new Error('This experiment requires at least one supported skill');
     this.reset();
@@ -140,7 +140,9 @@ export class LixGameModel {
     return true;
   }
   spawn() {
-    const hatch = this.hatches[0];
+    // Native tutorial levels sometimes have multiple entrances. Distribute
+    // the stream round-robin; undo deterministically restores spawned count.
+    const hatch = this.hatches[this.spawned % this.hatches.length];
     const point = gadgetTrigger(hatch);
     const u = { x: point.x, y: point.y,
       vx: hatch.flags?.includes('r') ? -1 : 1, vy: 0, fall: 0,
