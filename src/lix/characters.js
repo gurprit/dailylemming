@@ -97,8 +97,12 @@ export function activityForUnit(unit) {
   if (unit.state === 'digger') return 'digger';
   if (unit.state === 'miner') return 'miner';
   if (unit.state === 'builder') return 'builder';
-  if (unit.state === 'walking') return 'walker';
-  if (unit.state === 'falling' || unit.state === 'spawning') return 'faller';
+  if (unit.state === 'platformer') return 'platformer';
+  if (unit.state === 'jumping') return 'jumper';
+  if (unit.state === 'climbing') return 'climber';
+  if (unit.state === 'walking') return unit.runner ? 'runner' : 'walker';
+  if (unit.state === 'falling' || unit.state === 'spawning')
+    return unit.floater ? 'floater' : 'faller';
   return null; // no invented animation for unimplemented skills
 }
 export function frameColumnForUnit(unit, tick, indices) {
