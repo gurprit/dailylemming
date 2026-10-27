@@ -12,7 +12,7 @@ export const BUILDER_STEPS = 12;
 export const EXIT_ANIMATION_TICKS = 14;
 export const EXPLODER_FUSE_TICKS = 5 * PHYSICS_HZ;
 export const EXPLODER_RADIUS = 22;
-export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger', 'miner', 'platformer', 'jumper', 'walker', 'runner', 'climber', 'floater', 'exploder']);
+export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger', 'miner', 'platformer', 'jumper', 'walker', 'runner', 'climber', 'floater', 'exploder', 'batter', 'cuber']);
 const STEP_TICKS = 16;
 const MAX_SAFE_FALL = 126;
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -171,6 +171,7 @@ export class LixGameModel {
       u.state = skill === 'jumper' ? 'jumping' : skill;
       if (skill === 'platformer') {u.platformSteps=0;u.platformTicks=0;}
       if (skill === 'jumper') {u.jumpTicks=0;u.grounded=false;}
+      if (skill === 'cuber') {u.cubeTicks=0;u.grounded=true;}
     }
     this.emit('assigned', u, skill);
     return true;
@@ -314,6 +315,40 @@ export class LixGameModel {
       other.fuseTicks = 0;
       this.lost++;
       this.emit('blast-victim', other);
+    }
+  }
+  stepBatter(u) {
+    u.actionTicks++;
+    if (u.actionTicks === 3) {
+      const facing=Math.sign(u.vx || 1);
+      const target=this.units.find(other=>other!==u
+        && !['saved','lost','exiting'].includes(other.state)
+        && (other.x - u.x)*facing >= 0
+        && (other.x-u.x)*facing <= 24
+        && Math.abs(other.y-u.y) <= 20);
+      if(target) {
+        target.state='jumping';target.jumpTicks=0;
+        target.vx=facing;target.vy=-11;target.grounded=false;
+        this.emit('battered',target);
+      } else this.emit('batter-miss',u);
+    }
+    if (u.actionTicks>=8) {
+      u.state='walking';u.grounded=true;
+    }
+  }
+  stepCuber(u) {
+    // The cuber grows a solid 24px cube at the expense of this Lix.
+    // Steel remains intact and the new terrain can be climbed or blocked.
+    u.cubeTicks++;
+    if (u.cubeTicks % 5 === 1) {
+      const top=Math.round(u.y)-4-Math.floor(u.cubeTicks/5)*4;
+      this.terrain.paintRect(Math.round(u.x)-12,top,24,5,[171,149,111,255]);
+      this.changed=true;
+      this.emit('cube-layer',u);
+    }
+    if(u.cubeTicks>=30){
+      u.state='lost';this.lost++;
+      this.emit('cubed',u);
     }
   }
   stepExiting(u) {
@@ -513,6 +548,8 @@ export class LixGameModel {
       else if (u.state === 'platformer') this.stepPlatformer(u);
       else if (u.state === 'jumping') this.stepJumper(u);
       else if (u.state === 'climbing') this.stepClimber(u);
+      else if (u.state === 'batter') this.stepBatter(u);
+      else if (u.state === 'cuber') this.stepCuber(u);
       else if (u.state === 'walking') this.stepWalker(u);
       else if (u.state === 'spawning' || u.state === 'falling') this.stepFaller(u);
       if (u.state === 'lost') continue;
