@@ -53,6 +53,24 @@ export function inspectCharacterAtlas(source) {
   return { layout, rows };
 }
 
+export function drawActivitySprite(ctx, atlas, activity, tick, {
+  x = 0, y = 0, facingLeft = false, scale = 1
+} = {}) {
+  const row = atlas?.rows.get(activity);
+  if (!row?.indices.length) return false;
+  const { width: w, height: h } = atlas.layout;
+  const col = row.indices[Math.floor(Math.max(0, tick)) % row.indices.length];
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(facingLeft ? -scale : scale, scale);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(atlas.canvas,
+    1 + col * (w + 1), 1 + row.row * (h + 1), w, h,
+    -(Math.floor(w / 2) - 1), -(h - 8), w, h);
+  ctx.restore();
+  return true;
+}
+
 export function activityForUnit(unit) {
   if (unit.state === 'builder') return 'builder';
   if (unit.state === 'walking') return 'walker';
