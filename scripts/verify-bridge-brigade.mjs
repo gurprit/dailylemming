@@ -33,9 +33,9 @@ function run(blockAt=234,bridgeAt=null){
     blocker,builder};
 }
 const trials=[];
-for(let x=478;x<=510;x+=2)trials.push({x,...run(234,x)});
+for(let x=530;x<=572;x+=2)trials.push({x,...run(234,x)});
 const successful=trials.filter(x=>x.won&&x.saved>=2&&x.used===2&&x.blockers>=2&&x.bricks>=1&&x.seconds<100);
-const idle=run(null,null),onlyBlocker=run(234,null),onlyBuilder=run(null,478);
+const idle=run(null,null),onlyBlocker=run(234,null),onlyBuilder=run(null,550);
 const report={title:level.title,successful,trials,withoutSkills:idle,onlyBlocker,onlyBuilder};
 await mkdir(path.join(root,'generated/lix'),{recursive:true});
 await writeFile(path.join(root,'generated/lix/bridge-brigade-proof.json'),JSON.stringify(report,null,2)+'\n');
