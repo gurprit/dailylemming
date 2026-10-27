@@ -151,3 +151,31 @@ npm run dev
 ```
 
 Open `/play-lix.html` and use **Choose a level**, or follow the next-level action after rescuing Little Bridge. For actual community source artwork previews, `/lab.html` remains available.
+
+
+## v0.7: More skills and an animated escape!
+
+Original Lix character animation rows are now wired to new working browser skills: **Blocker**, **Basher** and **Digger**, alongside **Builder**. Choose a skill from the toolbar and tap a grounded Lix. Blockers hold position and turn other walkers away. Bashers carve a horizontal tunnel through non-steel terrain; Diggers carve a vertical shaft and fall when they break through. Each skill has an independent finite inventory, and Undo restores both skill supplies and modified terrain. These mechanics are genuine pixel collision interactions but **not yet a frame-perfect port** of original Lix.
+
+When a Lix enters its exit, it now spends **18 physics updates** in an `exiting` state. The original CC0 **Exiter** sprite animation plays with a small jumping arc and gentle sparkling effect, then the creature is counted as saved and the victory popup appears. Both existing verified levels remain simulation tested.
+
+### Third verified practice level: Tunnel Time
+
+`/play-lix.html?level=tunnel-time` introduces the Basher with a sandstone obstacle and a clear "BASH HERE" marker. The real-asset test `npm run test:tunnel-time` found **eight one-Basher winning positions** (x=284..298 in 2-pixel increments), rescuing one Lix in about 26–27 simulated seconds. A no-skill run cannot win. The victory flow offers **Little Bridge → Double Trouble → Tunnel Time**.
+
+The two imported community level experiments still are **not certified solvable**. Although Builder, Blocker, Basher and Digger are now present, other original Lix mechanics and precise interaction semantics remain unsupported. Scores stay independent of the shared daily challenge.
+
+```bash
+git fetch origin
+git switch feat/lix-skills-and-exit
+git pull --ff-only
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:real-lix
+npm run test:double-trouble
+npm run test:tunnel-time
+npm run dev
+```
+
+Try `/play-lix.html` and watch the character jump into the exit *before* results appear.
