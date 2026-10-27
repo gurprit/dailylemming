@@ -2,7 +2,11 @@
 // Draw the same target that receives the selected skill; never highlight a
 // fallen, exiting, unavailable or otherwise ineligible creature.
 export function selectableUnit(unit, skill, remaining = {}) {
-  if (!unit || !remaining?.[skill]) return false;
+  if (!unit || !remaining || remaining[skill] === 0 || remaining[skill] === undefined) return false;
+  if (['runner','climber','floater'].includes(skill))
+    return !unit[skill] && !['saved','lost','exiting','blocker'].includes(unit.state);
+  if (skill === 'walker')
+    return ['walking','blocker','runner'].includes(unit.state);
   if (skill === 'builder' && unit.state === 'builder') return true;
   return unit.state === 'walking' && unit.grounded === true;
 }
