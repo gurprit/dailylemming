@@ -103,7 +103,7 @@ const SKILL_LABELS = {
   basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner',
   walker: '↩ Walker', runner: '🏃 Runner', climber: '🧗 Climber',
   floater: '🪂 Floater', platformer: '🪵 Platformer', jumper: '↗ Jumper',
-  exploder: '💣 Exploder'
+  exploder: '💣 Exploder', batter: '🏓 Batter', cuber: '🧊 Cuber'
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
@@ -506,6 +506,8 @@ function loop(now) {
         say('BOOM! A crater has opened. Beware of nearby Lix!');
       }
       if (event.type === 'armed') say('Five seconds to BOOM! Watch the countdown. 💣');
+      if (event.type === 'battered') say('A Lix has been launched into the air!');
+      if (event.type === 'cubed') say('A solid cube has been completed.');
       if (event.type === 'dug' || event.type === 'bashed'
           || (event.type === 'mined' && event.detail === 'impact')) {
         const unit = model.units.find(u => Math.abs(u.x - event.x) < 9
@@ -615,7 +617,9 @@ canvas.addEventListener('pointerdown', event => {
       floater: 'Floater parachutes through long drops!',
       platformer: 'Platformer builds a flat bridge!',
       jumper: 'Jumper leaps over gaps!',
-      exploder: 'Exploder armed! Countdown above the moving Lix.'
+      exploder: 'Exploder armed! Countdown above the moving Lix.',
+      batter: 'Batter swings and launches a nearby Lix!',
+      cuber: 'Cuber begins constructing a solid block!'
     };
     say(message[selectedSkill]);
   } else {
