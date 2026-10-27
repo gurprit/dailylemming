@@ -207,6 +207,9 @@ export class LixGameModel {
   // They can be undone with the existing checkpoint controls.
   stepBlocker(u) {
     u.grounded = true;
+    // Keep animation phase local to this unit: the initial blocker pose plays
+    // once, then its own idle cycle loops independently of world time.
+    u.actionTicks = (u.actionTicks || 0) + 1;
   }
   stepBasher(u) {
     u.actionTicks++;
