@@ -1,4 +1,4 @@
-// Smoke-test genuine Lovely multi-skill community maps using real PNG tiles.
+// Smoke-test genuine Lovely and ranked community maps using real PNG tiles.
 // Loading, spawning and inventory validity do NOT constitute solution proofs.
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -8,13 +8,17 @@ import { parseLix, sourceAssets } from '../src/lix/parse.js';
 import { detectLixFrames, cutLixFrame } from '../src/lix/frames.js';
 import { LixGameModel, PLAYABLE_SKILLS } from '../src/lix/game.js';
 import { FEATURED_COMMUNITY_LEVELS } from '../src/lix/featured-levels.js';
+import { RANKED_POOLS } from '../src/lix/ranked-levels.js';
 import { LEVEL_OPTIONS } from '../src/lix/level-options.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-for (const id of FEATURED_COMMUNITY_LEVELS) {
+const rankedIds=[...new Set(Object.values(RANKED_POOLS).flat())];
+for (const id of rankedIds) {
   const meta=LEVEL_OPTIONS[id];
-  const level=parseLix(await readFile(path.join(root,'content/lix/lovely',
-    meta.communityFile+'.txt'),'utf8'));
+  const levelFile=meta.category==='ranked-community'
+    ? path.join(root,'content/lix/ranked',meta.rank,meta.communityFile+'.txt')
+    : path.join(root,'content/lix/lovely',meta.communityFile+'.txt');
+  const level=parseLix(await readFile(levelFile,'utf8'));
   const images=new Map();
   for (const img of sourceAssets(level)) {
     const png=PNG.sync.read(await readFile(path.join(root,'public/lix/images',img)));
@@ -32,7 +36,7 @@ for (const id of FEATURED_COMMUNITY_LEVELS) {
     throw Error('Incomplete community map: '+id);
   if(model.initial!==level.numeric.INITIAL || model.required!==level.numeric.REQUIRED)
     throw Error('Inconsistent Lix rescue quota: '+id);
-  console.log(JSON.stringify({id,title:level.title,originalAuthor:level.author,
+  console.log(JSON.stringify({id,rank:meta.rank||'lovely',title:level.title,originalAuthor:level.author,
     tiles:level.tiles.length,skills:skills.map(([name,count])=>name+':'+count),
     pngs:images.size,initial:model.initial,required:model.required,
     spawned:model.spawned,solutionVerified:false}));
