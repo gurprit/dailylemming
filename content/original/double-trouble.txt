@@ -1,0 +1,25 @@
+// Original follow-up puzzle built with the existing CC0 Lix tiles.
+// Two short gaps make the same Builder skill more interesting without
+// requiring advanced abilities unsupported by the browser adapter.
+$AUTHOR Daily Lemming
+$ENGLISH Double Trouble
+$HINT_ENGLISH Two gaps, two staircases. Watch where you start each bridge.
+#SIZE_X 640
+#SIZE_Y 288
+#INITIAL 1
+#REQUIRED 1
+#SPAWN_INTERVAL 1
+#BUILDER 4
+
+:simon/hatch001.H: 32 128
+:simon/tapir/goal.G: 548 176
+
+:simon/tapir/064h: 0 224
+:simon/tapir/064h: 64 224
+:simon/tapir/064h: 128 224
+:simon/tapir/064h: 276 224
+:simon/tapir/064h: 340 224
+:simon/tapir/064h: 488 224
+:simon/tapir/064h: 552 224
+
+:matt/water.W: 192 256
