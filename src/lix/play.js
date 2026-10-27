@@ -8,6 +8,11 @@ import turnaroundLevel from '../../content/original/turnaround.txt?raw';
 import bridgeBrigadeLevel from '../../content/original/bridge-brigade.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
+import lixBuilders from '../../content/lix/tutorial/builders.txt?raw';
+import lixBashers from '../../content/lix/tutorial/bashers.txt?raw';
+import lixDiggers from '../../content/lix/tutorial/diggers.txt?raw';
+import lixMiners from '../../content/lix/tutorial/miners.txt?raw';
+import lixBlockers from '../../content/lix/tutorial/blockers.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
@@ -30,9 +35,13 @@ const config = LEVEL_OPTIONS[levelId];
 const source = {
   'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, turnaround: turnaroundLevel,
   'bridge-brigade': bridgeBrigadeLevel, '6gaps': trickyLevel,
-  pitfall: pitfallLevel, 'building-block-maze': mazeLevel
+  pitfall: pitfallLevel, 'building-block-maze': mazeLevel,
+  'lix-builders': lixBuilders, 'lix-bashers': lixBashers,
+  'lix-diggers': lixDiggers, 'lix-miners': lixMiners, 'lix-blockers': lixBlockers
 }[levelId];
-const sourcePath = config.verified
+const sourcePath = config.category === 'official-tutorial'
+  ? 'levels/tutorial/basic/' + config.tutorialFile + '.txt'
+  : config.verified
   ? 'content/original/' + levelId + '.txt'
   : 'levels/single/lemforum/Lovely/' + ({
     '6gaps': '6gaps', pitfall: 'pitfall', 'building-block-maze': 'buildingblock'
@@ -601,7 +610,9 @@ async function boot() {
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
-      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher, Digger and Miner now work, but other original Lix skills and precise physics are still unavailable. A win is not guaranteed.';
+      : config.category === 'official-tutorial'
+        ? 'Authentic CC0 Lix beginner tutorial. Our browser physics differ from the original; this level loads but has not yet passed a full-solution test.'
+        : 'This imported level is experimental. Original physics and some abilities are still unavailable; a win is not guaranteed.';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
