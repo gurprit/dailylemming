@@ -41,7 +41,7 @@ let characterAtlas = null;
 let selectedSkill = 'builder';
 const SKILL_LABELS = {
   builder: '🧱 Builder', blocker: '🛑 Blocker',
-  basher: '⛏️ Basher', digger: '🕳️ Digger'
+  basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner'
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
@@ -363,6 +363,8 @@ function loop(now) {
         say('That steel cannot be cut. Try another route.');
       if (event.type === 'basher-finished') say('The Basher has finished tunnelling.');
       if (event.type === 'digger-finished') say('The Digger has reached open space.');
+      if (event.type === 'miner-finished') say('The Miner broke through to open space!');
+      if (event.type === 'miner-steel') say('The Miner cannot dig through steel.');
     }
     updateHud();
     draw();
@@ -427,7 +429,8 @@ canvas.addEventListener('pointerdown', event => {
         : 'Builder assigned. Your Lix is laying stairs!',
       blocker: 'Blocker assigned. Approaching Lix will turn around!',
       basher: 'Basher assigned. Cutting a horizontal tunnel!',
-      digger: 'Digger assigned. Digging a shaft down!'
+      digger: 'Digger assigned. Digging a shaft down!',
+      miner: 'Miner assigned. Carving a diagonal tunnel!'
     };
     say(message[selectedSkill]);
   } else {
@@ -521,7 +524,7 @@ async function boot() {
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
-      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher and Digger now work, but other original Lix skills and exact physics are still unavailable. A win is not guaranteed.';
+      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher, Digger and Miner now work, but other original Lix skills and precise physics are still unavailable. A win is not guaranteed.';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
