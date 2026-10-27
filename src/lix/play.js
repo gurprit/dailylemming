@@ -198,7 +198,7 @@ function draw() {
   if (config.verified) drawWaterline(ctx, model.baseGadgets,
     model.ticks, canvas.width, canvas.height);
   // A forgiving visual cue for the first puzzle; old community map has none.
-  if (config.verified && levelId !== 'tunnel-time') {
+  if (levelId === 'little-bridge' || levelId === 'double-trouble') {
     const x = 232, y = 203;
     ctx.save();
     ctx.fillStyle = '#b1ffd1';
