@@ -69,14 +69,24 @@ export class LixGameModel {
   }
   assignBuilder(index = 0) {
     const u = this.units[index];
-    // No instant mid-air platform creation, no assigning while already building.
-    if (this.done || !u || !this.remaining.builder ||
-        u.state !== 'walking' || !u.grounded) return false;
+    // Lix builder assignments can be queued while the current 12-brick
+    // staircase is in progress. This extends it without wasting an action.
+    if (this.done || !u || !this.remaining.builder) return false;
+    if (u.state === 'builder') {
+      this.remaining.builder--;
+      this.assigned++;
+      u.queuedBuilders = (u.queuedBuilders || 0) + 1;
+      this.emit('queued', u, String(u.queuedBuilders));
+      return true;
+    }
+    // A falling Lix cannot conjure a staircase in mid-air.
+    if (u.state !== 'walking' || !u.grounded) return false;
     this.remaining.builder--;
     this.assigned++;
     u.state = 'builder';
     u.buildTicks = 0;
     u.buildSteps = 0;
+    u.queuedBuilders = 0;
     u.vy = 0;
     this.emit('assigned', u, 'builder');
     return true;
@@ -131,10 +141,17 @@ export class LixGameModel {
       u.x = clamp(u.x, 1, this.width - 2);
     }
     if (phase === 15 && u.buildSteps >= BUILDER_STEPS) {
-      u.state = 'walking';
-      u.grounded = false;
-      u.vy = 0;
-      this.emit('builder-finished', u);
+      if (u.queuedBuilders > 0) {
+        u.queuedBuilders--;
+        u.buildTicks = 0;
+        u.buildSteps = 0;
+        this.emit('builder-continued', u);
+      } else {
+        u.state = 'walking';
+        u.grounded = false;
+        u.vy = 0;
+        this.emit('builder-finished', u);
+      }
     }
   }
 
