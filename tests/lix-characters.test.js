@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CHARACTER_ACTIVITIES, frameIsPresent, activityForUnit,
-  frameColumnForUnit, drawCharacterSprite, drawActivitySprite } from '../src/lix/characters.js';
+  frameColumnForUnit, frameColumnForActivity, drawCharacterSprite, drawActivitySprite } from '../src/lix/characters.js';
 
 test('Lix activity rows follow the original Ac enum, not arbitrary sprite indices', () => {
   const get = name => CHARACTER_ACTIVITIES.find(x => x.key === name);
@@ -64,4 +64,32 @@ test('the original exiter frames advance during escape instead of using global w
   assert.equal(first,0);
   assert.ok(middle > first && final > middle);
   assert.equal(frameColumnForUnit({state:'exiting',exitTicks:0},200,indices),0);
+});
+
+test('native Blocker animation skips empty/tail frames and loops 4..19', () => {
+  // Original row 16 also contains frame 20 (empty) and later release
+  // frames. The standing animation must never advance into that tail.
+  const indices = Array.from({ length: 26 }, (_, n) => n);
+  assert.equal(frameColumnForActivity('blocker', 0, indices), 0);
+  assert.equal(frameColumnForActivity('blocker', 19, indices), 19);
+  assert.equal(frameColumnForActivity('blocker', 20, indices), 4);
+  assert.equal(frameColumnForActivity('blocker', 35, indices), 19);
+  assert.equal(frameColumnForActivity('blocker', 36, indices), 4);
+  for (let t = 0; t < 150; t++) {
+    const column = frameColumnForActivity('blocker', t, indices);
+    assert.ok(column >= 0 && column <= 19,
+      'Blocker should not flash empty or release frames at tick ' + t);
+    assert.equal(frameColumnForUnit({ state: 'blocker', actionTicks: t }, t + 50, indices), column);
+  }
+});
+test('Blocker preview and gameplay choose same phase, reset per new assignment', () => {
+  const selected = Array.from({ length: 26 }, (_, i) => i);
+  assert.equal(frameColumnForUnit({state:'blocker', actionTicks:0}, 900, selected), 0);
+  assert.equal(frameColumnForUnit({state:'blocker', actionTicks:21}, 900, selected), 5);
+  const images = [], ctx = { save(){}, restore(){}, translate(){},
+    scale(){}, drawImage(...args){images.push(args);} };
+  const atlas = { canvas:{}, layout:{width:34,height:34},
+    rows:new Map([['blocker',{row:16,indices:selected}]]) };
+  assert.equal(drawActivitySprite(ctx, atlas, 'blocker', 20), true);
+  assert.equal(images[0][1], 1 + 4 * 35, 'gallery should not preview empty frame 20');
 });
