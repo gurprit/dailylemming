@@ -10,7 +10,7 @@ export const PHYSICS_HZ = 15;
 export const TICK_MS = 1000 / PHYSICS_HZ;
 export const BUILDER_STEPS = 12;
 export const EXIT_ANIMATION_TICKS = 14;
-export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger']);
+export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger', 'miner']);
 const STEP_TICKS = 16;
 const MAX_SAFE_FALL = 126;
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -264,6 +264,40 @@ export class LixGameModel {
     this.emit('saved', u);
   }
 
+  // Miner chips a descending diagonal tunnel. Every three physics updates
+  // the character carves non-steel pixels just ahead and beneath its feet.
+  // This is browser-adapter gameplay, not a byte-perfect Lix skill replay.
+  stepMiner(u) {
+    u.actionTicks++;
+    if (u.actionTicks % 3 !== 1) return;
+    const facing = Math.sign(u.vx) || 1;
+    const nearX = Math.round(u.x + facing * 3);
+    const left = facing > 0 ? nearX : nearX - 11;
+    const top = Math.round(u.y) - 4;
+    let removable = false, steel = false;
+    for (let yy = top; yy < top + 15; yy++) {
+      for (let xx = left; xx < left + 12; xx++) {
+        const i = this.terrain.index(xx, yy);
+        if (i < 0) continue;
+        if (this.terrain.steel[i]) steel = true;
+        else if (this.terrain.solid(xx, yy)) removable = true;
+      }
+    }
+    if (steel || !removable) {
+      u.state = steel ? 'walking' : 'falling';
+      u.grounded = Boolean(steel);
+      u.vy = steel ? 0 : 4;
+      this.emit(steel ? 'miner-steel' : 'miner-finished', u);
+      return;
+    }
+    this.terrain.digRect(left, top, 12, 15);
+    this.changed = true;
+    u.x = clamp(u.x + facing * 2, 1, this.width - 2);
+    u.y += 2;
+    u.grounded = false;
+    this.emit('mined', u);
+  }
+
   // Native walkers can climb small lips rather than flip at each tiny slope.
   // Steeper terrain reverses their direction. Free fall is vertical.
   stepWalker(u) {
@@ -355,6 +389,7 @@ export class LixGameModel {
       else if (u.state === 'blocker') this.stepBlocker(u);
       else if (u.state === 'basher') this.stepBasher(u);
       else if (u.state === 'digger') this.stepDigger(u);
+      else if (u.state === 'miner') this.stepMiner(u);
       else if (u.state === 'walking') this.stepWalker(u);
       else if (u.state === 'spawning' || u.state === 'falling') this.stepFaller(u);
       if (u.state === 'lost') continue;

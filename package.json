@@ -17,7 +17,8 @@
     "test:community-lix": "node scripts/verify-community-levels.mjs",
     "test:double-trouble": "node scripts/verify-double-trouble.mjs",
     "test:tunnel-time": "node scripts/verify-tunnel-time.mjs",
-    "test:dig-for-freedom": "node scripts/verify-dig-for-freedom.mjs"
+    "test:dig-for-freedom": "node scripts/verify-dig-for-freedom.mjs",
+    "test:secret-passage": "node scripts/verify-secret-passage.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",

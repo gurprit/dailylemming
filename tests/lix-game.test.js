@@ -329,3 +329,41 @@ test('undo restores the last non-builder skill and original collision pixels', (
   assert.equal(m.paused,true);
   assert.deepEqual(m.terrain.pixels,original);
 });
+
+test('miner descends diagonally, erases real soil and remains undoable', () => {
+  const {level,images}=sample();
+  level.skills.MINER=2;
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let n=0;n<13;n++) m.tick();
+  const u=m.units[0], x=u.x, y=u.y;
+  const pixels=m.terrain.pixels.slice();
+  assert.equal(m.assignSkill('miner',0),true);
+  assert.equal(m.remaining.miner,1);
+  for(let n=0;n<10;n++)m.tick();
+  assert.ok(u.x>x,'a miner works forward');
+  assert.ok(u.y>y,'a miner descends');
+  assert.ok(m.events.some(e=>e.type==='mined'));
+  assert.equal(m.terrain.solid(Math.round(x)+5,Math.round(y)+2),false);
+  assert.equal(m.undoBuilder(),true);
+  assert.equal(m.remaining.miner,2);
+  assert.equal(m.units[0].state,'walking');
+  assert.deepEqual(m.terrain.pixels,pixels);
+});
+test('miner stops on steel without cutting through indestructible material',()=>{
+  const {level,images}=sample();
+  level.skills.MINER=1;
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let n=0;n<13;n++)m.tick();
+  const u=m.units[0];
+  const px=Math.round(u.x)+4, py=Math.round(u.y)+2;
+  const index=m.terrain.index(px,py);
+  m.terrain.steel[index]=1;
+  assert.equal(m.assignSkill('miner',0),true);
+  m.tick();
+  assert.equal(u.state,'walking');
+  assert.equal(m.terrain.steel[index],1);
+  assert.equal(m.terrain.solid(px,py),true);
+  assert.ok(m.events.some(e=>e.type==='miner-steel'));
+});

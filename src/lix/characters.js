@@ -77,6 +77,7 @@ export function activityForUnit(unit) {
   if (unit.state === 'blocker') return 'blocker';
   if (unit.state === 'basher') return 'basher';
   if (unit.state === 'digger') return 'digger';
+  if (unit.state === 'miner') return 'miner';
   if (unit.state === 'builder') return 'builder';
   if (unit.state === 'walking') return 'walker';
   if (unit.state === 'falling' || unit.state === 'spawning') return 'faller';
@@ -89,7 +90,7 @@ export function frameColumnForUnit(unit, tick, indices) {
   const offset = unit.state === 'exiting'
     ? Math.min(indices.length - 1, Math.floor((unit.exitTicks || 0) * indices.length / 18))
     : unit.state === 'builder' ? (unit.buildTicks || 0) + 5
-    : unit.state === 'basher' || unit.state === 'digger' ? (unit.actionTicks || 0)
+    : unit.state === 'basher' || unit.state === 'digger' || unit.state === 'miner' ? (unit.actionTicks || 0)
     : Math.floor(Math.max(0, tick));
   return indices[((offset % indices.length) + indices.length) % indices.length];
 }

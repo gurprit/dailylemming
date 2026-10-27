@@ -76,6 +76,7 @@
    <option value="double-trouble">🌉 Double Trouble · verified next level</option>
    <option value="tunnel-time">⛏️ Tunnel Time · verified Basher level</option>
    <option value="dig-for-freedom">🕳️ Dig for Freedom · verified Digger level</option>
+   <option value="secret-passage">⛏ Secret Passage · verified two-skill level</option>
    <option value="pitfall">🧩 Pitfall · original Lix experiment</option>
    <option value="building-block-maze">🏰 Building Block Maze · original Lix experiment</option>
    <option value="6gaps">⚒️ 6 Gaps, 5 Builders · hard experiment</option>
@@ -99,6 +100,7 @@
     <button id="skill-blocker" class="skill-action" type="button" hidden>🛑 Blocker</button>
     <button id="skill-basher" class="skill-action" type="button" hidden>⛏️ Basher</button>
     <button id="skill-digger" class="skill-action" type="button" hidden>🕳️ Digger</button>
+    <button id="skill-miner" class="skill-action" type="button" hidden>⛏ Miner</button>
     <button id="pause" class="primary" type="button">▶ Start</button>
     <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
     <button id="undo" type="button" disabled title="Restore terrain and position before your last skill assignment">↶ Undo skill</button>
@@ -111,8 +113,8 @@
  </section>
  <div class="experiment-help">
   <article><h2>🏆 Level practice record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
-  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. On community levels, select Builder, Blocker, Basher or Digger and tap a grounded creature. Undo (Ctrl/Cmd+Z) restores the last skill. When a Lix reaches the exit, watch its escape animation before results appear. Press Space to pause, or R to restart.</p></article>
-  <article><h2>About this experiment</h2><p>Little Bridge, Double Trouble, Tunnel Time and Dig for Freedom are verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because some original skills and precise physics are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. On advanced levels, select Builder, Blocker, Basher, Digger or Miner and tap a grounded creature. Undo (Ctrl/Cmd+Z) restores the last skill. When a Lix reaches the exit, watch its escape animation before results appear. Press Space to pause, or R to restart.</p></article>
+  <article><h2>About this experiment</h2><p>Little Bridge, Double Trouble, Tunnel Time, Dig for Freedom and Secret Passage are verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because some original skills and precise physics are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
  <p style="font-size:13px;color:#b5c6dd;margin:20px 0 5px"><span id="art-status">Loading Lix character sprites…</span> · <a href="./sprites.html">View all character animations</a></p>
  <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>

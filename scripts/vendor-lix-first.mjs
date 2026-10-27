@@ -14,6 +14,7 @@ const levelFiles = [
   'content/original/double-trouble.txt',
   'content/original/tunnel-time.txt',
   'content/original/dig-for-freedom.txt',
+  'content/original/secret-passage.txt',
   'content/lix/lovely/pitfall.txt',
   'content/lix/lovely/buildingblock.txt'
 ];

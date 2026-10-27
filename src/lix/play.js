@@ -3,6 +3,7 @@ import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
 import digForFreedomLevel from '../../content/original/dig-for-freedom.txt?raw';
+import secretPassageLevel from '../../content/original/secret-passage.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -14,6 +15,7 @@ import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
+import { unitAtPoint, drawUnitTarget } from './targeting.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -23,7 +25,7 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
 const sourcePath = config.verified
@@ -40,10 +42,11 @@ let characterAtlas = null;
 let selectedSkill = 'builder';
 const SKILL_LABELS = {
   builder: '🧱 Builder', blocker: '🛑 Blocker',
-  basher: '⛏️ Basher', digger: '🕳️ Digger'
+  basher: '⛏️ Basher', digger: '🕳️ Digger', miner: '⛏ Miner'
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
+let pointerPosition = null;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
 const ground = document.createElement('canvas');
@@ -229,6 +232,26 @@ function draw() {
       ctx.restore();
     }
   }
+  if (levelId === 'secret-passage') {
+    ctx.save();
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = '#b1ffd1';
+    ctx.textAlign = 'center';
+    const hints = [
+      {label: 'MINE HERE', x: 180, y: 114},
+      {label: 'BASH HERE', x: 424, y: 209}
+    ];
+    for (const h of hints) {
+      ctx.fillText(h.label, h.x, h.y);
+      ctx.fillRect(h.x - 1, h.y + 6, 2, 10);
+      ctx.beginPath();
+      ctx.moveTo(h.x - 5, h.y + 14);
+      ctx.lineTo(h.x, h.y + 20);
+      ctx.lineTo(h.x + 5, h.y + 14);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   if (levelId === 'dig-for-freedom') {
     ctx.save();
     ctx.font = 'bold 11px system-ui';
@@ -266,6 +289,12 @@ function draw() {
     obstacle ||= drawBuilderPreview(u);
     paintCharacter(u);
   }
+  const hovered = pointerPosition && !model.done
+    ? unitAtPoint(model.units, pointerPosition.x, pointerPosition.y,
+      selectedSkill, model.remaining, pointerPosition.radius)
+    : -1;
+  canvas.style.cursor = hovered >= 0 ? 'none' : 'crosshair';
+  if (hovered >= 0) drawUnitTarget(ctx, model.units[hovered]);
   const warning = el('preview-warning');
   warning.hidden = !obstacle;
   if (obstacle) warning.textContent = obstacle.steel
@@ -320,7 +349,8 @@ function finish() {
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
-    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
+    : levelId === 'tunnel-time' ? 'dig-for-freedom'
+    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
   el('result-next').hidden = !(snap.won && next);
   el('result-next').textContent = next
     ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
@@ -355,6 +385,13 @@ function loop(now) {
         say('That steel cannot be cut. Try another route.');
       if (event.type === 'basher-finished') say('The Basher has finished tunnelling.');
       if (event.type === 'digger-finished') say('The Digger has reached open space.');
+      if (event.type === 'miner-finished') {
+        if (levelId === 'secret-passage' && model.remaining.basher > 0) {
+          selectedSkill = 'basher';
+          say('The Miner broke through! Basher selected next. Tap your Lix at BASH HERE.');
+        } else say('The Miner broke through to open space!');
+      }
+      if (event.type === 'miner-steel') say('The Miner cannot dig through steel.');
     }
     updateHud();
     draw();
@@ -378,21 +415,35 @@ function restart() {
   model.reset();
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
+  pointerPosition = null;
+  canvas.style.cursor = 'crosshair';
   el('result').hidden = true;
   say(config.hint);
   updateHud();
   draw();
 }
+function pointerPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * canvas.width / rect.width,
+    y: (event.clientY - rect.top) * canvas.height / rect.height,
+    radius: Math.max(25, 36 * canvas.width / rect.width)
+  };
+}
+canvas.addEventListener('pointermove', event => {
+  // Only mouse and pen pointers have a persistent hover state.
+  if (event.pointerType === 'touch') return;
+  pointerPosition = pointerPoint(event);
+});
+canvas.addEventListener('pointerleave', () => {
+  pointerPosition = null;
+  canvas.style.cursor = 'crosshair';
+});
 canvas.addEventListener('pointerdown', event => {
   if (!model || model.done) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = (event.clientX - rect.left) * canvas.width / rect.width;
-  const y = (event.clientY - rect.top) * canvas.height / rect.height;
-  // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
-  const radius = Math.max(27, 40 * canvas.width / rect.width);
-  const index = model.units.findIndex(u =>
-    (u.state === 'walking' || (selectedSkill === 'builder' && u.state === 'builder'))
-    && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
+  const point = pointerPoint(event);
+  const index = unitAtPoint(model.units, point.x, point.y,
+    selectedSkill, model.remaining, point.radius);
   if (index < 0) {
     say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
@@ -405,7 +456,8 @@ canvas.addEventListener('pointerdown', event => {
         : 'Builder assigned. Your Lix is laying stairs!',
       blocker: 'Blocker assigned. Approaching Lix will turn around!',
       basher: 'Basher assigned. Cutting a horizontal tunnel!',
-      digger: 'Digger assigned. Digging a shaft down!'
+      digger: 'Digger assigned. Digging a shaft down!',
+      miner: 'Miner assigned. Carving a diagonal tunnel!'
     };
     say(message[selectedSkill]);
   } else {
@@ -451,7 +503,8 @@ el('speed').addEventListener('click', () => {
 el('result-next').addEventListener('click', () => {
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
-    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
+    : levelId === 'tunnel-time' ? 'dig-for-freedom'
+    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
   if (next) window.location.href = './play-lix.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
@@ -483,8 +536,9 @@ async function boot() {
     spriteCache = terrainImages;
     characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
-    selectedSkill = Object.keys(SKILL_LABELS)
-      .find(skill => model.remaining[skill] > 0) || 'builder';
+    selectedSkill = levelId === 'secret-passage' ? 'miner'
+      : Object.keys(SKILL_LABELS)
+        .find(skill => model.remaining[skill] > 0) || 'builder';
     el('art-status').textContent = characterAtlas
       ? 'Original Lix character sprites · CC0'
       : 'Fallback character · sheet unavailable';
@@ -499,7 +553,7 @@ async function boot() {
     const warning = el('compat-warning');
     warning.hidden = config.verified;
     warning.textContent = config.verified ? ''
-      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher and Digger now work, but other original Lix skills and exact physics are still unavailable. A win is not guaranteed.';
+      : 'This imported level is an experimental adaptation. Builder, Blocker, Basher, Digger and Miner now work, but other original Lix skills and precise physics are still unavailable. A win is not guaranteed.';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;

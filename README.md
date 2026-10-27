@@ -183,3 +183,23 @@ Try `/play-lix.html` and watch the character jump into the exit *before* results
 ### Fourth verified practice level: Dig for Freedom
 
 `/play-lix.html?level=dig-for-freedom` has a full-length upper sandstone platform and a lower exit corridor. A Lix must use the **Digger** skill to tunnel downward, fall safely to the lower passage, and walk to its exit. The test `npm run test:dig-for-freedom` solved this stage with **20 different one-Digger starting positions**, each around 26 simulated seconds; no-skill play cannot win. This completes our first four verified practice puzzles: Little Bridge → Double Trouble → Tunnel Time → Dig for Freedom. They use CC0 Lix tiles with original Daily Lemming-authored layouts.
+
+## v0.8: precise Lix hover targeting, Miner and the first two-skill puzzle
+
+- **Hover targeting:** desktop mouse / pen changes from a crosshair to an animated-frame-following **four-corner `[ ]` reticle** when pointing at a creature eligible for the selected skill. Click and touch now use the same nearest-eligible-Lix hit test; non-selectable creatures (falling, escaping, lost or busy with other skills) are not highlighted. Character selection is checked again as they walk or the chosen skill changes.
+- **Miner:** the fifth playable skill carves a **descending diagonal tunnel** through genuine pixel terrain. The official CC0 Lix Miner animation is used. Steel stops the operation; a breakthrough becomes a fall. Its stock is finite and Undo restores the original terrain and inventory. The animation and skill physics are adapter approximations, **not replay-exact original Lix**.
+- **Secret Passage:** the fifth authored and solver-verified practice puzzle now requires **both Miner and Basher**. Mine down from the upper platform, land in the lower corridor, then bash through a solid underground wall. The second skill is automatically selected after mining breaks through, with clear `MINE HERE` and `BASH HERE` hints. A real-PNG solver checked 54 successful two-skill timing pairs, with the first completing in approximately 32 seconds. Without skills or with Miner alone, it cannot be finished.
+- Progression now reads **Little Bridge → Double Trouble → Tunnel Time → Dig for Freedom → Secret Passage**, before the still-unverified original CC0 community level experiments. Practice records remain per level; shared daily streaks are unchanged.
+
+```bash
+git fetch origin
+git switch feat/lix-targeting-miner
+git pull --ff-only
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:secret-passage
+npm run dev
+```
+
+Try `/play-lix.html?level=secret-passage` and move your pointer over a standing Lix to see the reticle.
