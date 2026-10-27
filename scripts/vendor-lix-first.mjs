@@ -23,7 +23,12 @@ const levelFiles = [
   'content/lix/tutorial/bashers.txt',
   'content/lix/tutorial/diggers.txt',
   'content/lix/tutorial/miners.txt',
-  'content/lix/tutorial/blockers.txt'
+  'content/lix/tutorial/blockers.txt',
+  'content/lix/tutorial/platformers.txt',
+  'content/lix/tutorial/jumpers.txt',
+  'content/lix/tutorial/runners.txt',
+  'content/lix/tutorial/walkers-turn.txt',
+  'content/lix/tutorial/climbers-floaters.txt'
 ];
 const levels = await Promise.all(levelFiles.map(async file =>
   parseLix(await readFile(path.join(root, file), 'utf8'))));
