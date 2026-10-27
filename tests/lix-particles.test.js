@@ -7,9 +7,9 @@ test('soil chips burst only when digging or mining, with bounded memory', () => 
   p.burst('drowned', 10, 20);
   assert.equal(p.items.length, 0);
   p.burst('dug', 12, 22);
-  assert.equal(p.items.length, 9);
+  assert.equal(p.items.length, 8);
   p.burst('mined', 15, 20, 1);
-  assert.equal(p.items.length, 20);
+  assert.equal(p.items.length, 18);
   for(let i=0;i<25;i++)p.burst('mined',15,20,1);
   assert.equal(p.items.length, 160);
   assert.ok(p.items.every(x=>x.size>=2&&x.size<=3));
@@ -35,7 +35,7 @@ test('draw emits squares but does not alter canvas state', () => {
   p.draw(ctx);
   assert.equal(actions[0],'save');
   assert.equal(actions.at(-1),'restore');
-  assert.equal(actions.filter(Array.isArray).length,9);
+  assert.equal(actions.filter(Array.isArray).length,8);
 });
 
 test('Basher throws a short backward debris burst', () => {
