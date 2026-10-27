@@ -4,6 +4,7 @@ import { LEVEL_OPTIONS, FEATURED_LIX_LEVELS, resolveLevelId } from '../src/lix/l
 import { readFileSync } from 'node:fs';
 import { parseLix } from '../src/lix/parse.js';
 import { PLAYABLE_SKILLS } from '../src/lix/game.js';
+import { FEATURED_COMMUNITY_LEVELS, mysteryLevel } from '../src/lix/featured-levels.js';
 test('only the demonstrated practice puzzles are verified and tutorial remains default', () => {
   assert.equal(resolveLevelId(''), 'little-bridge');
   assert.equal(resolveLevelId('nonexistent'),'little-bridge');
@@ -27,28 +28,42 @@ test('community levels retain authorship, warnings and original source links', (
   }
 });
 
-test('featured collection has exactly ten real native levels, all required skills implemented', () => {
-  assert.equal(FEATURED_LIX_LEVELS.length,10);
-  assert.equal(new Set(FEATURED_LIX_LEVELS).size,10);
-  for (const id of FEATURED_LIX_LEVELS) {
+
+test('ten mystery community levels all use multiple implemented abilities',()=>{
+  assert.equal(FEATURED_COMMUNITY_LEVELS.length,10);
+  assert.equal(new Set(FEATURED_COMMUNITY_LEVELS).size,10);
+  for(const id of FEATURED_COMMUNITY_LEVELS){
     const info=LEVEL_OPTIONS[id];
-    assert.equal(info?.category,'official-tutorial');
-    assert.equal(info.verified,false,'import smoke tests do not prove full solvability');
-    const source=readFileSync(new URL('../content/lix/tutorial/'+info.tutorialFile+'.txt',
+    assert.equal(info.category,'community-puzzle');
+    assert.equal(info.verified,false,'smoke tests are not winning-route proof');
+    const source=readFileSync(new URL('../content/lix/lovely/'+info.communityFile+'.txt',
       import.meta.url),'utf8');
     const level=parseLix(source);
     assert.equal(level.title,info.name);
-    for(const [skill,count] of Object.entries(level.skills)) {
-      if(count===0)continue;
-      if(skill==='EXPLODER2')continue;
-      assert.ok(PLAYABLE_SKILLS.includes(skill.toLowerCase()),id+' missing skill '+skill);
-    }
+    const required=Object.entries(level.skills).filter(([skill,n])=>n!==0&&skill!=='EXPLODER2');
+    assert.ok(required.length>=2,id+' should use multiple skills');
+    for(const [skill] of required)
+      assert.ok(PLAYABLE_SKILLS.includes(skill.toLowerCase()),id+' missing '+skill);
   }
 });
-test('homepage selector lists exactly ten original Lix levels, keeping daily separate',()=>{
+test('mystery picks are date-deterministic, shuffled and nonrepeating per ten-day block',()=>{
+  assert.deepEqual(mysteryLevel('2026-10-27'),mysteryLevel('2026-10-27'));
+  const ids=Array.from({length:10},(_,i)=>mysteryLevel(
+    new Date(Date.UTC(2026,9,27+i)).toISOString().slice(0,10)).levelId);
+  assert.equal(ids.length,10);
+  // Blocks align to the epoch of the daily scheduler, not October 27.
+  const day0='2026-10-26';
+  const start=(new Date(day0+'T00:00:00Z').getTime()
+    - new Date('2026-10-26T00:00:00Z').getTime())/86400000;
+  assert.equal(start,0);
+  for(const id of ids)assert.ok(FEATURED_COMMUNITY_LEVELS.includes(id));
+  assert.ok(FEATURED_COMMUNITY_LEVELS.includes(mysteryLevel('2026-10-29').levelId));
+});
+test('homepage offers one mystery, a separate verified daily, and exactly ten community levels',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  const ids=[...html.matchAll(/<option value="(lix-[^"]+)"/g)].map(m=>m[1]);
-  assert.deepEqual(ids,[...FEATURED_LIX_LEVELS]);
+  const ids=[...html.matchAll(/<option value="(lovely-[^"]+)"/g)].map(m=>m[1]);
+  assert.deepEqual(ids,[...FEATURED_COMMUNITY_LEVELS]);
+  assert.match(html,/<option value="__mystery__">/);
   assert.match(html,/<option value="__daily__">/);
-  assert.doesNotMatch(html,/<option value="(little-bridge|secret-passage|pitfall)"/);
+  assert.doesNotMatch(html,/<option value="lix-builders">/);
 });
