@@ -39,7 +39,7 @@ import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
 import { unitAtPoint, drawUnitTarget } from './targeting.js';
 import { DirtParticles } from './particles.js';
-import { MAX_MAP_SCALE, fitMapScale, mapTouchGeometry, zoomMapAtFingers } from './map-zoom.js';
+import { MAX_MAP_SCALE, fitMapScale, coverMapScale, mapTouchGeometry, zoomMapAtFingers } from './map-zoom.js';
 import { utcDay } from '../daily.js';
 import { dailyChallenge, dailyStreak, readDaily, saveDaily, dailyResultText } from './daily-challenge.js';
 import { mysteryLevel } from './featured-levels.js';
@@ -116,37 +116,59 @@ canvas.width = landscape.width; canvas.height = landscape.height;
 // This preserves crisp art and accurate hit-testing at every pinch scale.
 const viewport = canvas.parentElement;
 const mobileMap = window.matchMedia('(max-width: 660px), (pointer: coarse)');
-let mapScale = 1;
+const availableMapHeight = () => Math.min(window.innerHeight * 0.58, 460);
+const coverScale = () => coverMapScale(landscape.width, landscape.height,
+  viewport.clientWidth, availableMapHeight());
+let mapScale = mobileMap.matches ? coverScale() : 1;
 let previousFitScale = fitMapScale(landscape.width, viewport.clientWidth);
+let previousCoverScale = coverScale();
 
 function syncMapZoom() {
   if (!mobileMap.matches) {
     canvas.style.width = '';
+    viewport.style.removeProperty('--map-height');
     return;
   }
   const fit = fitMapScale(landscape.width, viewport.clientWidth);
   mapScale = Math.max(fit, Math.min(MAX_MAP_SCALE, mapScale));
   canvas.style.width = (landscape.width * mapScale).toFixed(2) + 'px';
+  // The viewport never extends below the visible map, even after zooming out.
+  // CSS caps the height at 58vh/460px so tall maps remain pannable.
+  viewport.style.setProperty('--map-height',
+    (landscape.height * mapScale).toFixed(2) + 'px');
   const zoomed = mapScale > fit + 0.02;
   const control = el('map-zoom');
   control.setAttribute('aria-pressed', String(zoomed));
   control.textContent = zoomed ? '↔ Fit map' : '🔎 Zoom in';
-  control.setAttribute('aria-label', zoomed ? 'Fit the entire level to the screen' : 'Zoom in to native pixels');
+  control.setAttribute('aria-label', zoomed
+    ? 'Fit the entire level to the screen' : 'Zoom in to fill the game area');
   previousFitScale = fit;
+  previousCoverScale = coverScale();
 }
 el('map-zoom').addEventListener('click', () => {
   const fit = fitMapScale(landscape.width, viewport.clientWidth);
-  mapScale = mapScale > fit + 0.02 ? fit : Math.max(1, fit);
+  mapScale = mapScale > fit + 0.02 ? fit : coverScale();
   syncMapZoom();
   viewport.scrollLeft = 0;
   viewport.scrollTop = 0;
 });
 window.addEventListener('resize', () => {
   const wasFitted = mapScale <= previousFitScale + 0.02;
+  const wasCover = Math.abs(mapScale - previousCoverScale) <= 0.02;
   if (wasFitted) mapScale = fitMapScale(landscape.width, viewport.clientWidth);
+  else if (wasCover) mapScale = coverScale();
   syncMapZoom();
 });
 syncMapZoom();
+// Some levels spawn far from the left edge. Begin near the entrance rather
+// than showing an empty slice of a zoomed-in wide map.
+if (mobileMap.matches && mapScale > previousFitScale + 0.02) {
+  const firstHatch = level.tiles.find(tile => tile.kind === 'hatch');
+  if (firstHatch) {
+    viewport.scrollLeft = Math.max(0,
+      (firstHatch.x + 16) * mapScale - viewport.clientWidth * 0.35);
+  }
+}
 const ground = document.createElement('canvas');
 ground.width = landscape.width; ground.height = landscape.height;
 const groundCtx = ground.getContext('2d');
