@@ -23,6 +23,13 @@ export const LEVEL_OPTIONS = Object.freeze({
     source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-skills-and-exit/content/original/tunnel-time.txt',
     hint: 'Select Basher (⛏️), then tap the Lix just before the BASH HERE marker at the wall.'
   },
+  'dig-for-freedom': {
+    name: 'Dig for Freedom', category: 'intermediate', verified: true,
+    intro: 'The exit is below! Use a Digger to cut through the upper sandstone floor, drop safely and reach freedom.',
+    credit: 'Original Daily Lemming Digger training puzzle, using CC0 Lix art.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-skills-and-exit/content/original/dig-for-freedom.txt',
+    hint: 'Select Digger (🕳️), then tap your Lix near DIG HERE on the upper platform.'
+  },
   pitfall: {
     name: 'Pitfall', category: 'community', verified: false,
     intro: 'An original Lix puzzle by Insane Steve. Real map and terrain, but many original skills are not implemented yet.',
