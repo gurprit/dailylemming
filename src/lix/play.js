@@ -2,6 +2,7 @@ import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
+import digForFreedomLevel from '../../content/original/dig-for-freedom.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -22,7 +23,7 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
 const sourcePath = config.verified
@@ -228,6 +229,17 @@ function draw() {
       ctx.restore();
     }
   }
+  if (levelId === 'dig-for-freedom') {
+    ctx.save();
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = '#b1ffd1';
+    ctx.textAlign = 'center';
+    ctx.fillText('DIG HERE', 160, 121);
+    ctx.fillRect(159, 126, 2, 12);
+    ctx.beginPath();
+    ctx.moveTo(155, 136); ctx.lineTo(160, 142); ctx.lineTo(165, 136); ctx.fill();
+    ctx.restore();
+  }
   if (levelId === 'tunnel-time') {
     ctx.save();
     ctx.font = 'bold 11px system-ui';
@@ -307,7 +319,8 @@ function finish() {
     + (practice.improved ? ' New practice personal best! ✨'
       : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   const next = levelId === 'little-bridge' ? 'double-trouble'
-    : levelId === 'double-trouble' ? 'tunnel-time' : null;
+    : levelId === 'double-trouble' ? 'tunnel-time'
+    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
   el('result-next').hidden = !(snap.won && next);
   el('result-next').textContent = next
     ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
@@ -437,7 +450,8 @@ el('speed').addEventListener('click', () => {
 });
 el('result-next').addEventListener('click', () => {
   const next = levelId === 'little-bridge' ? 'double-trouble'
-    : levelId === 'double-trouble' ? 'tunnel-time' : null;
+    : levelId === 'double-trouble' ? 'tunnel-time'
+    : levelId === 'tunnel-time' ? 'dig-for-freedom' : null;
   if (next) window.location.href = './play-lix.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
