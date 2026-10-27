@@ -81,12 +81,15 @@ console.log('PASS: real PNG terrain, hatch frame, foot collision, movement and d
 // This deliberately tests the exact level PNGs and game physics shipped to players.
 const friendly = parseLix(await readFile(path.join(root, 'content/original/little-bridge.txt'), 'utf8'));
 const friendlyAssets = sourceAssets(friendly);
+console.log('Tutorial sprite widths:', friendlyAssets.filter(x => x.includes('064h')).map(x => ({
+  asset: x, width: assets.get(x)?.data?.width, height: assets.get(x)?.data?.height
+})));
 for (const asset of friendlyAssets)
   if (!assets.has(asset)) throw new Error('Tutorial asset missing from local vendor pack: ' + asset);
 const attempted = [];
 let solution = null;
 const wins = [];
-for (let builderX = 132; builderX <= 184; builderX += 2) {
+for (let builderX = 202; builderX <= 252; builderX += 2) {
   const attempt = new LixGameModel(friendly, assets);
   attempt.togglePause();
   let assigned = false;
@@ -115,7 +118,7 @@ console.log('Friendly tutorial real-assets win check: ' + JSON.stringify({
     skills: solution.result.used, seconds: solution.result.seconds
   }
 }));
-if (!solution || solution.result.used !== 1 || wins.length < 15 || !wins.includes(166))
+if (!solution || solution.result.used !== 1 || wins.length < 15 || !wins.includes(232))
   throw new Error('Friendly puzzle is not reliably solvable in a broad one-builder timing window');
 
 // Ensure the gap is a puzzle, not just a decorative hole anyone crosses.
