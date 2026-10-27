@@ -32,6 +32,7 @@
  .experiment-view canvas{user-select:none;-webkit-user-select:none}
  .experiment-buttons button#step{border-color:#89aeac;background:#21433f;color:#ddfff0}
  .experiment-buttons button#undo{border-color:#e5b06f;background:#3a3341;color:#ffe0ba}
+ .easy-mode #step,.easy-mode #speed{display:none}
  .experiment-warning{font-size:13px;line-height:1.55;font-weight:700;padding:11px 12px;border-radius:9px;background:#5b332a;color:#ffe4ad;margin:12px 0 0}
  .experiment-warning[hidden]{display:none}
  .experiment-hint{min-height:22px}
@@ -55,9 +56,9 @@
 <main class="experiment">
  <nav class="experiment-nav">
   <a href="./index.html">← Daily Lemming</a>
-  <small><a href="./play-lix.html">Easy level</a> · <a href="./play-lix.html?level=6gaps">Original hard level</a></small>
+  <small><a href="./play-lix.html">Easy level</a> · <a href="./play-lix.html?level=6gaps">Harder original Lix level</a></small>
  </nav>
- <div class="tag">🟢 ONE HAPPY LITTLE LEVEL · PIXEL TERRAIN ENGINE</div>
+ <div class="tag" id="mode-tag">🌿 EASY PRACTICE · ONE LITTLE BRIDGE</div>
  <h1 id="level-title">Little Bridge</h1>
  <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
  <section aria-label="Playable puzzle">
