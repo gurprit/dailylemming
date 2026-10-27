@@ -1,9 +1,11 @@
 // An independent local practice record. Never touches daily challenge streaks.
 const KEY = 'daily-lemming-lix-practice-v2';
 
-export function getPractice(storage = globalThis.localStorage) {
+const keyFor = levelId => levelId === '6gaps' ? KEY : KEY + ':' + levelId;
+
+export function getPractice(storage = globalThis.localStorage, levelId = '6gaps') {
   try {
-    const read = JSON.parse(storage?.getItem(KEY) || '{}');
+    const read = JSON.parse(storage?.getItem(keyFor(levelId)) || '{}');
     return read && typeof read === 'object'
       ? { attempts: Number(read.attempts) || 0,
           wins: Number(read.wins) || 0,
@@ -12,8 +14,8 @@ export function getPractice(storage = globalThis.localStorage) {
     return { attempts: 0, wins: 0, best: null };
   }
 }
-export function savePractice(result, storage = globalThis.localStorage) {
-  const prev = getPractice(storage);
+export function savePractice(result, storage = globalThis.localStorage, levelId = '6gaps') {
+  const prev = getPractice(storage, levelId);
   const record = { attempts: prev.attempts + 1,
     wins: prev.wins + (result.won ? 1 : 0), best: prev.best };
   const next = { used: result.used, seconds: result.seconds };
@@ -21,7 +23,7 @@ export function savePractice(result, storage = globalThis.localStorage) {
     || next.used < record.best.used
     || (next.used === record.best.used && next.seconds < record.best.seconds));
   if (improved) record.best = next;
-  try { storage?.setItem(KEY, JSON.stringify(record)); } catch {}
+  try { storage?.setItem(keyFor(levelId), JSON.stringify(record)); } catch {}
   return { ...record, improved };
 }
 export function practiceLabel(record) {
