@@ -262,8 +262,7 @@ function updateHud() {
   if (!model) return;
   const state = model.snapshot();
   el('saved').textContent = state.saved + '/' + state.total;
-  el('builders').textContent = String(state.builder);
-  el('count').textContent = String(state.builder);
+  el('builders').textContent = String(Object.values(state.skills || {}).reduce((a, n) => a + n, 0));
   el('timer').textContent = fmt(state.seconds);
   el('state').textContent = state.done ? (state.won ? 'SAVED!' : 'FAILED')
     : state.paused ? (state.started ? 'PAUSED' : 'READY') : 'RUNNING';
@@ -281,7 +280,7 @@ function updateHud() {
   el('speed').textContent = '⏩ ' + speed + '× speed';
   el('step').disabled = !state.paused || state.done;
   el('undo').disabled = !model.undoAvailable;
-  el('builder').setAttribute('aria-pressed', String(selectedSkill === 'builder'));
+
 }
 function finish() {
   if (ended) return;
