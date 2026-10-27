@@ -1,0 +1,24 @@
+// Original Daily Lemming introductory level, authored for the browser adapter.
+// Uses CC0 terrain sprites from Lix. Not an original Lix community puzzle.
+$AUTHOR Daily Lemming
+$ENGLISH Little Bridge
+$HINT_ENGLISH One tiny gap. Assign one Builder as you approach the edge.
+#SIZE_X 512
+#SIZE_Y 288
+#INITIAL 1
+#REQUIRED 1
+#SPAWN_INTERVAL 1
+#BUILDER 3
+
+:simon/hatch001.H: 32 128
+:simon/tapir/goal.G: 420 176
+
+:simon/tapir/064h: 0 224
+:simon/tapir/064h: 64 224
+:simon/tapir/064h: 128 224
+:simon/tapir/064h: 276 224
+:simon/tapir/064h: 340 224
+:simon/tapir/064h: 404 224
+:simon/tapir/064h: 468 224
+
+:matt/water.W: 192 256

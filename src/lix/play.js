@@ -1,18 +1,27 @@
-import rawLevel from '../../content/lix/lovely/6gaps.txt?raw';
+import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
+import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
 import { gadgetDrawable } from './render.js';
+import { getPractice, savePractice, practiceLabel } from './practice.js';
+import { projectBuilder } from './preview.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
 const el = id => document.getElementById(id);
 const canvas = el('playfield');
 const ctx = canvas.getContext('2d');
-const level = parseLix(rawLevel, { sourcePath: 'levels/single/lemforum/Lovely/6gaps.txt' });
+const levelId = new URLSearchParams(location.search).get('level') === '6gaps'
+  ? '6gaps' : 'little-bridge';
+const level = levelId === '6gaps'
+  ? parseLix(trickyLevel, { sourcePath: 'levels/single/lemforum/Lovely/6gaps.txt' })
+  : parseLix(friendlyLevel, { sourcePath: 'content/original/little-bridge.txt' });
+document.body.classList.toggle('easy-mode', levelId === 'little-bridge');
 let model = null;
 let spriteCache = null;
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
+let processedEvents = 0;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
 const ground = document.createElement('canvas');
@@ -23,6 +32,9 @@ function fmt(s) {
   return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 }
 function say(s) { el('message').textContent = s; }
+function showPractice(record = getPractice(undefined, levelId)) {
+  el('practice-best').textContent = practiceLabel(record);
+}
 function freshGround() {
   if (!model?.changed) return;
   const data = new ImageData(new Uint8ClampedArray(model.terrain.pixels),
@@ -86,6 +98,35 @@ async function loadArt() {
   await Promise.all(Array.from({ length: Math.min(6, assets.length) }, worker));
   return result;
 }
+function drawBuilderPreview(u) {
+  if (!model.paused || !model.remaining.builder ||
+    !['walking', 'builder'].includes(u.state)) return null;
+  if (u.state === 'walking' && !u.grounded) return null;
+  const projection = projectBuilder(model.terrain, u);
+  if (!projection) return null;
+  ctx.save();
+  ctx.globalAlpha = 0.32;
+  ctx.fillStyle = '#ffdd93';
+  ctx.strokeStyle = '#fdf8cb';
+  ctx.setLineDash([3, 4]);
+  ctx.beginPath();
+  ctx.arc(u.x, u.y - 10, 18, 0, Math.PI * 2);
+  ctx.stroke();
+  for (const brick of projection.bricks) {
+    ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+  }
+  if (projection.blocked) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ff8f86';
+    ctx.strokeStyle = '#fff1da';
+    ctx.lineWidth = 2;
+    const { x, y } = projection.blocked;
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillText('!', x - 2, y + 4);
+  }
+  ctx.restore();
+  return projection.blocked;
+}
 function paintCharacter(u) {
   if (['lost', 'saved'].includes(u.state)) return;
   const x = Math.round(u.x), y = Math.round(u.y);
@@ -113,6 +154,23 @@ function draw() {
   if (!model) return;
   freshGround();
   ctx.drawImage(ground, 0, 0);
+  // A forgiving visual cue for the first puzzle; old community map has none.
+  if (levelId === 'little-bridge') {
+    const x = 232, y = 203;
+    ctx.save();
+    ctx.fillStyle = '#b1ffd1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('BUILD HERE', x, y - 21);
+    ctx.fillStyle = 'rgba(130,255,177,.7)';
+    ctx.fillRect(x - 1, y - 15, 2, 12);
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y - 6);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + 5, y - 6);
+    ctx.fill();
+    ctx.restore();
+  }
   for (const g of model.baseGadgets) {
     if (!g.image) continue;
     // Animated hatches and liquids cycle through their clipped Cutbit frames.
@@ -123,7 +181,16 @@ function draw() {
       ctx.fillText('EXIT', g.x + 4, Math.max(12, g.y - 7));
     }
   }
-  for (const u of model.units) paintCharacter(u);
+  let obstacle = null;
+  for (const u of model.units) {
+    obstacle ||= drawBuilderPreview(u);
+    paintCharacter(u);
+  }
+  const warning = el('preview-warning');
+  warning.hidden = !obstacle;
+  if (obstacle) warning.textContent = obstacle.steel
+    ? '⚠ Steel above: a longer queued staircase may collide and turn your builder back.'
+    : '⚠ Overhead obstacle: this staircase may stop early and reverse direction.';
   if (model.paused && !model.done) {
     ctx.fillStyle = 'rgba(12,22,42,.56)';
     ctx.fillRect(0, 0, canvas.width, 46);
@@ -148,16 +215,22 @@ function updateHud() {
   el('builder').disabled = state.builder < 1 || state.done;
   el('pause').disabled = state.done;
   el('speed').textContent = '⏩ ' + speed + '× speed';
+  el('step').disabled = !state.paused || state.done;
+  el('undo').disabled = !model.undoAvailable;
+  el('builder').setAttribute('aria-pressed', String(state.builder > 0));
 }
 function finish() {
   if (ended) return;
   ended = true;
   const snap = model.snapshot();
+  const practice = savePractice(snap, undefined, levelId);
+  showPractice(practice);
   el('result-icon').textContent = snap.won ? '✦' : '↻';
   el('result-heading').textContent = snap.won ? 'You did it!' : 'One more try?';
   el('result-summary').textContent = 'Saved ' + snap.saved + '/' + snap.total
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' builder assignments.'
-    + (snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
+    + (practice.improved ? ' New practice personal best! ✨'
+      : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   el('result').hidden = false;
   el('result-retry').focus();
 }
@@ -174,6 +247,15 @@ function loop(now) {
         model.tick();
         accumulator -= TICK_MS;
       }
+    }
+    // Event-based hints surface physics changes without interrupting gameplay.
+    while (processedEvents < model.events.length) {
+      const event = model.events[processedEvents++];
+      if (event.type === 'landed') say('Landed safely. Tap the walker to build a bridge.');
+      if (event.type === 'builder-finished') say('Staircase finished. Another builder can be assigned.');
+      if (event.type === 'builder-continued') say('Queued builder activated, staircase continuing!');
+      if (event.type === 'builder-blocked') say('Builder hit an obstacle and turned around.');
+      if (event.type === 'drowned') say('The wanderer fell into danger. Try another route!');
     }
     updateHud();
     draw();
@@ -196,8 +278,11 @@ function restart() {
   if (!model) return;
   model.reset();
   accumulator = 0; last = 0; speed = 1; ended = false;
+  processedEvents = 0;
   el('result').hidden = true;
-  say('Five builders. Six gaps. One tiny walker. Can you find the route?');
+  say(levelId === 'little-bridge'
+    ? 'Just one gap. Tap the walker near the BUILD HERE arrow to make a little bridge.'
+    : 'Five builders. Six gaps. One tiny walker. Can you find the route?');
   updateHud();
   draw();
 }
@@ -206,23 +291,46 @@ canvas.addEventListener('pointerdown', event => {
   const rect = canvas.getBoundingClientRect();
   const x = (event.clientX - rect.left) * canvas.width / rect.width;
   const y = (event.clientY - rect.top) * canvas.height / rect.height;
+  // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
+  const radius = Math.max(27, 40 * canvas.width / rect.width);
   const index = model.units.findIndex(u => ['walking', 'builder'].includes(u.state)
-    && Math.hypot(x - u.x, y - (u.y - 10)) < 27);
+    && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
   if (index < 0) {
-    say('Tap the moving green-haired walker to assign a builder.');
+    say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
   }
+  const wasBuilding = model.units[index]?.state === 'builder';
   if (model.assignBuilder(index)) {
-    say('Builder assigned! A staircase is being constructed.');
+    say(wasBuilding
+      ? 'Another builder queued! The staircase will continue without stopping.'
+      : 'Builder assigned! A staircase is being constructed.');
   } else {
-    say('That walker is already building, or you have no builders remaining.');
+    say('Start builders on solid ground, or tap an active builder to queue another staircase.');
   }
   updateHud();
 });
 el('builder').addEventListener('click', () => say('Builder selected: tap the little walker to create stairs.'));
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
-el('speed').addEventListener('click', () => { speed = speed === 1 ? 2 : 1; updateHud(); });
+function undo() {
+  if (!model?.undoBuilder()) return;
+  ended = false;
+  processedEvents = model.events.length;
+  accumulator = 0;
+  last = 0;
+  el('result').hidden = true;
+  say('Last builder undone. Skill, position and terrain restored. Press Resume when ready.');
+  updateHud();
+  draw();
+}
+el('undo').addEventListener('click', undo);
+el('step').addEventListener('click', () => {
+  if (model?.stepOnce()) { updateHud(); draw(); }
+});
+el('speed').addEventListener('click', () => {
+  speed = speed === 1 ? 2 : speed === 2 ? 4 : 1;
+  updateHud();
+});
 el('result-retry').addEventListener('click', restart);
 el('result-close').addEventListener('click', () => { el('result').hidden = true; });
 window.addEventListener('keydown', event => {
@@ -231,13 +339,36 @@ window.addEventListener('keydown', event => {
   if (!el('result').hidden) return;
   if (event.code === 'Space') { event.preventDefault(); model.togglePause(); updateHud(); }
   if (event.key.toLowerCase() === 'r') restart();
+  if (event.key.toLowerCase() === 'z' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    undo();
+  }
+  if (event.key === '.' && model?.stepOnce()) { updateHud(); draw(); }
 });
 window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
 async function boot() {
   try {
     spriteCache = await loadArt();
     model = new LixGameModel(level, spriteCache);
+    el('level-title').textContent = level.title;
+    el('mode-tag').textContent = levelId === 'little-bridge'
+      ? '🌿 EASY PRACTICE · ONE LITTLE BRIDGE'
+      : '🧪 HARD PRACTICE · ORIGINAL LIX COMMUNITY LEVEL';
+    el('level-intro').textContent = levelId === 'little-bridge'
+      ? 'A single small gap, three builders and no nasty steel ceilings. Follow the BUILD HERE arrow to cross safely.'
+      : 'The original CC0 puzzle by mobius: six gaps, five builders, and a much trickier route.';
+    el('credit').textContent = levelId === 'little-bridge'
+      ? 'Original introductory level by Daily Lemming. CC0 artwork from Lix.'
+      : 'Original Lix level by mobius. Level and artwork made available under CC0.';
+    el('source-link').href = levelId === 'little-bridge'
+      ? 'https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt'
+      : 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/6gaps.txt';
+    document.title = level.title + ' | Daily Lemming';
+    say(levelId === 'little-bridge'
+      ? 'Press Start, then assign a builder near the BUILD HERE arrow. You have three attempts.'
+      : 'Five builders. Six gaps. One tiny walker. Can you find the route?');
     el('loading').hidden = true;
+    showPractice();
     updateHud(); draw();
     animation = requestAnimationFrame(loop);
   } catch (error) {

@@ -60,11 +60,12 @@ test('builder creates collision terrain and is limited by skill inventory', () =
   const x = u.x, y = u.y;
   assert.equal(game.assignBuilder(0), true);
   assert.equal(game.remaining.builder, 4);
-  for (let i = 0; i < 6; i++) game.tick();
+  for (let i = 0; i < 16; i++) game.tick();
   assert.equal(u.state, 'builder');
   assert.ok(u.x > x && u.y < y);
-  assert.ok(game.terrain.solid(Math.round(x + 3), Math.round(y - 3)));
-  assert.equal(game.assignBuilder(0), false);
+  assert.ok(game.terrain.solid(Math.round(x + 3), Math.round(y + 2)));
+  assert.equal(game.assignBuilder(0), true, 'builder chaining can queue another assignment');
+  assert.equal(game.units[0].queuedBuilders, 1);
   game.reset();
   assert.equal(game.remaining.builder, 5);
   assert.equal(game.spawned, 0);
@@ -113,4 +114,132 @@ test('Lix sprite sheet dimensions do not push hatch spawn into the middle of map
   assert.equal(unit.state, 'walking');
   assert.equal(model.saved, 0);
   assert.equal(model.lost, 0);
+});
+
+test('builders cannot create mid-air platforms or consume skill while falling', () => {
+  const { level, images } = sample(false);
+  level.tiles = level.tiles.filter(t => t.kind !== 'terrain');
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let n = 0; n < 3; n++) model.tick();
+  assert.equal(model.units[0].state, 'spawning');
+  assert.equal(model.assignBuilder(0), false);
+  assert.equal(model.remaining.builder, 5);
+});
+test('walking off a gap enters a vertical fall instead of hovering over water', () => {
+  const { level, images } = sample(true);
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  let falling = false, x = null, oldY = null;
+  for (let i = 0; i < 180 && !model.done; i++) {
+    model.tick();
+    const u = model.units[0];
+    if (u?.state === 'falling') {
+      if (!falling) { falling = true; x = u.x; oldY = u.y; }
+      else {
+        assert.equal(u.x, x, 'a standard Lix fall has no horizontal motion');
+        assert.ok(u.y > oldY, 'the foot must descend every fall update');
+        break;
+      }
+    }
+  }
+  assert.equal(falling, true);
+});
+test('a builder places no more than 12 short steps and rises 2px per brick', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 12; i++) model.tick();
+  const u = model.units[0];
+  assert.equal(model.assignBuilder(0), true);
+  const startY = u.y;
+  for (let i = 0; i < 200; i++) model.tick();
+  const bricks = model.events.filter(e => e.type === 'brick');
+  assert.equal(bricks.length, 12);
+  assert.equal(bricks.at(-1).y, Math.round(startY - 24));
+  assert.equal(model.assigned, 1);
+});
+
+test('frame stepping progresses one fixed Lix physics update while remaining paused', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  assert.equal(model.paused, true);
+  assert.equal(model.stepOnce(), true);
+  assert.equal(model.ticks, 1);
+  assert.equal(model.spawned, 1);
+  assert.equal(model.started, true);
+  assert.equal(model.paused, true);
+  assert.equal(model.stepOnce(), true);
+  assert.equal(model.ticks, 2);
+  model.togglePause();
+  assert.equal(model.stepOnce(), false, 'frame stepping disabled during live play');
+});
+test('grounded walker can queue a builder assignment while paused', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 15; i++) model.tick();
+  model.togglePause();
+  assert.equal(model.paused, true);
+  assert.equal(model.units[0].state, 'walking');
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.paused, true);
+  assert.equal(model.remaining.builder, 4);
+});
+
+test('queued builder assignments extend beyond the normal twelve bricks', () => {
+  const { level, images } = sample();
+  level.tiles = level.tiles.map(tile =>
+    tile.kind === 'goal' ? { ...tile, x: 222 } : tile);
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 15; i++) model.tick();
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.remaining.builder, 3);
+  assert.equal(model.units[0].queuedBuilders, 1);
+  for (let i = 0; i < 460 && !model.done; i++) model.tick();
+  assert.equal(model.events.filter(e => e.type === 'builder-continued').length, 1);
+  assert.equal(model.events.filter(e => e.type === 'brick').length, 24);
+  assert.equal(model.units[0].queuedBuilders, 0);
+  assert.equal(model.assigned, 2);
+});
+
+test('undo restores bridge pixels, spent builder, position and elapsed time', () => {
+  const { level, images } = sample(true);
+  const game = new LixGameModel(level, images);
+  game.togglePause();
+  for (let i = 0; i < 12; i++) game.tick();
+  const x = game.units[0].x, y = game.units[0].y, tick = game.ticks;
+  const original = game.terrain.pixels.slice();
+  assert.equal(game.assignBuilder(0), true);
+  for (let i = 0; i < 40; i++) game.tick();
+  assert.equal(game.undoAvailable, true);
+  assert.equal(game.undoBuilder(), true);
+  assert.equal(game.ticks, tick);
+  assert.equal(game.units[0].x, x);
+  assert.equal(game.units[0].y, y);
+  assert.equal(game.units[0].state, 'walking');
+  assert.equal(game.remaining.builder, 5);
+  assert.equal(game.assigned, 0);
+  assert.equal(game.paused, true);
+  assert.deepEqual(game.terrain.pixels, original);
+  assert.equal(game.undoBuilder(), false);
+});
+test('undo queued builder restores queue without cancelling active build', () => {
+  const { level, images } = sample();
+  const game = new LixGameModel(level, images);
+  game.togglePause();
+  for (let i = 0; i < 12; i++) game.tick();
+  assert.equal(game.assignBuilder(0), true);
+  for (let i = 0; i < 25; i++) game.tick();
+  const before = game.units[0].buildSteps;
+  assert.equal(game.assignBuilder(0), true);
+  assert.equal(game.units[0].queuedBuilders, 1);
+  assert.equal(game.undoBuilder(), true);
+  assert.equal(game.units[0].state, 'builder');
+  assert.equal(game.units[0].buildSteps, before);
+  assert.equal(game.units[0].queuedBuilders, 0);
+  assert.equal(game.remaining.builder, 4);
+  assert.equal(game.history.length, 1);
 });
