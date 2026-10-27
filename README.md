@@ -53,7 +53,7 @@ for optional automatic deployment and phone QA.
 
 ## Hosting
 
-GitHub Actions tests and builds each change. The Pages workflow deploys `master`, if GitHub Pages is configured to use **GitHub Actions** as its source in repository Settings → Pages. Preview locally with `npm run dev`; no server/database credentials are required.
+GitHub Actions tests and builds each change. Cloudflare deploys on pushes to `master` once scoped Cloudflare credentials are added as repository Actions secrets. The optional GitHub Pages workflow is **manual-only** because Pages has not yet been enabled for this repository; enable GitHub Pages with **GitHub Actions** as its source in Settings → Pages before using it. Preview locally with `npm run dev`; no game backend credentials are needed.
 
 ## Lix community-level integration (in progress)
 
