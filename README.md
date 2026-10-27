@@ -69,3 +69,22 @@ npm run dev
 ```
 
 Then open `http://localhost:5173/play-lix.html`. The daily home page and Level Lab also link to the experiment.
+
+## Lix physics and controls: experimental v0.4
+
+The `feat/lix-physics-polish` branch refines the existing CC0 "6 Gaps, 5 Builders" experiment rather than replacing it or changing the global daily challenge.
+
+- Fixed-timestep **15 Lix physics updates/second**, matching the original game's normal play rate.
+- Builder assignments create up to 12 short bricks; each rises 2 map pixels. This removes the implausibly huge staircases of the earlier alpha.
+- Standing, wall turns, short descents and vertical falling use individual pixel collision checks; assign-builder while airborne is rejected.
+- Pause to plan, tap to build on desktop or phone, advance by one frame (`.` on keyboard), speed up, restart.
+- While paused, an approximate translucent projection shows where a new builder's staircase would go.
+- A separate browser-local practice personal best ranks successful runs by fewest builders then shortest completion time. This **does not affect UTC daily streaks**.
+
+### Deterministic real-asset check
+
+After `npm run lix:vendor:first`, execute `npm run test:real-lix`. It reads the actual pinned Lix PNGs (including multi-frame gadget sheets), constructs the pixel collision map and checks that the walker spawns, lands on the real terrain, and eventually fails if no builder skill is assigned. A simulation trace is written to `generated/lix/first-level-simulation.json`.
+
+`npm test` still covers the unit-level physics, pause stepping, builder restrictions and practice records. The GitHub Actions workflow runs both suites and the Vite production build.
+
+**Still an experiment:** faithfully replaying and solving the original Lix puzzle with exactly the same outcomes has **not** been established. Lix's native state machine, all terrain additions, and some gadget trigger semantics remain approximated. The original human-played 3-builder win happened in the earlier permissive engine and should not be treated as a proof for the recalibrated builder physics. The imported candidates are still excluded from the shared daily rotation until fully verified.
