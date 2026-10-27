@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101728">
-<meta name="description" content="Play a real community-made Lix puzzle with Daily Lemming's experimental browser engine.">
+<meta name="description" content="Play Little Bridge and explore original Lix community puzzles in Daily Lemming.">
 <title>Little Bridge | Daily Lemming</title>
 <link rel="stylesheet" href="/src/styles.css">
 <style>
@@ -35,6 +35,10 @@
  .easy-mode #step,.easy-mode #speed{display:none}
  .experiment-warning{font-size:13px;line-height:1.55;font-weight:700;padding:11px 12px;border-radius:9px;background:#5b332a;color:#ffe4ad;margin:12px 0 0}
  .experiment-warning[hidden]{display:none}
+ .level-select{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 18px;color:#b5c6dd;font-size:13px;font-weight:700}
+ .level-select select{flex:1;min-width:220px;max-width:540px;background:#283851;color:#f4fff8;border:1px solid #536985;border-radius:9px;padding:11px;font:inherit;min-height:44px}
+ .compat-warning{border:1px solid #ac8b58;border-radius:10px;background:#413422;color:#ffe1b2;padding:12px 15px;font-size:13px;line-height:1.6;margin:10px 0 20px}
+ .compat-warning[hidden]{display:none}
  .experiment-hint{min-height:22px}
  @media(max-width:660px){.experiment-buttons button{flex:1 1 42%}.experiment-buttons button#restart{flex:1 1 100%}}
  .experiment-hint{font-size:13px;line-height:1.6;color:#bccde4;margin:13px 3px 0}
@@ -56,11 +60,21 @@
 <main class="experiment">
  <nav class="experiment-nav">
   <a href="./index.html">← Daily Lemming</a>
-  <small><a href="./play-lix.html">Easy level</a> · <a href="./play-lix.html?level=6gaps">Harder original Lix level</a></small>
+  <small><a href="./sprites.html">Lix animations</a> · <a href="./lab.html">Level Lab</a></small>
  </nav>
  <div class="tag" id="mode-tag">🌿 EASY PRACTICE · ONE LITTLE BRIDGE</div>
  <h1 id="level-title">Little Bridge</h1>
  <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
+ <label class="level-select" for="level-picker">
+  <span>Choose a level</span>
+  <select id="level-picker" aria-label="Choose a practice or imported Lix level">
+   <option value="little-bridge">🌱 Little Bridge · verified tutorial</option>
+   <option value="pitfall">🧩 Pitfall · original Lix experiment</option>
+   <option value="building-block-maze">🏰 Building Block Maze · original Lix experiment</option>
+   <option value="6gaps">⚒️ 6 Gaps, 5 Builders · hard experiment</option>
+  </select>
+ </label>
+ <p class="compat-warning" id="compat-warning" role="status" hidden></p>
  <section aria-label="Playable puzzle">
   <div class="experiment-stats">
    <div><span>RESCUED</span><b id="saved">0/1</b></div>
@@ -86,7 +100,7 @@
   </div>
  </section>
  <div class="experiment-help">
-  <article><h2>🏆 Practice personal best</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
+  <article><h2>🏆 Level practice record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
   <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. You get three builders, and Undo (Ctrl/Cmd+Z) lets you retry. Press Space to pause, or R to restart.</p></article>
   <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
