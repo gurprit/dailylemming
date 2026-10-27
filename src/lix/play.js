@@ -17,6 +17,7 @@ const levelId = new URLSearchParams(location.search).get('level') === '6gaps'
 const level = levelId === '6gaps'
   ? parseLix(trickyLevel, { sourcePath: 'levels/single/lemforum/Lovely/6gaps.txt' })
   : parseLix(friendlyLevel, { sourcePath: 'content/original/little-bridge.txt' });
+document.body.classList.toggle('easy-mode', levelId === 'little-bridge');
 let model = null;
 let spriteCache = null;
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
@@ -350,6 +351,9 @@ async function boot() {
     spriteCache = await loadArt();
     model = new LixGameModel(level, spriteCache);
     el('level-title').textContent = level.title;
+    el('mode-tag').textContent = levelId === 'little-bridge'
+      ? '🌿 EASY PRACTICE · ONE LITTLE BRIDGE'
+      : '🧪 HARD PRACTICE · ORIGINAL LIX COMMUNITY LEVEL';
     el('level-intro').textContent = levelId === 'little-bridge'
       ? 'A single small gap, three builders and no nasty steel ceilings. Follow the BUILD HERE arrow to cross safely.'
       : 'The original CC0 puzzle by mobius: six gaps, five builders, and a much trickier route.';
