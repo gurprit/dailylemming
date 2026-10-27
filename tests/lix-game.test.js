@@ -423,3 +423,71 @@ test('two original Lix hatches alternate entrants deterministically', () => {
   for(let i=0;i<15&&model.spawned<2;i++)model.tick();
   assert.deepEqual(model.events.filter(x=>x.type==='spawn').map(x=>x.x),starts.slice(0,2));
 });
+
+test('native Lix unlimited Walker and Jumper inventories never decrement', () => {
+  const {level,images}=sample();
+  level.skills={WALKER:-1,JUMPER:-1};
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let i=0;i<13;i++)m.tick();
+  assert.equal(m.remaining.walker,-1);
+  assert.equal(m.remaining.jumper,-1);
+  const u=m.units[0],heading=u.vx;
+  assert.equal(m.assignSkill('walker',0),true);
+  assert.equal(u.vx,-heading);
+  assert.equal(m.remaining.walker,-1);
+  assert.equal(m.assignSkill('jumper',0),true);
+  assert.equal(u.state,'jumping');
+  for(let i=0;i<20&&!m.done;i++)m.tick();
+  assert.equal(m.remaining.jumper,-1);
+  m.reset();
+  assert.equal(m.remaining.jumper,-1);
+});
+test('native Lix platformer paints flat terrain and advances horizontally', () => {
+  const {level,images}=sample();
+  level.skills={PLATFORMER:2};
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let i=0;i<13;i++)m.tick();
+  const u=m.units[0],firstY=u.y,firstX=u.x;
+  assert.equal(m.assignSkill('platformer',0),true);
+  for(let i=0;i<9;i++)m.tick();
+  assert.ok(u.x>firstX);
+  assert.equal(u.y,firstY);
+  assert.ok(m.events.some(e=>e.type==='platform'));
+  assert.equal(m.remaining.platformer,1);
+});
+test('runner, climber and floater are permanent traits with finite inventory and long fall safety', () => {
+  const {level,images}=sample();
+  level.skills={RUNNER:1,CLIMBER:1,FLOATER:1};
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let i=0;i<13;i++)m.tick();
+  const u=m.units[0];
+  for(const skill of ['runner','climber','floater']){
+    assert.equal(m.assignSkill(skill,0),true,skill);
+    assert.equal(u[skill],true);
+    assert.equal(m.remaining[skill],0);
+  }
+  const x=u.x;m.tick();assert.ok(u.x-x>=4);
+  u.state='falling';u.fall=140;u.vy=8;u.y=205;
+  m.tick();
+  assert.equal(u.state,'walking');
+  assert.equal(m.lost,0);
+  m.reset();
+  assert.equal(m.remaining.runner,1);
+});
+test('Climber scales a wall rather than turning around',()=>{
+  const {level,images}=sample();
+  level.skills={CLIMBER:1};
+  level.tiles.push(item('wall','terrain',43,160));
+  images.set('wall.png',tile(25,64));
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let i=0;i<13;i++)m.tick();
+  const u=m.units[0];
+  assert.equal(m.assignSkill('climber',0),true);
+  for(let i=0;i<90&&!m.done;i++)m.tick();
+  assert.ok(m.events.some(e=>e.type==='climbing'));
+  assert.ok(m.events.some(e=>e.type==='climbed'));
+});
