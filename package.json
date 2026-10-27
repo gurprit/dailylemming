@@ -16,7 +16,8 @@
     "lix:inspect:characters": "node scripts/inspect-lix-characters.mjs",
     "test:community-lix": "node scripts/verify-community-levels.mjs",
     "test:double-trouble": "node scripts/verify-double-trouble.mjs",
-    "test:tunnel-time": "node scripts/verify-tunnel-time.mjs"
+    "test:tunnel-time": "node scripts/verify-tunnel-time.mjs",
+    "test:dig-for-freedom": "node scripts/verify-dig-for-freedom.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",
