@@ -54,13 +54,31 @@ export function inspectCharacterAtlas(source) {
   return { layout, rows };
 }
 
+// LixD Blocker.perform() plays the start-up frames 0..19 once, then
+// loops frames 4..19. The row also contains special tail/blank frames
+// (including frame 20) that are NOT part of the idle cycle.
+export function frameColumnForActivity(activity, tick, indices) {
+  if (!indices?.length) return null;
+  const frame = Math.max(0, Math.floor(tick));
+  if (activity === 'blocker') {
+    const native = frame < 20 ? frame : 4 + ((frame - 20) % 16);
+    if (indices.includes(native)) return native;
+    // Resist accidentally sampling empty frame 20 or the non-looping
+    // release frames when a partial or custom sheet is loaded.
+    const safe = indices.filter(index => index >= 0 && index <= 19);
+    return safe.length ? safe[frame % safe.length] : null;
+  }
+  return indices[frame % indices.length];
+}
+
 export function drawActivitySprite(ctx, atlas, activity, tick, {
   x = 0, y = 0, facingLeft = false, scale = 1
 } = {}) {
   const row = atlas?.rows.get(activity);
   if (!row?.indices.length) return false;
   const { width: w, height: h } = atlas.layout;
-  const col = row.indices[Math.floor(Math.max(0, tick)) % row.indices.length];
+  const col = frameColumnForActivity(activity, tick, row.indices);
+  if (col === null) return false;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(facingLeft ? -scale : scale, scale);
@@ -85,6 +103,10 @@ export function activityForUnit(unit) {
 }
 export function frameColumnForUnit(unit, tick, indices) {
   if (!indices?.length) return null;
+  // A Blocker has its own frame counter. Restart the cycle on assignment,
+  // then loop 4..19, matching LixD physics.job.blocker.Blocker.perform().
+  if (unit.state === 'blocker')
+    return frameColumnForActivity('blocker', unit.actionTicks || 0, indices);
   // Lix's builder animation advances once per physics tick; builder starts
   // around source frame 6. Walkers also advance on native 15Hz physics ticks.
   const offset = unit.state === 'exiting'
