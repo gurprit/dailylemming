@@ -88,3 +88,5 @@ After `npm run lix:vendor:first`, execute `npm run test:real-lix`. It reads the 
 `npm test` still covers the unit-level physics, pause stepping, builder restrictions and practice records. The GitHub Actions workflow runs both suites and the Vite production build.
 
 **Still an experiment:** faithfully replaying and solving the original Lix puzzle with exactly the same outcomes has **not** been established. Lix's native state machine, all terrain additions, and some gadget trigger semantics remain approximated. The original human-played 3-builder win happened in the earlier permissive engine and should not be treated as a proof for the recalibrated builder physics. The imported candidates are still excluded from the shared daily rotation until fully verified.
+
+Lix's queued-builder action is also supported: select a unit that is already building to spend another builder and continue its staircase without interruption. The heuristic route-search artifact is diagnostic only; it does not certify solvability or original-engine parity.
