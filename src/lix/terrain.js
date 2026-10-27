@@ -79,6 +79,24 @@ export class PixelTerrain {
       if (!this.steel[i]) this.pixels.fill(0, i * 4, i * 4 + 4);
     }
   }
+  // Circular blast, matching the pixel-art silhouette of an explosion.
+  // Steel remains indestructible. Returns the number of excavated pixels.
+  digCircle(cx, cy, radius) {
+    const r = Math.max(0, Math.floor(radius));
+    const left = Math.max(0, Math.floor(cx - r));
+    const right = Math.min(this.width - 1, Math.ceil(cx + r));
+    const top = Math.max(0, Math.floor(cy - r));
+    const bottom = Math.min(this.height - 1, Math.ceil(cy + r));
+    let removed = 0;
+    for (let y = top; y <= bottom; y++) for (let x = left; x <= right; x++) {
+      if ((x - cx) ** 2 + (y - cy) ** 2 > r ** 2) continue;
+      const i = this.index(x, y);
+      if (i < 0 || this.steel[i] || this.pixels[i * 4 + 3] < 96) continue;
+      this.pixels.fill(0, i * 4, i * 4 + 4);
+      removed++;
+    }
+    return removed;
+  }
   async toImageData() {
     return new ImageData(new Uint8ClampedArray(this.pixels), this.width, this.height);
   }
