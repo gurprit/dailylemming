@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "npm run lix:vendor:first && vite build",
     "preview": "vite preview",
     "test": "node --test",
     "lix:audit": "node scripts/audit-lix.mjs",
@@ -22,10 +22,13 @@
     "test:turnaround": "node scripts/verify-turnaround.mjs",
     "test:bridge-brigade": "node scripts/verify-bridge-brigade.mjs",
     "test:official-tutorials": "node scripts/verify-official-tutorials.mjs",
-    "test:mystery-levels": "node scripts/verify-mystery-levels.mjs"
+    "test:mystery-levels": "node scripts/verify-mystery-levels.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "preview:worker": "npm run build && wrangler dev"
   },
   "devDependencies": {
     "vite": "^6.3.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "wrangler": "^4.0.0"
   }
 }
