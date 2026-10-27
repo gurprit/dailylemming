@@ -495,6 +495,7 @@ function restart() {
   canvas.style.cursor = 'crosshair';
   el('result').hidden = true;
   el('result-share').hidden = true;
+  el('result-share').textContent = 'Share daily result ↗';
   say(config.hint);
   updateHud();
   draw();
@@ -553,7 +554,8 @@ for (const skill of Object.keys(SKILL_LABELS)) {
   });
 }
 el('level-picker').addEventListener('change', event => {
-  const id = resolveLevelId(event.target.value);
+  const id = event.target.value === '__daily__'
+    ? '__daily__' : resolveLevelId(event.target.value);
   window.location.href = id === '__daily__' ? './index.html'
     : './index.html?level=' + encodeURIComponent(id);
 });
@@ -617,7 +619,19 @@ window.addEventListener('keydown', event => {
   }
   if (event.key === '.' && model?.stepOnce()) { updateHud(); draw(); }
 });
-window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
+// Keep the tab honest when somebody plays across a 00:00 UTC reset.
+function checkDailyReset() {
+  if (!dailyMode || utcDay() === daily.day) return;
+  if (model && !model.done) model.paused = true;
+  say('A new UTC daily puzzle is ready. Reload to play today\'s challenge!');
+  el('daily-date').textContent = 'NEW CHALLENGE AVAILABLE · RELOAD';
+}
+window.addEventListener('focus', checkDailyReset);
+const resetPoll = window.setInterval(checkDailyReset, 60_000);
+window.addEventListener('pagehide', () => {
+  cancelAnimationFrame(animation);
+  window.clearInterval(resetPoll);
+});
 async function boot() {
   try {
     // Original character art is optional; retain the hand-drawn figure
