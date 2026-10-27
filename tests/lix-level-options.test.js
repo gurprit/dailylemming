@@ -56,7 +56,7 @@ test('mystery picks are date-deterministic and nonrepeating within each rotation
   const ids=Array.from({length:size},(_,i)=>mysteryLevel(
     new Date(blockStart+i*86400000).toISOString().slice(0,10)).levelId);
   assert.deepEqual(new Set(ids),new Set(FEATURED_COMMUNITY_LEVELS));
-  const nextBlock=Array.from({length:10},(_,i)=>mysteryLevel(
+  const nextBlock=Array.from({length:size},(_,i)=>mysteryLevel(
     new Date(blockStart+(size+i)*86400000).toISOString().slice(0,10)).levelId);
   assert.deepEqual(new Set(nextBlock),new Set(FEATURED_COMMUNITY_LEVELS));
   assert.notDeepEqual(ids,nextBlock,'blocks should shuffle differently');
