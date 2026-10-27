@@ -19,7 +19,7 @@
  .experiment-stats span{display:block;color:#99acc9;letter-spacing:1px;font-size:10px;font-weight:700}
  .experiment-stats b{display:block;font-size:22px;margin-top:4px}
  .experiment-view{position:relative;background:#182642;border:1px solid #425577;border-top:0;min-height:280px;overflow:hidden}
- .experiment-view canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;touch-action:manipulation;cursor:crosshair;image-rendering:pixelated}
+ .experiment-view canvas{display:block;width:100%;height:auto;aspect-ratio:auto;touch-action:manipulation;cursor:crosshair;image-rendering:pixelated}
  .experiment-view .busy{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center;padding:20px;color:#d1f9df;background:#15203ae8}
  .experiment-view .busy[hidden]{display:none}
  .experiment-actions{padding:15px;background:#19253e;border:1px solid #425577;border-top:0;border-radius:0 0 16px 16px}
@@ -102,7 +102,7 @@
  <div class="experiment-help">
   <article><h2>🏆 Level practice record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
   <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. You get three builders, and Undo (Ctrl/Cmd+Z) lets you retry. Press Space to pause, or R to restart.</p></article>
-  <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+  <article><h2>About this experiment</h2><p>Little Bridge is verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because their full original skill sets are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
  </div>
  <p style="font-size:13px;color:#b5c6dd;margin:20px 0 5px"><span id="art-status">Loading Lix character sprites…</span> · <a href="./sprites.html">View all character animations</a></p>
  <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>
