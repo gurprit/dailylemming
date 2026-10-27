@@ -14,6 +14,7 @@ import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
+import { unitAtPoint, drawUnitTarget } from './targeting.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -44,6 +45,7 @@ const SKILL_LABELS = {
 };
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
+let pointerPosition = null;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
 const ground = document.createElement('canvas');
@@ -266,6 +268,12 @@ function draw() {
     obstacle ||= drawBuilderPreview(u);
     paintCharacter(u);
   }
+  const hovered = pointerPosition && !model.done
+    ? unitAtPoint(model.units, pointerPosition.x, pointerPosition.y,
+      selectedSkill, model.remaining, pointerPosition.radius)
+    : -1;
+  canvas.style.cursor = hovered >= 0 ? 'none' : 'crosshair';
+  if (hovered >= 0) drawUnitTarget(ctx, model.units[hovered]);
   const warning = el('preview-warning');
   warning.hidden = !obstacle;
   if (obstacle) warning.textContent = obstacle.steel
@@ -378,21 +386,35 @@ function restart() {
   model.reset();
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
+  pointerPosition = null;
+  canvas.style.cursor = 'crosshair';
   el('result').hidden = true;
   say(config.hint);
   updateHud();
   draw();
 }
+function pointerPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * canvas.width / rect.width,
+    y: (event.clientY - rect.top) * canvas.height / rect.height,
+    radius: Math.max(25, 36 * canvas.width / rect.width)
+  };
+}
+canvas.addEventListener('pointermove', event => {
+  // Only mouse and pen pointers have a persistent hover state.
+  if (event.pointerType === 'touch') return;
+  pointerPosition = pointerPoint(event);
+});
+canvas.addEventListener('pointerleave', () => {
+  pointerPosition = null;
+  canvas.style.cursor = 'crosshair';
+});
 canvas.addEventListener('pointerdown', event => {
   if (!model || model.done) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = (event.clientX - rect.left) * canvas.width / rect.width;
-  const y = (event.clientY - rect.top) * canvas.height / rect.height;
-  // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
-  const radius = Math.max(27, 40 * canvas.width / rect.width);
-  const index = model.units.findIndex(u =>
-    (u.state === 'walking' || (selectedSkill === 'builder' && u.state === 'builder'))
-    && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
+  const point = pointerPoint(event);
+  const index = unitAtPoint(model.units, point.x, point.y,
+    selectedSkill, model.remaining, point.radius);
   if (index < 0) {
     say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
