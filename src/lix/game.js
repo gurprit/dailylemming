@@ -58,6 +58,15 @@ export class LixGameModel {
     if (this.paused) this.started = true;
     this.paused = !this.paused;
   }
+  stepOnce() {
+    // Pause-and-step is useful for precise, touch-friendly skill timing.
+    if (!this.paused || this.done) return false;
+    this.started = true;
+    this.paused = false;
+    this.tick();
+    this.paused = true;
+    return true;
+  }
   assignBuilder(index = 0) {
     const u = this.units[index];
     // No instant mid-air platform creation, no assigning while already building.
