@@ -9,7 +9,24 @@ export class DirtParticles {
   }
   clear() { this.items.length = 0; }
   burst(type, x, y, facing = 1) {
-    if (!['dug','mined','bashed'].includes(type)) return;
+    if (!['dug','mined','bashed','exploded'].includes(type)) return;
+    if (type === 'exploded') {
+      const FIRE = ['#fff8ca','#fff0a2','#ffca54','#ff9a42','#ed603b','#82706f'];
+      for (let n = 0; n < 52; n++) {
+        const angle = n * Math.PI * (3-Math.sqrt(5));
+        const velocity = 40 + this.random() * 150;
+        const lifespan = .24 + this.random() * .55;
+        this.items.push({
+          x: x + Math.cos(angle) * 2, y: y - 10 + Math.sin(angle) * 2,
+          vx: Math.cos(angle) * velocity, vy: Math.sin(angle) * velocity - 25,
+          life: lifespan, maxLife: lifespan,
+          size: this.random() < .5 ? 2 : 4, color: FIRE[n % FIRE.length]
+        });
+      }
+      if (this.items.length > this.max)
+        this.items.splice(0, this.items.length - this.max);
+      return;
+    }
     const count = type === 'dug' ? 8 : type === 'mined' ? 10 : 8;
     for (let n = 0; n < count; n++) {
       const r = this.random, sideways = r() * 2 - 1;
