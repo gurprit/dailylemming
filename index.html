@@ -34,6 +34,21 @@
  .experiment-buttons button.primary{background:#86e7ae;color:#123448;border:0}
  .experiment-buttons button:focus-visible{outline:3px solid #c3f9d5;outline-offset:3px}
  .experiment-view canvas{user-select:none;-webkit-user-select:none}
+ .mobile-map-controls{display:none}
+ @media(max-width:660px){
+  .mobile-map-controls{display:flex;gap:12px;align-items:center;justify-content:space-between;
+    padding:9px 12px;background:#152238;border:1px solid #425577;border-bottom:0;
+    color:#cad8ea;font-size:12px;line-height:1.35}
+  .mobile-map-controls button{flex:none;min-height:44px;padding:8px 12px;border-radius:8px;
+    border:1px solid #86e7ae;background:#244437;color:#f4fff8;font-weight:750}
+  .experiment-view{min-height:230px;height:min(58vh,460px);overflow:auto;
+    overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .experiment-view canvas{width:max(100%,var(--map-native-width,640px));max-width:none;
+    height:auto;touch-action:pan-x pan-y}
+  .experiment-view.is-fit{min-height:0;height:auto;max-height:none}
+  .experiment-view.is-fit canvas{width:100%}
+ }
+
  .experiment-buttons button#step{border-color:#89aeac;background:#21433f;color:#ddfff0}
  .experiment-buttons button#undo{border-color:#e5b06f;background:#3a3341;color:#ffe0ba}
  .easy-mode #step,.easy-mode #speed{display:none}
@@ -109,7 +124,11 @@
    <div><span>TIME</span><b id="timer">00:00</b></div>
    <div><span>STATE</span><b id="state">READY</b></div>
   </div>
-  <div class="experiment-view">
+  <div class="mobile-map-controls" aria-label="Mobile level view">
+  <span>Swipe to explore the level. Tap a Lix to assign a skill.</span>
+  <button id="map-zoom" type="button" aria-pressed="true">↔ Fit map</button>
+ </div>
+ <div class="experiment-view">
    <canvas id="playfield" width="512" height="288" role="img" aria-label="A walking creature, one small gap, a builder skill and exit"></canvas>
    <div class="busy" id="loading" role="status">Loading original CC0 level graphics and building terrain collision map…</div>
   </div>
