@@ -40,7 +40,7 @@
     color:#cad8ea;font-size:12px;line-height:1.35}
   .mobile-map-controls button{flex:none;min-height:44px;padding:8px 12px;border-radius:8px;
     border:1px solid #86e7ae;background:#244437;color:#f4fff8;font-weight:750}
-  .experiment-view{min-height:230px;height:min(58vh,460px);overflow:auto;
+  .experiment-view{min-height:0;height:min(58vh,460px,var(--map-height,460px));overflow:auto;
     overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .experiment-view canvas{width:max(100%,var(--map-native-width,640px));max-width:none;
     height:auto;touch-action:none}
@@ -73,7 +73,7 @@
  .experiment-result h2{font-size:29px;margin:8px 0 5px}
  .experiment-result p{line-height:1.6;color:#bed0e1}
  .experiment-result button{margin:6px 0;width:100%;min-height:46px;border-radius:9px;border:1px solid #4c6481;background:#2d405a;color:#f5fcfe;font-weight:800}
- @media(max-width:660px){.experiment{padding:10px 10px 28px}.experiment-stats{padding:12px 6px}.experiment-stats b{font-size:18px}.experiment-help{grid-template-columns:1fr}.experiment-buttons button{flex:1 1 40%;font-size:12px}.experiment-view{min-height:175px}}
+ @media(max-width:660px){.experiment{padding:10px 10px 28px}.experiment-stats{padding:12px 6px}.experiment-stats b{font-size:18px}.experiment-help{grid-template-columns:1fr}.experiment-buttons button{flex:1 1 40%;font-size:12px}.experiment-view{min-height:0}}
 </style>
 <script type="module" src="/src/lix/play.js"></script>
 </head>
