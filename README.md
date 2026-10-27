@@ -264,3 +264,23 @@ npm run lix:vendor:first
 npm test
 npm run dev
 ```
+
+## Ten curated original Lix levels and the additional skill actions
+
+The homepage's long practice-level picker has been replaced by **exactly ten original CC0 Lix basic tutorials**: Builders (Simon), Bashers (Simon), Diggers (Simon), Miners (Simon/Wuzzy), Blockers (Simon), Platformers (Wuzzy/Simon), Jumpers (geoo), Runners (Simon), Walkers Turn (Wuzzy), and Climbers and Floaters (Rubix/Simon). The level sources are preserved at `content/lix/tutorial/` from the pinned upstream `SimonN/LixD` commit, with creator credits and source links.
+
+**These are curated official introductory levels, not an actual popularity ranking.** Lix publishes its level collection, but no authoritative most-played chart was found to justify claiming a ranked top ten. The selection privileges recognizable, beginner-oriented originals that cover the Lix skills.
+
+All skills required by these ten maps now have working browser-adapter actions and matching original sprite rows: Builder, Basher, Digger, Miner, Blocker, Platformer, Jumper, Walker, Runner, Climber and Floater. The native Lix unlimited-skill convention (`-1`, e.g. Jumpers and Walkers Turn) is supported and displayed as `∞`. Permanent traits for Runner/Climber/Floater, diagonal/flat construction, jumping and turning are included. The art and physics are **approximations** of native Lix, not frame-perfect equivalents, and a smoke test only verifies map loading, terrain, spawning and required inventory, **not complete winning routes**. These originals are therefore not yet eligible for the shared daily pool.
+
+The shared verified daily mode remains accessible as its own choice on the homepage and still uses the seven existing solution-tested Daily Lemming maps. All previous maps remain in the repo for testing, but no longer crowd the dropdown.
+
+```bash
+git switch master
+git pull --ff-only origin master
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:official-tutorials
+npm run dev
+```
