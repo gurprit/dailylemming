@@ -76,3 +76,42 @@ if (!final.done || final.spawned !== 1)
 if (final.won)
   throw new Error('Level can be completed without assigning any builders');
 console.log('PASS: real PNG terrain, hatch frame, foot collision, movement and death');
+
+// The friendly default must have a deterministic real-assets winning route.
+// This deliberately tests the exact level PNGs and game physics shipped to players.
+const friendly = parseLix(await readFile(path.join(root, 'content/original/little-bridge.txt'), 'utf8'));
+const friendlyAssets = sourceAssets(friendly);
+for (const asset of friendlyAssets)
+  if (!assets.has(asset)) throw new Error('Tutorial asset missing from local vendor pack: ' + asset);
+const attempted = [];
+let solution = null;
+for (let builderX = 132; builderX <= 184; builderX += 2) {
+  const attempt = new LixGameModel(friendly, assets);
+  attempt.togglePause();
+  let assigned = false;
+  for (let t = 0; t < 1500 && !attempt.done; t++) {
+    const walker = attempt.units[0];
+    if (!assigned && walker?.state === 'walking' && walker.grounded
+        && walker.vx > 0 && walker.x >= builderX) {
+      assigned = attempt.assignBuilder(0);
+    }
+    attempt.tick();
+  }
+  const result = attempt.snapshot();
+  attempted.push({ builderX, assigned, result });
+  if (result.won) {
+    solution = { builderX, result, finalX: attempt.units[0]?.x,
+      events: attempt.events.filter(e => ['assigned', 'brick', 'landed', 'saved'].includes(e.type)) };
+    break;
+  }
+}
+await writeFile(path.join(root, 'generated/lix/little-bridge-proof.json'),
+  JSON.stringify({ level: friendly.title, solution, attempted }, null, 2) + '\n');
+console.log('Friendly tutorial real-assets win check: ' + JSON.stringify({
+  tested: attempted.length, won: !!solution, solution: solution && {
+    builderX: solution.builderX, saved: solution.result.saved,
+    skills: solution.result.used, seconds: solution.result.seconds
+  }
+}));
+if (!solution || solution.result.used > 2)
+  throw new Error('Friendly puzzle has no verified one-builder rescue with real assets');
