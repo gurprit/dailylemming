@@ -111,6 +111,24 @@ let pointerPosition = null;
 const dirt = new DirtParticles();
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
+canvas.style.setProperty('--map-native-width', landscape.width + 'px');
+// On a phone, native-size pixels make precise skill targeting possible.
+// Fit mode reveals the whole puzzle so a player can plan the route.
+let mapZoomed = true;
+function syncMapZoom() {
+  const viewport = canvas.parentElement;
+  viewport.classList.toggle('is-fit', !mapZoomed);
+  const control = el('map-zoom');
+  control.setAttribute('aria-pressed', String(mapZoomed));
+  control.textContent = mapZoomed ? '↔ Fit map' : '🔎 Zoom in';
+  viewport.scrollLeft = 0;
+  viewport.scrollTop = 0;
+}
+el('map-zoom').addEventListener('click', () => {
+  mapZoomed = !mapZoomed;
+  syncMapZoom();
+});
+syncMapZoom();
 const ground = document.createElement('canvas');
 ground.width = landscape.width; ground.height = landscape.height;
 const groundCtx = ground.getContext('2d');
@@ -592,7 +610,7 @@ canvas.addEventListener('pointerleave', () => {
   pointerPosition = null;
   canvas.style.cursor = 'crosshair';
 });
-canvas.addEventListener('pointerdown', event => {
+function assignAtPointer(event) {
   if (!model || model.done) return;
   const point = pointerPoint(event);
   const index = unitAtPoint(model.units, point.x, point.y,
@@ -626,7 +644,25 @@ canvas.addEventListener('pointerdown', event => {
     say('Choose an available skill and tap a Lix standing on solid ground.');
   }
   updateHud();
+}
+// Touch must not spend a skill when the user is swiping across a zoomed map.
+let touchDown = null;
+canvas.addEventListener('pointerdown', event => {
+  if (event.pointerType === 'touch') {
+    touchDown = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    return;
+  }
+  assignAtPointer(event);
 });
+canvas.addEventListener('pointerup', event => {
+  if (event.pointerType !== 'touch' || !touchDown ||
+      touchDown.id !== event.pointerId) return;
+  const starting = touchDown;
+  touchDown = null;
+  if (Math.hypot(event.clientX - starting.x, event.clientY - starting.y) > 12) return;
+  assignAtPointer(event);
+});
+canvas.addEventListener('pointercancel', () => { touchDown = null; });
 for (const skill of Object.keys(SKILL_LABELS)) {
   const btn = el('skill-' + skill);
   btn.addEventListener('click', () => {
