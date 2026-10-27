@@ -1,0 +1,28 @@
+// A short original level for learning the Basher skill.
+// Uses the original CC0 Lix sandstone, hatch and exit sprites.
+$AUTHOR Daily Lemming
+$ENGLISH Tunnel Time
+$HINT_ENGLISH Stop just before the wall and give your Lix the Basher skill.
+#SIZE_X 640
+#SIZE_Y 288
+#INITIAL 1
+#REQUIRED 1
+#SPAWN_INTERVAL 1
+#BASHER 3
+
+:simon/hatch001.H: 32 128
+:simon/tapir/goal.G: 548 176
+
+:simon/tapir/064h: 0 224
+:simon/tapir/064h: 64 224
+:simon/tapir/064h: 128 224
+:simon/tapir/064h: 192 224
+:simon/tapir/064h: 256 224
+:simon/tapir/064h: 320 224
+:simon/tapir/064h: 384 224
+:simon/tapir/064h: 448 224
+:simon/tapir/064h: 512 224
+:simon/tapir/064h: 576 224
+:simon/tapir/064h: 300 192
+
+:matt/water.W: 192 256
