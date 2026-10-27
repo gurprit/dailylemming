@@ -10,7 +10,7 @@ import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
 import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
-import { drawWaterBackdrop } from './water.js';
+import { drawWaterBackdrop, drawWaterline } from './water.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -171,6 +171,9 @@ function draw() {
   if (levelId === 'little-bridge') drawWaterBackdrop(ctx, model.baseGadgets, model.ticks,
     canvas.width, canvas.height);
   ctx.drawImage(ground, 0, 0);
+  // Show continuous animated water at the bottom edge, not a lone tile.
+  if (levelId === 'little-bridge') drawWaterline(ctx, model.baseGadgets,
+    model.ticks, canvas.width, canvas.height);
   // A forgiving visual cue for the first puzzle; old community map has none.
   if (levelId === 'little-bridge') {
     const x = 232, y = 203;
