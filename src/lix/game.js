@@ -302,7 +302,9 @@ export class LixGameModel {
     u.x = clamp(u.x + facing * 2, 1, this.width - 2);
     u.y += 2;
     u.grounded = false;
-    this.emit('mined', u);
+    // Original Lix Miner sheet has a repeating pick swing. Only signal
+    // visible dirt impact once every 12 ticks, not every 3-tick terrain cut.
+    this.emit('mined', u, (u.actionTicks - 1) % 12 === 0 ? 'impact' : 'scrape');
   }
 
   // Native walkers can climb small lips rather than flip at each tiny slope.
