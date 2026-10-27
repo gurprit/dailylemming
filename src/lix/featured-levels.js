@@ -7,13 +7,13 @@ import { dayNumber, utcDay } from '../daily.js';
 export const FEATURED_COMMUNITY_LEVELS = Object.freeze([
   'lovely-escapethepit', // climber, floater, bomb, blocker, builder, platformer, digger
   'lovely-pitfall', // eight distinct skills
-  'lovely-solareclipse', // nine distinct skills
+  'lovely-beneaththelab', // compact 512px map; builder, platformer, miner
   'lovely-alternative', // twelve distinct skills
   'lovely-anecklaceofraindrops', // seven distinct skills
   'lovely-everylix', // walker, climber, floater, jumper
   'lovely-putyourlix', // climber, platformer, miner, jumper
   'lovely-climbtofreedom', // climber, builder, digger
-  'lovely-beneaththelab' // builder, platformer, miner
+  'lovely-solareclipse' // advanced nine-skill challenge, later in rotation
 ]);
 export function mysteryLevel(day = utcDay()) {
   const n = Math.max(0, dayNumber(day));
