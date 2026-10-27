@@ -602,7 +602,9 @@ async function boot() {
     el('level-title').textContent = level.title;
     el('mode-tag').textContent = config.verified
       ? '🌿 VERIFIED PRACTICE · ' + config.name.toUpperCase()
-      : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
+      : config.category === 'official-tutorial'
+        ? '🟢 ORIGINAL LIX BASIC TUTORIAL · ' + config.name.toUpperCase()
+        : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
     el('level-intro').textContent = config.intro;
     el('credit').textContent = config.credit;
     el('source-link').href = config.source;
