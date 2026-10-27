@@ -1,4 +1,4 @@
-// Keep the verified tutorial separate from imported community experiments.
+// Keep two verified practice puzzles separate from imported community experiments.
 // Imported original levels require more original-Lix skills than our current
 // browser adapter implements; don't silently claim they are solvable.
 export const LEVEL_OPTIONS = Object.freeze({
