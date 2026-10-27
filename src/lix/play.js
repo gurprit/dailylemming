@@ -3,6 +3,7 @@ import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
 import { gadgetDrawable } from './render.js';
+import { getPractice, savePractice, practiceLabel } from './practice.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -24,6 +25,9 @@ function fmt(s) {
   return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 }
 function say(s) { el('message').textContent = s; }
+function showPractice(record = getPractice()) {
+  el('practice-best').textContent = practiceLabel(record);
+}
 function freshGround() {
   if (!model?.changed) return;
   const data = new ImageData(new Uint8ClampedArray(model.terrain.pixels),
@@ -177,11 +181,14 @@ function finish() {
   if (ended) return;
   ended = true;
   const snap = model.snapshot();
+  const practice = savePractice(snap);
+  showPractice(practice);
   el('result-icon').textContent = snap.won ? '✦' : '↻';
   el('result-heading').textContent = snap.won ? 'You did it!' : 'One more try?';
   el('result-summary').textContent = 'Saved ' + snap.saved + '/' + snap.total
     + ' in ' + fmt(snap.seconds) + ' using ' + snap.used + ' builder assignments.'
-    + (snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
+    + (practice.improved ? ' New practice personal best! ✨'
+      : snap.won ? ' Great work!' : ' Experiment with the timing and placement of your bridges.');
   el('result').hidden = false;
   el('result-retry').focus();
 }
@@ -280,6 +287,7 @@ async function boot() {
     spriteCache = await loadArt();
     model = new LixGameModel(level, spriteCache);
     el('loading').hidden = true;
+    showPractice();
     updateHud(); draw();
     animation = requestAnimationFrame(loop);
   } catch (error) {
