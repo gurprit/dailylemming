@@ -11,7 +11,8 @@
     "lix:audit": "node scripts/audit-lix.mjs",
     "lix:assets": "node scripts/audit-lix.mjs --assets",
     "lix:vendor:first": "node scripts/vendor-lix-first.mjs",
-    "test:real-lix": "node scripts/verify-lix-first.mjs"
+    "test:real-lix": "node scripts/verify-lix-first.mjs",
+    "lix:search": "node scripts/search-lix-first.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",
