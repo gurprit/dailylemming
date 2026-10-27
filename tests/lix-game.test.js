@@ -64,7 +64,8 @@ test('builder creates collision terrain and is limited by skill inventory', () =
   assert.equal(u.state, 'builder');
   assert.ok(u.x > x && u.y < y);
   assert.ok(game.terrain.solid(Math.round(x + 3), Math.round(y + 2)));
-  assert.equal(game.assignBuilder(0), false);
+  assert.equal(game.assignBuilder(0), true, 'builder chaining can queue another assignment');
+  assert.equal(game.units[0].queuedBuilders, 1);
   game.reset();
   assert.equal(game.remaining.builder, 5);
   assert.equal(game.spawned, 0);
@@ -184,4 +185,22 @@ test('grounded walker can queue a builder assignment while paused', () => {
   assert.equal(model.assignBuilder(0), true);
   assert.equal(model.paused, true);
   assert.equal(model.remaining.builder, 4);
+});
+
+test('queued builder assignments extend beyond the normal twelve bricks', () => {
+  const { level, images } = sample();
+  level.tiles = level.tiles.map(tile =>
+    tile.kind === 'goal' ? { ...tile, x: 222 } : tile);
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 15; i++) model.tick();
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.assignBuilder(0), true);
+  assert.equal(model.remaining.builder, 3);
+  assert.equal(model.units[0].queuedBuilders, 1);
+  for (let i = 0; i < 460 && !model.done; i++) model.tick();
+  assert.equal(model.events.filter(e => e.type === 'builder-continued').length, 1);
+  assert.equal(model.events.filter(e => e.type === 'brick').length, 24);
+  assert.equal(model.units[0].queuedBuilders, 0);
+  assert.equal(model.assigned, 2);
 });
