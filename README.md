@@ -44,3 +44,28 @@ Run `npm run lix:audit` to inspect the 30 candidate levels. The audit outputs `g
 Open `/lab.html` on the local dev server for an **approximate terrain inspection page**. Artwork loads from the pinned upstream Lix repository, so an internet connection is currently required. It is an internal developer aid, **not a playable level**.
 
 See [Lix integration notes](docs/lix-integration.md) for licence detail and what's left to build before these puzzles can enter the daily queue.
+
+## One real Lix level: experimental playable adapter
+
+The new **[6 Gaps, 5 Builders](./play-lix.html)** mode uses the upstream CC0 puzzle by mobius from the imported `Lovely` source files. This is an **isolated experiment**, available at `/play-lix.html` when running `npm run dev`.
+
+This is the first browser adapter that:
+- parses an authentic Lix level;
+- downloads and decodes its referenced Lix images, removes pure magenta colour-key pixels;
+- composes all ordered bitmap terrain layers into a real pixel collision map (including group expansion, dark masks, rotations and steel);
+- simulates one walking creature, stair-building assignments, death/water, and exit rescue in a deterministic fixed-timestep loop;
+- supports click/touch, pause-to-plan, speed and restart without touching daily records.
+
+**Not verified:** it is not a port of the original Lix physics, skill duration and collision rules are approximations, trigger placements need comparison against original game metadata, and we have **not** proved a human can complete the original puzzle in this adapter. For reliable offline-compatible assets after installation, run `npm run lix:vendor:first` to download just the 11 required CC0 images; GitHub Pages builds run the same command and bundle these images. A pinned remote fallback remains for local dev when images are missing. Please report any mismatch between screenshots, impossible jumps or unresponsive skill assignments. **It is not yet in the daily puzzle rotation.**
+
+To try locally:
+
+```bash
+git switch feat/first-lix-playable
+npm install
+npm run lix:vendor:first
+npm test
+npm run dev
+```
+
+Then open `http://localhost:5173/play-lix.html`. The daily home page and Level Lab also link to the experiment.

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101728">
+<meta name="description" content="Play a real community-made Lix puzzle with Daily Lemming's experimental browser engine.">
+<title>6 Gaps, 5 Builders | Daily Lemming experimental level</title>
+<link rel="stylesheet" href="/src/styles.css">
+<style>
+ .experiment{max-width:1050px;margin:0 auto;padding:20px 20px 55px}
+ .experiment-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;padding:10px 0 25px}
+ .experiment-nav a{font-weight:700}
+ .experiment-nav small{color:#93a8c1}
+ .experiment h1{font-family:"Space Grotesk",system-ui,sans-serif;font-size:clamp(33px,5vw,60px);margin:4px 0 8px;letter-spacing:-2px}
+ .experiment .lead{color:#b5c6dd;line-height:1.6;margin:0 0 22px;max-width:720px}
+ .experiment .tag{color:#88efad;font-size:11px;font-weight:800;letter-spacing:1.6px}
+ .experiment-stats{display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px;padding:19px;background:#19253e;border:1px solid #425577;border-radius:16px 16px 0 0}
+ .experiment-stats span{display:block;color:#99acc9;letter-spacing:1px;font-size:10px;font-weight:700}
+ .experiment-stats b{display:block;font-size:22px;margin-top:4px}
+ .experiment-view{position:relative;background:#182642;border:1px solid #425577;border-top:0;min-height:280px;overflow:hidden}
+ .experiment-view canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;touch-action:manipulation;cursor:crosshair;image-rendering:pixelated}
+ .experiment-view .busy{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center;padding:20px;color:#d1f9df;background:#15203ae8}
+ .experiment-view .busy[hidden]{display:none}
+ .experiment-actions{padding:15px;background:#19253e;border:1px solid #425577;border-top:0;border-radius:0 0 16px 16px}
+ .experiment-buttons{display:flex;flex-wrap:wrap;gap:12px}
+ .experiment-buttons button{min-height:50px;padding:12px 16px;border-radius:10px;border:1px solid #53647f;background:#273852;color:#f0f7ff;font-weight:700;flex:1;cursor:pointer}
+ .experiment-buttons button[aria-pressed="true"]{background:#224f43;border:2px solid #8cebb1}
+ .experiment-buttons button:disabled{opacity:.55;cursor:not-allowed}
+ .experiment-buttons button.primary{background:#86e7ae;color:#123448;border:0}
+ .experiment-hint{font-size:13px;line-height:1.6;color:#bccde4;margin:13px 3px 0}
+ .experiment-help{margin-top:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ .experiment-help article{background:#1a273f;border:1px solid #3f4f6e;border-radius:12px;padding:16px}
+ .experiment-help h2{font-size:16px;margin:0 0 8px}
+ .experiment-help p{font-size:13px;line-height:1.7;color:#afbdd3;margin:0}
+ .experiment-result{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:#0a1128dd;z-index:9}
+ .experiment-result[hidden]{display:none}
+ .experiment-result>div{width:min(430px,100%);background:#1d2b46;border:1px solid #62826e;border-radius:18px;padding:28px;text-align:center}
+ .experiment-result h2{font-size:29px;margin:8px 0 5px}
+ .experiment-result p{line-height:1.6;color:#bed0e1}
+ .experiment-result button{margin:6px 0;width:100%;min-height:46px;border-radius:9px;border:1px solid #4c6481;background:#2d405a;color:#f5fcfe;font-weight:800}
+ @media(max-width:660px){.experiment{padding:10px 10px 28px}.experiment-stats{padding:12px 6px}.experiment-stats b{font-size:18px}.experiment-help{grid-template-columns:1fr}.experiment-buttons button{flex:1 1 40%;font-size:12px}.experiment-view{min-height:175px}}
+</style>
+<script type="module" src="/src/lix/play.js"></script>
+</head>
+<body>
+<main class="experiment">
+ <nav class="experiment-nav">
+  <a href="./index.html">← Daily Lemming</a>
+  <small>Independent community-level engineering experiment</small>
+ </nav>
+ <div class="tag">🧪 REAL LIX LEVEL · EXPERIMENTAL ENGINE</div>
+ <h1>6 Gaps, 5 Builders</h1>
+ <p class="lead">Save one wanderer using just five builders. Original CC0 level by <strong>mobius</strong>. Place steps carefully and find a route to the exit.</p>
+ <section aria-label="Playable puzzle">
+  <div class="experiment-stats">
+   <div><span>RESCUED</span><b id="saved">0/1</b></div>
+   <div><span>BUILDERS</span><b id="builders">5</b></div>
+   <div><span>TIME</span><b id="timer">00:00</b></div>
+   <div><span>STATE</span><b id="state">READY</b></div>
+  </div>
+  <div class="experiment-view">
+   <canvas id="playfield" width="512" height="288" role="img" aria-label="One walking creature, terrain, five builder skills and exit"></canvas>
+   <div class="busy" id="loading" role="status">Loading original CC0 level graphics and building terrain collision map…</div>
+  </div>
+  <div class="experiment-actions">
+   <div class="experiment-buttons">
+    <button id="builder" type="button" aria-pressed="true">🧱 Builder · <span id="count">5</span></button>
+    <button id="pause" class="primary" type="button">▶ Start</button>
+    <button id="speed" type="button">⏩ 1× speed</button>
+    <button id="restart" type="button">↻ Restart</button>
+   </div>
+   <p id="message" class="experiment-hint" role="status">Choose Builder, then tap the little walker when you need to span a gap. You can pause to plan.</p>
+  </div>
+ </section>
+ <div class="experiment-help">
+  <article><h2>How to play</h2><p>Start the run. Tap the moving green-haired creature to assign a builder. Each builder lays a rising staircase. Press Space to pause or R to restart. Touch works too.</p></article>
+  <article><h2>About this experiment</h2><p>Real Lix source, tiles, colour-masked terrain and collisions are loaded. Physics, trigger positions and skill timing are provisional, and completion has not yet been confirmed against a Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+ </div>
+ <p class="credits">Source: <a href="https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Lovely/6gaps.txt">Lix: 6 Gaps, 5 Builders by mobius</a>. Level and artwork made available under CC0.</p>
+</main>
+<div id="result" class="experiment-result" hidden>
+ <div role="dialog" aria-modal="true" aria-labelledby="result-heading">
+  <div style="font-size:46px" id="result-icon">✦</div>
+  <h2 id="result-heading">Run finished!</h2>
+  <p id="result-summary"></p>
+  <button id="result-retry" type="button">Try again</button>
+  <button id="result-close" type="button">Close</button>
+ </div>
+</div>
+</body>
+</html>

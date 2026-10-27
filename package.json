@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "node --test",
     "lix:audit": "node scripts/audit-lix.mjs",
-    "lix:assets": "node scripts/audit-lix.mjs --assets"
+    "lix:assets": "node scripts/audit-lix.mjs --assets",
+    "lix:vendor:first": "node scripts/vendor-lix-first.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0"

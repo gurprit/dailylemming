@@ -1,4 +1,5 @@
 import { parseLix, sourceAssets, assessLixCompatibility } from './parse.js';
+import { isVisiblePixel } from './terrain.js';
 import orderText from '../../content/lix/lovely/_order.X.txt?raw';
 
 const sources = import.meta.glob('../../content/lix/lovely/*.txt', {
@@ -20,7 +21,22 @@ function asset(name) {
   if (!imageCache.has(name)) imageCache.set(name, new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
+    img.onload = () => {
+      try {
+        const off = document.createElement('canvas');
+        off.width = img.naturalWidth;
+        off.height = img.naturalHeight;
+        const ctx = off.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const rgba = ctx.getImageData(0, 0, off.width, off.height);
+        for (let i = 0; i < rgba.data.length; i += 4) {
+          if (!isVisiblePixel(rgba.data[i], rgba.data[i + 1], rgba.data[i + 2], rgba.data[i + 3]))
+            rgba.data[i + 3] = 0;
+        }
+        ctx.putImageData(rgba, 0, 0);
+        resolve(off);
+      } catch (error) { reject(new Error('Image decode failed: ' + name + ': ' + error)); }
+    };
     img.onerror = () => reject(new Error('Cannot load ' + name));
     img.src = assetPrefix + name.split('/').map(encodeURIComponent).join('/');
   }));

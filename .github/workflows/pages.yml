@@ -27,6 +27,7 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm test
+      - run: npm run lix:vendor:first
       - run: npm run build
         env:
           DAILY_LEMMING_BASE: /dailylemming/
