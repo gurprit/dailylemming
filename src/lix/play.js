@@ -6,6 +6,7 @@ import { detectLixFrames, cutLixFrame } from './frames.js';
 import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
 import { projectBuilder } from './preview.js';
+import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -20,6 +21,7 @@ const level = levelId === '6gaps'
 document.body.classList.toggle('easy-mode', levelId === 'little-bridge');
 let model = null;
 let spriteCache = null;
+let characterAtlas = null;
 let last = 0, accumulator = 0, speed = 1, animation = 0, ended = false;
 let processedEvents = 0;
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
@@ -129,6 +131,7 @@ function drawBuilderPreview(u) {
 }
 function paintCharacter(u) {
   if (['lost', 'saved'].includes(u.state)) return;
+  if (drawCharacterSprite(ctx, characterAtlas, u, model?.ticks || 0)) return;
   const x = Math.round(u.x), y = Math.round(u.y);
   ctx.save();
   ctx.translate(x, y);
@@ -348,8 +351,21 @@ window.addEventListener('keydown', event => {
 window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
 async function boot() {
   try {
-    spriteCache = await loadArt();
+    // Original character art is optional; retain the hand-drawn figure
+    // when the sheet can't be downloaded for any reason.
+    const [terrainImages, atlas] = await Promise.all([
+      loadArt(),
+      loadCharacterAtlas().catch(error => {
+        console.warn('Lix character sheet unavailable; using placeholder', error);
+        return null;
+      })
+    ]);
+    spriteCache = terrainImages;
+    characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
+    el('art-status').textContent = characterAtlas
+      ? 'Original Lix character sprites · CC0'
+      : 'Fallback character · sheet unavailable';
     el('level-title').textContent = level.title;
     el('mode-tag').textContent = levelId === 'little-bridge'
       ? '🌿 EASY PRACTICE · ONE LITTLE BRIDGE'
