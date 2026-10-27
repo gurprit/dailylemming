@@ -1,0 +1,23 @@
+// First authentic crowd-management lesson: one Lix stays to redirect two.
+$AUTHOR Daily Lemming
+$ENGLISH Turnaround
+$HINT_ENGLISH Turn one Lix into a Blocker before the edge, guiding the other two to the exit.
+#SIZE_X 640
+#SIZE_Y 288
+#INITIAL 3
+#REQUIRED 2
+#SPAWN_INTERVAL 50
+#BLOCKER 1
+
+:simon/hatch001.H: 240 128 r
+:simon/tapir/goal.G: 536 176
+
+:simon/tapir/064h: 192 224
+:simon/tapir/064h: 256 224
+:simon/tapir/064h: 320 224
+:simon/tapir/064h: 384 224
+:simon/tapir/064h: 448 224
+:simon/tapir/064h: 512 224
+:simon/tapir/064h: 576 224
+
+:matt/water.W: 160 256
