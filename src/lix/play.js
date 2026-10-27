@@ -1,5 +1,6 @@
 import trickyLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
+import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -20,11 +21,11 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
-const sourcePath = config.category === 'tutorial'
-  ? 'content/original/little-bridge.txt'
+const sourcePath = config.verified
+  ? 'content/original/' + (levelId === 'double-trouble' ? 'double-trouble' : 'little-bridge') + '.txt'
   : 'levels/single/lemforum/Lovely/' + ({
     '6gaps': '6gaps', pitfall: 'pitfall', 'building-block-maze': 'buildingblock'
   }[levelId]) + '.txt';
@@ -168,14 +169,14 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!model) return;
   freshGround();
-  if (levelId === 'little-bridge') drawWaterBackdrop(ctx, model.baseGadgets, model.ticks,
+  if (config.verified) drawWaterBackdrop(ctx, model.baseGadgets, model.ticks,
     canvas.width, canvas.height);
   ctx.drawImage(ground, 0, 0);
   // Show continuous animated water at the bottom edge, not a lone tile.
-  if (levelId === 'little-bridge') drawWaterline(ctx, model.baseGadgets,
+  if (config.verified) drawWaterline(ctx, model.baseGadgets,
     model.ticks, canvas.width, canvas.height);
   // A forgiving visual cue for the first puzzle; old community map has none.
-  if (levelId === 'little-bridge') {
+  if (config.verified) {
     const x = 232, y = 203;
     ctx.save();
     ctx.fillStyle = '#b1ffd1';
@@ -190,9 +191,24 @@ function draw() {
     ctx.lineTo(x + 5, y - 6);
     ctx.fill();
     ctx.restore();
+    if (levelId === 'double-trouble') {
+      const x2 = 444, y2 = 203;
+      ctx.save();
+      ctx.fillStyle = '#b1ffd1';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('BUILD AGAIN', x2, y2 - 21);
+      ctx.fillRect(x2 - 1, y2 - 15, 2, 12);
+      ctx.beginPath();
+      ctx.moveTo(x2 - 5, y2 - 6);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x2 + 5, y2 - 6);
+      ctx.fill();
+      ctx.restore();
+    }
   }
   for (const g of model.baseGadgets) {
-    if (!g.image || (levelId === 'little-bridge' && g.sourceImage?.endsWith('.W'))) continue;
+    if (!g.image || (config.verified && g.sourceImage?.endsWith('.W'))) continue;
     // Animated hatches and liquids cycle through their clipped Cutbit frames.
     ctx.drawImage(gadgetDrawable(g, model.ticks), g.x, g.y);
     if (g.kind === 'goal') {
@@ -387,7 +403,7 @@ async function boot() {
       : 'Fallback character · sheet unavailable';
     el('level-title').textContent = level.title;
     el('mode-tag').textContent = config.verified
-      ? '🌿 VERIFIED TUTORIAL · ONE LITTLE BRIDGE'
+      ? '🌿 VERIFIED PRACTICE · ' + config.name.toUpperCase()
       : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
     el('level-intro').textContent = config.intro;
     el('credit').textContent = config.credit;
