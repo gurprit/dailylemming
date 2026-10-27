@@ -385,3 +385,19 @@ test('a stationary blocker is allowed to remain once the rescue quota is achieve
   game.saved = 2;
   assert.equal(game.readyToFinish, true);
 });
+
+test('blocker frame count starts at assignment and advances while stationary', () => {
+  const {level, images} = sample();
+  level.skills.BLOCKER = 1;
+  const m = new LixGameModel(level, images);
+  m.togglePause();
+  for (let i = 0; i < 13; i++) m.tick();
+  assert.equal(m.assignSkill('blocker', 0), true);
+  const u = m.units[0], x = u.x, y = u.y;
+  assert.equal(u.actionTicks, 0);
+  for (let i = 0; i < 36; i++) m.tick();
+  assert.equal(u.actionTicks, 36);
+  assert.equal(u.state, 'blocker');
+  assert.equal(u.x, x);
+  assert.equal(u.y, y);
+});
