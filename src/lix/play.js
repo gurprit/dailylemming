@@ -39,6 +39,7 @@ import { loadCharacterAtlas, drawCharacterSprite } from './characters.js';
 import { drawWaterBackdrop, drawWaterline } from './water.js';
 import { unitAtPoint, drawUnitTarget } from './targeting.js';
 import { DirtParticles } from './particles.js';
+import { MAX_MAP_SCALE, fitMapScale, mapTouchGeometry, zoomMapAtFingers } from './map-zoom.js';
 import { utcDay } from '../daily.js';
 import { dailyChallenge, dailyStreak, readDaily, saveDaily, dailyResultText } from './daily-challenge.js';
 import { mysteryLevel } from './featured-levels.js';
@@ -111,21 +112,38 @@ let pointerPosition = null;
 const dirt = new DirtParticles();
 const landscape = { width: level.numeric.SIZE_X, height: level.numeric.SIZE_Y };
 canvas.width = landscape.width; canvas.height = landscape.height;
-canvas.style.setProperty('--map-native-width', landscape.width + 'px');
-// On a phone, native-size pixels make precise skill targeting possible.
-// Fit mode reveals the whole puzzle so a player can plan the route.
-let mapZoomed = true;
+// The canvas keeps its original pixel buffer; zoom changes only its CSS size.
+// This preserves crisp art and accurate hit-testing at every pinch scale.
+const viewport = canvas.parentElement;
+const mobileMap = window.matchMedia('(max-width: 660px), (pointer: coarse)');
+let mapScale = 1;
+let previousFitScale = fitMapScale(landscape.width, viewport.clientWidth);
+
 function syncMapZoom() {
-  const viewport = canvas.parentElement;
-  viewport.classList.toggle('is-fit', !mapZoomed);
+  if (!mobileMap.matches) {
+    canvas.style.width = '';
+    return;
+  }
+  const fit = fitMapScale(landscape.width, viewport.clientWidth);
+  mapScale = Math.max(fit, Math.min(MAX_MAP_SCALE, mapScale));
+  canvas.style.width = (landscape.width * mapScale).toFixed(2) + 'px';
+  const zoomed = mapScale > fit + 0.02;
   const control = el('map-zoom');
-  control.setAttribute('aria-pressed', String(mapZoomed));
-  control.textContent = mapZoomed ? '↔ Fit map' : '🔎 Zoom in';
-  viewport.scrollLeft = 0;
-  viewport.scrollTop = 0;
+  control.setAttribute('aria-pressed', String(zoomed));
+  control.textContent = zoomed ? '↔ Fit map' : '🔎 Zoom in';
+  control.setAttribute('aria-label', zoomed ? 'Fit the entire level to the screen' : 'Zoom in to native pixels');
+  previousFitScale = fit;
 }
 el('map-zoom').addEventListener('click', () => {
-  mapZoomed = !mapZoomed;
+  const fit = fitMapScale(landscape.width, viewport.clientWidth);
+  mapScale = mapScale > fit + 0.02 ? fit : Math.max(1, fit);
+  syncMapZoom();
+  viewport.scrollLeft = 0;
+  viewport.scrollTop = 0;
+});
+window.addEventListener('resize', () => {
+  const wasFitted = mapScale <= previousFitScale + 0.02;
+  if (wasFitted) mapScale = fitMapScale(landscape.width, viewport.clientWidth);
   syncMapZoom();
 });
 syncMapZoom();
@@ -645,24 +663,88 @@ function assignAtPointer(event) {
   }
   updateHud();
 }
-// Touch must not spend a skill when the user is swiping across a zoomed map.
-let touchDown = null;
+// One finger pans the map; two fingers pinch around their midpoint.
+// Taps are only considered after all movement has been ruled out.
+const touches = new Map();
+let tapCandidate = null;
+let pinchStart = null;
+function relativeToViewport(point) {
+  const box = viewport.getBoundingClientRect();
+  return {
+    x: point.x - box.left - viewport.clientLeft,
+    y: point.y - box.top - viewport.clientTop
+  };
+}
+function beginPinch() {
+  const [first, second] = [...touches.values()];
+  const a = relativeToViewport(first), b = relativeToViewport(second);
+  const centre = mapTouchGeometry(a, b);
+  pinchStart = {
+    startScale: mapScale, startDistance: centre.distance,
+    worldX: (viewport.scrollLeft + centre.x) / mapScale,
+    worldY: (viewport.scrollTop + centre.y) / mapScale
+  };
+  // A two-finger gesture can never trigger a skill on release.
+  tapCandidate = null;
+}
 canvas.addEventListener('pointerdown', event => {
-  if (event.pointerType === 'touch') {
-    touchDown = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  if (event.pointerType !== 'touch') {
+    assignAtPointer(event);
     return;
   }
-  assignAtPointer(event);
+  event.preventDefault();
+  canvas.setPointerCapture?.(event.pointerId);
+  touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (touches.size === 2) beginPinch();
+  else if (touches.size === 1) {
+    tapCandidate = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+  } else {
+    tapCandidate = null;
+  }
+});
+canvas.addEventListener('pointermove', event => {
+  if (event.pointerType !== 'touch') return;
+  const prior = touches.get(event.pointerId);
+  if (!prior) return;
+  const current = { x: event.clientX, y: event.clientY };
+  touches.set(event.pointerId, current);
+  if (touches.size >= 2) {
+    if (!pinchStart) beginPinch();
+    const [p1,p2] = [...touches.values()];
+    const target = zoomMapAtFingers({
+      ...pinchStart,
+      first: relativeToViewport(p1), second: relativeToViewport(p2),
+      mapWidth: landscape.width, viewportWidth: viewport.clientWidth
+    });
+    mapScale = target.scale;
+    syncMapZoom();
+    viewport.scrollLeft = target.left;
+    viewport.scrollTop = target.top;
+    return;
+  }
+  const distance = tapCandidate
+    ? Math.hypot(current.x - tapCandidate.x, current.y - tapCandidate.y) : Infinity;
+  if (tapCandidate && distance > 8) tapCandidate.moved = true;
+  if (!tapCandidate || tapCandidate.moved) {
+    viewport.scrollLeft -= current.x - prior.x;
+    viewport.scrollTop -= current.y - prior.y;
+  }
 });
 canvas.addEventListener('pointerup', event => {
-  if (event.pointerType !== 'touch' || !touchDown ||
-      touchDown.id !== event.pointerId) return;
-  const starting = touchDown;
-  touchDown = null;
-  if (Math.hypot(event.clientX - starting.x, event.clientY - starting.y) > 12) return;
-  assignAtPointer(event);
+  if (event.pointerType !== 'touch') return;
+  const isTap = touches.size === 1 && tapCandidate?.id === event.pointerId
+    && !tapCandidate.moved
+    && Math.hypot(event.clientX - tapCandidate.x, event.clientY - tapCandidate.y) <= 12;
+  touches.delete(event.pointerId);
+  tapCandidate = null;
+  pinchStart = null;
+  if (isTap) assignAtPointer(event);
 });
-canvas.addEventListener('pointercancel', () => { touchDown = null; });
+canvas.addEventListener('pointercancel', event => {
+  touches.delete(event.pointerId);
+  tapCandidate = null;
+  pinchStart = null;
+});
 for (const skill of Object.keys(SKILL_LABELS)) {
   const btn = el('skill-' + skill);
   btn.addEventListener('click', () => {
@@ -791,17 +873,10 @@ async function boot() {
       : config.category === 'official-tutorial'
         ? '🟢 ORIGINAL LIX BASIC TUTORIAL · ' + config.name.toUpperCase()
         : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
-    el('level-intro').textContent = config.intro;
     el('credit').textContent = config.credit;
     el('source-link').href = config.source;
     el('level-picker').value = mysteryMode ? '__mystery__'
       : dailyMode ? '__daily__' : levelId;
-    const warning = el('compat-warning');
-    warning.hidden = config.verified;
-    warning.textContent = config.verified ? ''
-      : config.category === 'official-tutorial'
-        ? 'Authentic CC0 Lix beginner tutorial. Our browser physics differ from the original; this level loads but has not yet passed a full-solution test.'
-        : 'Authentic Lix community puzzle. Every listed skill is available in our browser adapter, but native physics and full winning solutions have not yet been verified. Try different approaches!';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
