@@ -204,3 +204,42 @@ test('queued builder assignments extend beyond the normal twelve bricks', () => 
   assert.equal(model.units[0].queuedBuilders, 0);
   assert.equal(model.assigned, 2);
 });
+
+test('undo restores bridge pixels, spent builder, position and elapsed time', () => {
+  const { level, images } = sample(true);
+  const game = new LixGameModel(level, images);
+  game.togglePause();
+  for (let i = 0; i < 12; i++) game.tick();
+  const x = game.units[0].x, y = game.units[0].y, tick = game.ticks;
+  const original = game.terrain.pixels.slice();
+  assert.equal(game.assignBuilder(0), true);
+  for (let i = 0; i < 40; i++) game.tick();
+  assert.equal(game.undoAvailable, true);
+  assert.equal(game.undoBuilder(), true);
+  assert.equal(game.ticks, tick);
+  assert.equal(game.units[0].x, x);
+  assert.equal(game.units[0].y, y);
+  assert.equal(game.units[0].state, 'walking');
+  assert.equal(game.remaining.builder, 5);
+  assert.equal(game.assigned, 0);
+  assert.equal(game.paused, true);
+  assert.deepEqual(game.terrain.pixels, original);
+  assert.equal(game.undoBuilder(), false);
+});
+test('undo queued builder restores queue without cancelling active build', () => {
+  const { level, images } = sample();
+  const game = new LixGameModel(level, images);
+  game.togglePause();
+  for (let i = 0; i < 12; i++) game.tick();
+  assert.equal(game.assignBuilder(0), true);
+  for (let i = 0; i < 25; i++) game.tick();
+  const before = game.units[0].buildSteps;
+  assert.equal(game.assignBuilder(0), true);
+  assert.equal(game.units[0].queuedBuilders, 1);
+  assert.equal(game.undoBuilder(), true);
+  assert.equal(game.units[0].state, 'builder');
+  assert.equal(game.units[0].buildSteps, before);
+  assert.equal(game.units[0].queuedBuilders, 0);
+  assert.equal(game.remaining.builder, 4);
+  assert.equal(game.history.length, 1);
+});
