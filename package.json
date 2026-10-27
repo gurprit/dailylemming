@@ -14,7 +14,8 @@
     "test:real-lix": "node scripts/verify-lix-first.mjs",
     "lix:search": "node scripts/search-lix-first.mjs",
     "lix:inspect:characters": "node scripts/inspect-lix-characters.mjs",
-    "test:community-lix": "node scripts/verify-community-levels.mjs"
+    "test:community-lix": "node scripts/verify-community-levels.mjs",
+    "test:double-trouble": "node scripts/verify-double-trouble.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.0",
