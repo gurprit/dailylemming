@@ -41,6 +41,7 @@ export class LixGameModel {
     this.started = this.done = this.won = false;
     this.changed = true;
     this.events = [];
+    this.history = [];
   }
   get initial() { return this.level.numeric.INITIAL; }
   get required() { return this.level.numeric.REQUIRED; }
@@ -67,12 +68,45 @@ export class LixGameModel {
     this.paused = true;
     return true;
   }
+  get undoAvailable() { return !this.done && this.history.length > 0; }
+  saveCheckpoint() {
+    // The first puzzle has at most five assignments. Save only the modified
+    // pixel buffer, not duplicate image/steel data or potentially huge art.
+    this.history.push({
+      pixels: this.terrain.pixels.slice(),
+      units: this.units.map(u => ({ ...u })),
+      remaining: { ...this.remaining },
+      spawned: this.spawned, saved: this.saved, lost: this.lost,
+      assigned: this.assigned, ticks: this.ticks,
+      eventsLength: this.events.length, started: this.started
+    });
+  }
+  undoBuilder() {
+    if (!this.undoAvailable) return false;
+    const before = this.history.pop();
+    this.terrain.pixels.set(before.pixels);
+    this.units = before.units.map(u => ({ ...u }));
+    this.remaining = { ...before.remaining };
+    this.spawned = before.spawned;
+    this.saved = before.saved;
+    this.lost = before.lost;
+    this.assigned = before.assigned;
+    this.ticks = before.ticks;
+    this.events.length = before.eventsLength;
+    this.started = before.started;
+    this.done = false;
+    this.won = false;
+    this.paused = true;
+    this.changed = true;
+    return true;
+  }
   assignBuilder(index = 0) {
     const u = this.units[index];
     // Lix builder assignments can be queued while the current 12-brick
     // staircase is in progress. This extends it without wasting an action.
     if (this.done || !u || !this.remaining.builder) return false;
     if (u.state === 'builder') {
+      this.saveCheckpoint();
       this.remaining.builder--;
       this.assigned++;
       u.queuedBuilders = (u.queuedBuilders || 0) + 1;
@@ -81,6 +115,7 @@ export class LixGameModel {
     }
     // A falling Lix cannot conjure a staircase in mid-air.
     if (u.state !== 'walking' || !u.grounded) return false;
+    this.saveCheckpoint();
     this.remaining.builder--;
     this.assigned++;
     u.state = 'builder';
