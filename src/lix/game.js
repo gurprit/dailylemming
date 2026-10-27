@@ -51,8 +51,12 @@ export class LixGameModel {
   get required() { return this.level.numeric.REQUIRED; }
   get seconds() { return Math.floor(this.ticks / PHYSICS_HZ); }
   get readyToFinish() {
+    // Permanent blockers stay behind as volunteers. Once all other Lix
+    // have resolved and the rescue quota is reached, don't run down the
+    // entire level clock waiting for a Blocker to vanish.
     return this.spawned === this.initial
-      && this.units.every(u => u.state === 'saved' || u.state === 'lost');
+      && this.units.every(u => u.state === 'saved' || u.state === 'lost'
+        || (u.state === 'blocker' && this.saved >= this.required));
   }
   emit(type, unit, detail = '') {
     this.events.push({ type, tick: this.ticks,
