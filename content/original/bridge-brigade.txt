@@ -19,7 +19,7 @@ $HINT_ENGLISH Block the first Lix to turn friends toward safety, then build over
 :simon/tapir/064h: 320 224
 :simon/tapir/064h: 384 224
 :simon/tapir/064h: 448 224
-:simon/tapir/064h: 532 224
-:simon/tapir/064h: 596 224
+:simon/tapir/064h: 544 224
+:simon/tapir/064h: 608 224
 
 :matt/water.W: 500 256
