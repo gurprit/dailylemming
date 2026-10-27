@@ -2,11 +2,18 @@
 // but deliberately shuffled to evoke opening a random mid-game Lix puzzle.
 // Unverified community puzzles never enter the scored/streak daily pool.
 import { dayNumber, utcDay } from '../daily.js';
+// Multi-tool community maps only: avoid one-skill training disguised as dailies.
+// These are playable previews, NOT solution-verified scored daily puzzles.
 export const FEATURED_COMMUNITY_LEVELS = Object.freeze([
-  'lovely-pipedream', 'lovely-beneaththelab', 'lovely-climbtofreedom',
-  'lovely-everylix', 'lovely-escapethepit', 'lovely-pitfall',
-  'lovely-putyourlix', 'lovely-solareclipse', 'lovely-alternative',
-  'lovely-anecklaceofraindrops'
+  'lovely-escapethepit', // climber, floater, bomb, blocker, builder, platformer, digger
+  'lovely-pitfall', // eight distinct skills
+  'lovely-solareclipse', // nine distinct skills
+  'lovely-alternative', // twelve distinct skills
+  'lovely-anecklaceofraindrops', // seven distinct skills
+  'lovely-everylix', // walker, climber, floater, jumper
+  'lovely-putyourlix', // climber, platformer, miner, jumper
+  'lovely-climbtofreedom', // climber, builder, digger
+  'lovely-beneaththelab' // builder, platformer, miner
 ]);
 export function mysteryLevel(day = utcDay()) {
   const n = Math.max(0, dayNumber(day));
