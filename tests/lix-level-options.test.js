@@ -4,6 +4,7 @@ import { LEVEL_OPTIONS, FEATURED_LIX_LEVELS, resolveLevelId } from '../src/lix/l
 import { readFileSync } from 'node:fs';
 import { parseLix } from '../src/lix/parse.js';
 import { PLAYABLE_SKILLS } from '../src/lix/game.js';
+import { dayNumber } from '../src/daily.js';
 import { FEATURED_COMMUNITY_LEVELS, mysteryLevel } from '../src/lix/featured-levels.js';
 test('only the demonstrated practice puzzles are verified and tutorial remains default', () => {
   assert.equal(resolveLevelId(''), 'little-bridge');
@@ -46,18 +47,18 @@ test('ten mystery community levels all use multiple implemented abilities',()=>{
       assert.ok(PLAYABLE_SKILLS.includes(skill.toLowerCase()),id+' missing '+skill);
   }
 });
-test('mystery picks are date-deterministic, shuffled and nonrepeating per ten-day block',()=>{
+test('mystery picks are date-deterministic and nonrepeating within each ten-day block',()=>{
   assert.deepEqual(mysteryLevel('2026-10-27'),mysteryLevel('2026-10-27'));
+  const today='2026-10-27';
+  const offset=dayNumber(today)%10;
+  const blockStart=Date.parse(today+'T00:00:00Z')-offset*86400000;
   const ids=Array.from({length:10},(_,i)=>mysteryLevel(
-    new Date(Date.UTC(2026,9,27+i)).toISOString().slice(0,10)).levelId);
-  assert.equal(ids.length,10);
-  // Blocks align to the epoch of the daily scheduler, not October 27.
-  const day0='2026-10-26';
-  const start=(new Date(day0+'T00:00:00Z').getTime()
-    - new Date('2026-10-26T00:00:00Z').getTime())/86400000;
-  assert.equal(start,0);
-  for(const id of ids)assert.ok(FEATURED_COMMUNITY_LEVELS.includes(id));
-  assert.ok(FEATURED_COMMUNITY_LEVELS.includes(mysteryLevel('2026-10-29').levelId));
+    new Date(blockStart+i*86400000).toISOString().slice(0,10)).levelId);
+  assert.deepEqual(new Set(ids),new Set(FEATURED_COMMUNITY_LEVELS));
+  const nextBlock=Array.from({length:10},(_,i)=>mysteryLevel(
+    new Date(blockStart+(10+i)*86400000).toISOString().slice(0,10)).levelId);
+  assert.deepEqual(new Set(nextBlock),new Set(FEATURED_COMMUNITY_LEVELS));
+  assert.notDeepEqual(ids,nextBlock,'blocks should shuffle differently');
 });
 test('homepage offers one mystery, a separate verified daily, and exactly ten community levels',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
