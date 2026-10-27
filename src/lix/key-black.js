@@ -9,10 +9,6 @@ export function keyBlackBackground(image, layout, threshold = 10) {
   const { width: fw, height: fh } = layout;
   const visited = new Uint8Array(fw * fh);
   const queue = new Int32Array(fw * fh);
-  const isBlack = (x, y) => {
-    const n = ((1 + y + Math.floor(y / fh) * 0) * width + x) * 4;
-    return n; // unused: per-frame coordinates are calculated below
-  };
   for (let row = 0; row < layout.rows; row++) for (let col = 0; col < layout.columns; col++) {
     visited.fill(0);
     const left = 1 + col * (fw + 1), top = 1 + row * (fh + 1);
