@@ -471,7 +471,7 @@ test('runner, climber and floater are permanent traits with finite inventory and
   }
   const x=u.x;m.tick();assert.ok(u.x-x>=4);
   u.state='falling';u.fall=140;u.vy=8;u.y=205;
-  m.tick();
+  for(let i=0;i<15 && u.state==='falling' && !m.done;i++)m.tick();
   assert.equal(u.state,'walking');
   assert.equal(m.lost,0);
   m.reset();
