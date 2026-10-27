@@ -6,6 +6,7 @@ import { parseLix } from '../src/lix/parse.js';
 import { PLAYABLE_SKILLS } from '../src/lix/game.js';
 import { dayNumber } from '../src/daily.js';
 import { FEATURED_COMMUNITY_LEVELS, mysteryLevel } from '../src/lix/featured-levels.js';
+import { LIX_RANKS, RANKED_POOLS, rankedLevel, isRank } from '../src/lix/ranked-levels.js';
 test('only the demonstrated practice puzzles are verified and tutorial remains default', () => {
   assert.equal(resolveLevelId(''), 'little-bridge');
   assert.equal(resolveLevelId('nonexistent'),'little-bridge');
@@ -72,4 +73,46 @@ test('homepage offers one mystery, a separate verified daily, and only curated c
   assert.match(html,/<option value="__mystery__">/);
   assert.match(html,/<option value="__daily__">/);
   assert.doesNotMatch(html,/<option value="lix-builders">/);
+});
+
+test('ranked practice uses the six real Lix categories, ordered from Lovely to Hopeless',()=>{
+  assert.deepEqual(LIX_RANKS.map(rank=>rank.name),["Lovely","Quirky","Cunning","Daunting","Vicious","Hopeless"]);
+  assert.equal(isRank('cunning'),true);
+  assert.equal(isRank('mayhem'),false,'Mayhem is not an official Lix rank');
+  assert.equal(rankedLevel('invalid'),null);
+  for (const rank of LIX_RANKS) {
+    const pool=RANKED_POOLS[rank.id];
+    assert.ok(pool.length>=2,'include at least two puzzles for '+rank.name);
+    assert.equal(new Set(pool).size,pool.length);
+    for(const id of pool){
+      const meta=LEVEL_OPTIONS[id];
+      assert.ok(meta, 'missing level metadata: '+id);
+      assert.equal(meta.verified,false, 'unverified community import must not count toward scored daily');
+      if(rank.id==='lovely') assert.equal(meta.category,'community-puzzle');
+      else {
+        assert.equal(meta.category,'ranked-community');
+        assert.equal(meta.rank,rank.id);
+        assert.match(meta.source,new RegExp('/lemforum/'+rank.name+'/'));
+        const content=readFileSync(new URL('../content/lix/ranked/'+rank.id+'/'+meta.communityFile+'.txt',import.meta.url),'utf8');
+        const level=parseLix(content);
+        assert.equal(level.title,meta.name,'official title must match '+id);
+        const used=Object.entries(level.skills).filter(([name,count])=>count!==0 && name!=='EXPLODER2');
+        assert.ok(used.length>=2,'real puzzle must offer more than one tool: '+id);
+        for(const [skill] of used)
+          assert.ok(PLAYABLE_SKILLS.includes(skill.toLowerCase()),id+' uses unimplemented '+skill);
+      }
+    }
+    const a=rankedLevel(rank.id,'2026-10-27');
+    assert.deepEqual(a,rankedLevel(rank.id,'2026-10-27'),'same rank/date is deterministic');
+    assert.ok(pool.includes(a.levelId));
+    assert.equal(a.challenge,false,'rank practice cannot affect daily streak');
+  }
+});
+test('rank selector is accessible and links to each official category without replacing the scored daily',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  for(const rank of LIX_RANKS)
+    assert.match(html,new RegExp('href="./index.html\\?difficulty='+rank.id+'" data-rank="'+rank.id+'"'));
+  assert.match(html,/href=".\/index.html\?mode=daily" data-mode="daily"/);
+  assert.match(html,/aria-label="Select game mode and practice difficulty"/);
+  assert.match(html,/rank-links a\[aria-current="page"\]/);
 });

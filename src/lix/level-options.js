@@ -9,6 +9,86 @@ export const FEATURED_LIX_LEVELS = Object.freeze([
   'lix-climbers-floaters'
 ]);
 export const LEVEL_OPTIONS = Object.freeze({
+  "quirky-flugtag": {
+    name: "Flugtag", category: 'ranked-community', verified: false,
+    rank: "quirky",
+    communityFile: "flugtag",
+    credit: "Flugtag by Insane Steve, from the CC0 Lix Quirky pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Quirky/flugtag.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "quirky-loggingyourprog": {
+    name: "Logging Your Progress", category: 'ranked-community', verified: false,
+    rank: "quirky",
+    communityFile: "loggingyourprog",
+    credit: "Logging Your Progress by Simon, from the CC0 Lix Quirky pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Quirky/loggingyourprog.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "cunning-lix": {
+    name: "LIX", category: 'ranked-community', verified: false,
+    rank: "cunning",
+    communityFile: "lix",
+    credit: "LIX by Proxima, from the CC0 Lix Cunning pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Cunning/lix.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "cunning-onceyoupop": {
+    name: "Once You Pop, You Can't Stop!", category: 'ranked-community', verified: false,
+    rank: "cunning",
+    communityFile: "onceyoupop",
+    credit: "Once You Pop, You Can't Stop! by Proxima, from the CC0 Lix Cunning pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Cunning/onceyoupop.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "daunting-backslash": {
+    name: "Backslash", category: 'ranked-community', verified: false,
+    rank: "daunting",
+    communityFile: "backslash",
+    credit: "Backslash by geoo, from the CC0 Lix Daunting pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Daunting/backslash.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "daunting-roundtrip": {
+    name: "Round Trip", category: 'ranked-community', verified: false,
+    rank: "daunting",
+    communityFile: "roundtrip",
+    credit: "Round Trip by Insane Steve, from the CC0 Lix Daunting pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Daunting/roundtrip.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "vicious-endeavor": {
+    name: "Endeavor", category: 'ranked-community', verified: false,
+    rank: "vicious",
+    communityFile: "endeavor",
+    credit: "Endeavor by Insane Steve, from the CC0 Lix Vicious pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Vicious/endeavor.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "vicious-getbehindmesatan": {
+    name: "Get Behind Me, Satan", category: 'ranked-community', verified: false,
+    rank: "vicious",
+    communityFile: "getbehindmesatan",
+    credit: "Get Behind Me, Satan by mobius, from the CC0 Lix Vicious pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Vicious/getbehindmesatan.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "hopeless-emptyspace": {
+    name: "Empty Space is Hardly a Waste", category: 'ranked-community', verified: false,
+    rank: "hopeless",
+    communityFile: "emptyspace",
+    credit: "Empty Space is Hardly a Waste by I.S./geoo, from the CC0 Lix Hopeless pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Hopeless/emptyspace.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
+  "hopeless-dontcatchmeifyoucan": {
+    name: "Don't Catch Me if You Can", category: 'ranked-community', verified: false,
+    rank: "hopeless",
+    communityFile: "dontcatchmeifyoucan",
+    credit: "Don't Catch Me if You Can by geoo, from the CC0 Lix Hopeless pack.",
+    source: "https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/single/lemforum/Hopeless/dontcatchmeifyoucan.txt",
+    hint: 'Study the route, choose your tools and save enough Lix. This ranked practice map uses experimental browser physics.'
+  },
   'lix-builders': {
     name: 'Builders', category: 'official-tutorial', verified: false,
     intro: 'Bridge over obstacles using the original Lix Builders training map. This authentic tutorial is in browser-compatibility testing.',

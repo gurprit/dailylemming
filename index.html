@@ -56,7 +56,16 @@
  .daily-summary{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;padding:12px 15px;margin:7px 0 14px;background:#193b32;border:1px solid #579d76;border-radius:12px;color:#e6fff0;font-size:13px}
  .daily-summary strong{color:#92f3ae}
  .daily-summary[hidden]{display:none}
-  .level-browser{margin:12px 0 16px}
+  .rank-browser{margin:12px 0 14px}
+ .rank-browser__head{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+ .rank-browser__head strong{font-size:11px;letter-spacing:1.25px;color:#96eab4}
+ .rank-browser__head small{font-size:11px;color:#95a9c4}
+ .rank-links{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding:3px 0 10px;overscroll-behavior-x:contain}
+ .rank-links a{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;flex:none;min-height:42px;padding:10px 14px;border:1px solid #4b607d;border-radius:10px;background:#23354f;color:#c9d8ea;font-size:12px;font-weight:800;text-decoration:none}
+ .rank-links a[aria-current="page"]{border-color:#8ee9ad;background:#205142;color:#f7fffb;box-shadow:inset 0 0 0 1px #8ee9ad}
+ .rank-links a:focus-visible{outline:3px solid #8ee9ad;outline-offset:2px}
+ .rank-links .rank-links__divider{flex:none;border-left:1px solid #516681;margin:5px 1px 5px 3px}
+ .level-browser{margin:12px 0 16px}
  .level-browser summary{cursor:pointer;color:#90e8b0;font-size:13px;font-weight:750;padding:8px 0;user-select:none}
  .level-browser summary:hover{text-decoration:underline}
  .level-browser .level-select{margin:6px 0 0}
@@ -89,6 +98,20 @@
   <div>🔥 <strong id="daily-streak">0</strong> day streak</div>
  </section>
  <h1 id="level-title">Little Bridge</h1>
+ <nav class="rank-browser" aria-label="Select game mode and practice difficulty">
+  <div class="rank-browser__head"><strong>CHOOSE YOUR DIFFICULTY</strong><small>Difficulty ranks are unscored practice · Official Lix categories</small></div>
+  <div class="rank-links">
+   <a href="./index.html" data-mode="mystery">🎲 Mystery</a>
+   <a href="./index.html?mode=daily" data-mode="daily">🏆 Scored daily</a>
+   <span class="rank-links__divider" aria-hidden="true"></span>
+   <a href="./index.html?difficulty=lovely" data-rank="lovely">1 · Lovely</a>
+   <a href="./index.html?difficulty=quirky" data-rank="quirky">2 · Quirky</a>
+   <a href="./index.html?difficulty=cunning" data-rank="cunning">3 · Cunning</a>
+   <a href="./index.html?difficulty=daunting" data-rank="daunting">4 · Daunting</a>
+   <a href="./index.html?difficulty=vicious" data-rank="vicious">5 · Vicious</a>
+   <a href="./index.html?difficulty=hopeless" data-rank="hopeless">6 · Hopeless</a>
+  </div>
+ </nav>
  <details class="level-browser">
   <summary>Explore other Lix puzzles and the verified daily challenge</summary>
  <label class="level-select" for="level-picker">
@@ -96,6 +119,7 @@
   <select id="level-picker" aria-label="Choose a mystery community level or verified daily challenge">
     <option value="__mystery__">🎲 Today's Mystery · shared community puzzle</option>
     <option value="__daily__">🏆 Verified Daily Challenge · streak</option>
+    <option value="__ranked__" disabled>🎮 Ranked practice · use the difficulty links above</option>
     <optgroup label="Multi-ability community challenges">
       <option value="lovely-escapethepit">Escape the Pit</option>
       <option value="lovely-pitfall">Pitfall</option>

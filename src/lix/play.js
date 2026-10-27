@@ -9,6 +9,16 @@ import lovely_putyourlix from '../../content/lix/lovely/putyourlix.txt?raw';
 import lovely_solareclipse from '../../content/lix/lovely/solareclipse.txt?raw';
 import lovely_alternative from '../../content/lix/lovely/alternative.txt?raw';
 import lovely_anecklaceofraindrops from '../../content/lix/lovely/anecklaceofraindrops.txt?raw';
+import ranked_quirky_flugtag from '../../content/lix/ranked/quirky/flugtag.txt?raw';
+import ranked_quirky_loggingyourprog from '../../content/lix/ranked/quirky/loggingyourprog.txt?raw';
+import ranked_cunning_lix from '../../content/lix/ranked/cunning/lix.txt?raw';
+import ranked_cunning_onceyoupop from '../../content/lix/ranked/cunning/onceyoupop.txt?raw';
+import ranked_daunting_backslash from '../../content/lix/ranked/daunting/backslash.txt?raw';
+import ranked_daunting_roundtrip from '../../content/lix/ranked/daunting/roundtrip.txt?raw';
+import ranked_vicious_endeavor from '../../content/lix/ranked/vicious/endeavor.txt?raw';
+import ranked_vicious_getbehindmesatan from '../../content/lix/ranked/vicious/getbehindmesatan.txt?raw';
+import ranked_hopeless_emptyspace from '../../content/lix/ranked/hopeless/emptyspace.txt?raw';
+import ranked_hopeless_dontcatchmeifyoucan from '../../content/lix/ranked/hopeless/dontcatchmeifyoucan.txt?raw';
 import friendlyLevel from '../../content/original/little-bridge.txt?raw';
 import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
@@ -43,6 +53,7 @@ import { MAX_MAP_SCALE, fitMapScale, coverMapScale, mapTouchGeometry, zoomMapAtF
 import { utcDay } from '../daily.js';
 import { dailyChallenge, dailyStreak, readDaily, saveDaily, dailyResultText } from './daily-challenge.js';
 import { mysteryLevel } from './featured-levels.js';
+import { RANKED_POOLS, isRank, rankedLevel } from './ranked-levels.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -51,10 +62,14 @@ const canvas = el('playfield');
 const ctx = canvas.getContext('2d');
 const params = new URLSearchParams(location.search);
 const dailyMode = params.get('mode') === 'daily';
-const mysteryMode = !dailyMode && !params.has('level');
+const rankedRank = isRank(params.get('difficulty')) ? params.get('difficulty') : null;
+const rankedMode = !dailyMode && !params.has('level') && rankedRank !== null;
+const mysteryMode = !dailyMode && !rankedMode && !params.has('level');
 const daily = dailyChallenge(utcDay());
 const mystery = mysteryLevel(utcDay());
+const ranked = rankedMode ? rankedLevel(rankedRank, utcDay()) : null;
 const levelId = dailyMode ? daily.levelId
+  : rankedMode ? ranked.levelId
   : mysteryMode ? mystery.levelId : resolveLevelId(params.get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const DEMO_TUTORIAL_SKILL = {
@@ -81,9 +96,22 @@ const source = {
   'lovely-putyourlix': lovely_putyourlix,
   'lovely-solareclipse': lovely_solareclipse,
   'lovely-alternative': lovely_alternative,
-  'lovely-anecklaceofraindrops': lovely_anecklaceofraindrops
+  'lovely-anecklaceofraindrops': lovely_anecklaceofraindrops,
+  'quirky-flugtag': ranked_quirky_flugtag,
+  'quirky-loggingyourprog': ranked_quirky_loggingyourprog,
+  'cunning-lix': ranked_cunning_lix,
+  'cunning-onceyoupop': ranked_cunning_onceyoupop,
+  'daunting-backslash': ranked_daunting_backslash,
+  'daunting-roundtrip': ranked_daunting_roundtrip,
+  'vicious-endeavor': ranked_vicious_endeavor,
+  'vicious-getbehindmesatan': ranked_vicious_getbehindmesatan,
+  'hopeless-emptyspace': ranked_hopeless_emptyspace,
+  'hopeless-dontcatchmeifyoucan': ranked_hopeless_dontcatchmeifyoucan
 }[levelId];
-const sourcePath = config.category === 'community-puzzle'
+const sourcePath = config.category === 'ranked-community'
+  ? 'levels/single/lemforum/' + config.rank[0].toUpperCase()
+      + config.rank.slice(1) + '/' + config.communityFile + '.txt'
+  : config.category === 'community-puzzle'
   ? 'levels/single/lemforum/Lovely/' + config.communityFile + '.txt'
   : config.category === 'official-tutorial'
   ? 'levels/tutorial/basic/' + config.tutorialFile + '.txt'
@@ -845,9 +873,11 @@ window.addEventListener('keydown', event => {
 });
 // Keep the tab honest when somebody plays across a 00:00 UTC reset.
 function checkDailyReset() {
-  if (!(dailyMode || mysteryMode) || utcDay() === daily.day) return;
+  if (!(dailyMode || mysteryMode || rankedMode) || utcDay() === daily.day) return;
   if (model && !model.done) model.paused = true;
-  say(mysteryMode
+  say(rankedMode
+    ? 'A different ' + rankedRank + ' practice level is ready! Reload to play.'
+    : mysteryMode
     ? 'A new mystery level is ready! Reload to discover your next puzzle.'
     : 'A new verified daily challenge is ready! Reload to play.');
   if (dailyMode) el('daily-date').textContent = 'NEW CHALLENGE AVAILABLE · RELOAD';
@@ -886,7 +916,9 @@ async function boot() {
       el('daily-date').textContent = daily.day + ' · UTC · DAY ' + String(daily.number).padStart(3,'0');
     }
     el('result-share').hidden = true;
-    el('mode-tag').textContent = mysteryMode
+    el('mode-tag').textContent = rankedMode
+      ? '🎮 ' + rankedRank.toUpperCase() + ' · LIX RANKED PRACTICE'
+      : mysteryMode
       ? '🎲 TODAY\'S MYSTERY · REAL LIX COMMUNITY PUZZLE'
       : dailyMode
       ? '✳ VERIFIED DAILY CHALLENGE · ' + config.name.toUpperCase()
@@ -897,8 +929,16 @@ async function boot() {
         : '🧪 COMMUNITY LEVEL · EXPERIMENTAL PHYSICS';
     el('credit').textContent = config.credit;
     el('source-link').href = config.source;
-    el('level-picker').value = mysteryMode ? '__mystery__'
+    el('level-picker').value = rankedMode ? '__ranked__'
+      : mysteryMode ? '__mystery__'
       : dailyMode ? '__daily__' : levelId;
+    for (const link of document.querySelectorAll('.rank-links a')) {
+      const active = link.dataset.rank === rankedRank && rankedMode
+        || link.dataset.mode === 'daily' && dailyMode
+        || link.dataset.mode === 'mystery' && mysteryMode;
+      if (active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    }
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
