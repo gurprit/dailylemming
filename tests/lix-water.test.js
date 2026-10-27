@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { drawWaterBackdrop } from '../src/lix/water.js';
+import { drawWaterBackdrop, drawWaterline } from '../src/lix/water.js';
 
 test('repeat an animated water frame behind full-width ground, clipped to level bottom', () => {
   const calls = [];
@@ -18,4 +18,21 @@ test('repeat an animated water frame behind full-width ground, clipped to level 
   assert.deepEqual(frames[0],['draw',0,256]);
   assert.deepEqual(frames.at(-1),['draw',480,256]);
   assert.equal(drawWaterBackdrop(ctx,[],0,512,288),false);
+});
+
+test('waterline extends across every pixel column at the bottom of Little Bridge', () => {
+  const calls = [];
+  const ctx = {save(){},restore(){},beginPath(){},clip(){},
+    rect(...xs) {calls.push(['clip',...xs]);},
+    drawImage(_img, sx,sy,sw,sh,dx,dy,dw,dh) {
+      calls.push(['draw',dx,dy,dw,dh]);
+    }};
+  const water = {kind:'hazard',sourceImage:'matt/water.W',
+    imageData:{width:32,height:32},frames:[{width:32,height:32}]};
+  assert.equal(drawWaterline(ctx,[water],0,512,288,14),true);
+  assert.deepEqual(calls[0],['clip',0,274,512,14]);
+  const draws = calls.filter(x=>x[0]==='draw');
+  assert.equal(draws.length,16);
+  assert.deepEqual(draws.at(0),['draw',0,274,32,14]);
+  assert.deepEqual(draws.at(-1),['draw',480,274,32,14]);
 });
