@@ -9,6 +9,8 @@ import { gadgetTrigger, insideTrigger } from './gadgets.js';
 export const PHYSICS_HZ = 15;
 export const TICK_MS = 1000 / PHYSICS_HZ;
 export const BUILDER_STEPS = 12;
+export const EXIT_ANIMATION_TICKS = 14;
+export const PLAYABLE_SKILLS = Object.freeze(['builder', 'blocker', 'basher', 'digger']);
 const STEP_TICKS = 16;
 const MAX_SAFE_FALL = 126;
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -26,15 +28,17 @@ export class LixGameModel {
     this.hazards = this.baseGadgets.filter(g => g.kind === 'hazard');
     if (this.hatches.length !== 1 || this.goals.length < 1)
       throw new Error('This experiment requires exactly one hatch and at least one goal');
-    if (!Number.isInteger(level.skills.BUILDER) || level.skills.BUILDER < 1)
-      throw new Error('This experiment requires at least one builder');
+    if (!PLAYABLE_SKILLS.some(skill => (level.skills[skill.toUpperCase()] || 0) > 0))
+      throw new Error('This experiment requires at least one supported skill');
     this.reset();
   }
 
   reset() {
     // Resetting restores the original map, erasing all previous bridge pixels.
     this.terrain = composeLixLevel(this.level, this.images).terrain;
-    this.remaining = { builder: this.level.skills.BUILDER };
+    this.remaining = Object.fromEntries(PLAYABLE_SKILLS.map(skill => [
+      skill, Math.max(0, this.level.skills[skill.toUpperCase()] || 0)
+    ]));
     this.units = [];
     this.spawned = this.saved = this.lost = this.assigned = this.ticks = 0;
     this.paused = true;
@@ -100,12 +104,13 @@ export class LixGameModel {
     this.changed = true;
     return true;
   }
-  assignBuilder(index = 0) {
+  assignBuilder(index = 0) { return this.assignSkill('builder', index); }
+  assignSkill(skill, index = 0) {
+    if (!PLAYABLE_SKILLS.includes(skill)) return false;
     const u = this.units[index];
-    // Lix builder assignments can be queued while the current 12-brick
-    // staircase is in progress. This extends it without wasting an action.
-    if (this.done || !u || !this.remaining.builder) return false;
-    if (u.state === 'builder') {
+    if (this.done || !u || !this.remaining[skill]) return false;
+    // Continuous staircases can queue extra builder assignments.
+    if (skill === 'builder' && u.state === 'builder') {
       this.saveCheckpoint();
       this.remaining.builder--;
       this.assigned++;
@@ -113,17 +118,21 @@ export class LixGameModel {
       this.emit('queued', u, String(u.queuedBuilders));
       return true;
     }
-    // A falling Lix cannot conjure a staircase in mid-air.
     if (u.state !== 'walking' || !u.grounded) return false;
     this.saveCheckpoint();
-    this.remaining.builder--;
+    this.remaining[skill]--;
     this.assigned++;
-    u.state = 'builder';
-    u.buildTicks = 0;
-    u.buildSteps = 0;
-    u.queuedBuilders = 0;
     u.vy = 0;
-    this.emit('assigned', u, 'builder');
+    u.actionTicks = 0;
+    if (skill === 'builder') {
+      u.state = 'builder';
+      u.buildTicks = 0;
+      u.buildSteps = 0;
+      u.queuedBuilders = 0;
+    } else {
+      u.state = skill;
+    }
+    this.emit('assigned', u, skill);
     return true;
   }
   spawn() {
@@ -190,12 +199,83 @@ export class LixGameModel {
     }
   }
 
+  // Blockers hold their ground, redirecting walkers that approach.
+  // They can be undone with the existing checkpoint controls.
+  stepBlocker(u) {
+    u.grounded = true;
+  }
+  stepBasher(u) {
+    u.actionTicks++;
+    if (u.actionTicks % 3 !== 1) return;
+    const direction = Math.sign(u.vx) || 1;
+    const x = Math.round(u.x + direction * 6);
+    const left = direction > 0 ? x : x - 11;
+    let removable = false, steel = false;
+    for (let yy = Math.round(u.y) - 25; yy < u.y; yy++) {
+      for (let xx = left; xx < left + 12; xx++) {
+        const i = this.terrain.index(xx, yy);
+        if (i < 0) continue;
+        if (this.terrain.steel[i]) steel = true;
+        else if (this.terrain.solid(xx, yy)) removable = true;
+      }
+    }
+    if (steel || !removable) {
+      u.state = 'walking';
+      if (steel) u.vx *= -1;
+      this.emit(steel ? 'basher-steel' : 'basher-finished', u);
+      return;
+    }
+    this.terrain.digRect(left, Math.round(u.y) - 25, 12, 25);
+    this.changed = true;
+    u.x = clamp(u.x + direction * 2, 1, this.width - 2);
+    this.emit('bashed', u);
+  }
+  stepDigger(u) {
+    u.actionTicks++;
+    if (u.actionTicks % 4 !== 1) return;
+    const x = Math.round(u.x), y = Math.round(u.y);
+    let steel = false, ground = false;
+    for (let xx = x - 6; xx < x + 7; xx++) for (let yy = y + 1; yy <= y + 4; yy++) {
+      const i = this.terrain.index(xx, yy);
+      if (i < 0) continue;
+      if (this.terrain.steel[i]) steel = true;
+      else if (this.terrain.solid(xx, yy)) ground = true;
+    }
+    if (steel || !ground) {
+      u.state = steel ? 'walking' : 'falling';
+      u.grounded = Boolean(steel);
+      u.vy = steel ? 0 : 4;
+      this.emit(steel ? 'digger-steel' : 'digger-finished', u);
+      return;
+    }
+    this.terrain.digRect(x - 6, y + 1, 13, 4);
+    this.changed = true;
+    u.y += 2;
+    this.emit('dug', u);
+  }
+  stepExiting(u) {
+    // Keep the creature visible for the authentic 14-tick Lix exiter cycle.
+    // Only increase saved AFTER the cycle finishes, so the victory dialog
+    // cannot obscure the little celebratory escape animation.
+    u.exitTicks++;
+    if (u.exitTicks < EXIT_ANIMATION_TICKS) return;
+    u.state = 'saved';
+    this.saved++;
+    this.emit('saved', u);
+  }
+
   // Native walkers can climb small lips rather than flip at each tiny slope.
   // Steeper terrain reverses their direction. Free fall is vertical.
   stepWalker(u) {
     const nextX = u.x + u.vx * 2;
     if (nextX < 1 || nextX >= this.width - 1) {
       u.vx *= -1;
+      return;
+    }
+    if (this.units.some(other => other !== u && other.state === 'blocker'
+        && Math.abs(nextX - other.x) <= 8 && Math.abs(u.y - other.y) <= 15)) {
+      u.vx *= -1;
+      this.emit('blocked', u);
       return;
     }
     const obstacle = this.terrain.solid(nextX, u.y - 2)
@@ -270,13 +350,19 @@ export class LixGameModel {
     if (this.spawned < this.initial && (this.ticks - 1) % interval === 0) this.spawn();
     for (const u of this.units) {
       if (u.state === 'saved' || u.state === 'lost') continue;
+      if (u.state === 'exiting') { this.stepExiting(u); continue; }
       if (u.state === 'builder') this.stepBuilder(u);
+      else if (u.state === 'blocker') this.stepBlocker(u);
+      else if (u.state === 'basher') this.stepBasher(u);
+      else if (u.state === 'digger') this.stepDigger(u);
       else if (u.state === 'walking') this.stepWalker(u);
       else if (u.state === 'spawning' || u.state === 'falling') this.stepFaller(u);
       if (u.state === 'lost') continue;
       if (this.inGoal(u)) {
-        u.state = 'saved'; this.saved++;
-        this.emit('saved', u);
+        u.state = 'exiting';
+        u.exitTicks = 0;
+        u.exitOriginY = u.y;
+        this.emit('exit-started', u);
       } else if (this.inHazard(u) || u.y > this.height + 12) {
         u.state = 'lost'; this.lost++;
         this.emit('drowned', u);
@@ -293,6 +379,8 @@ export class LixGameModel {
     return { spawned: this.spawned, saved: this.saved, lost: this.lost,
       total: this.initial, required: this.required, used: this.assigned,
       seconds: this.seconds, builder: this.remaining.builder,
+      skills: { ...this.remaining },
+      exiting: this.units.filter(u => u.state === 'exiting').length,
       paused: this.paused, started: this.started, done: this.done, won: this.won };
   }
 }

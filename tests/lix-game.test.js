@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LixGameModel } from '../src/lix/game.js';
+import { LixGameModel, EXIT_ANIMATION_TICKS } from '../src/lix/game.js';
 
 const tile = (w, h, color = [20, 160, 80, 255]) => {
   const data = new Uint8ClampedArray(w * h * 4);
@@ -242,4 +242,90 @@ test('undo queued builder restores queue without cancelling active build', () =>
   assert.equal(game.units[0].queuedBuilders, 0);
   assert.equal(game.remaining.builder, 4);
   assert.equal(game.history.length, 1);
+});
+
+test('exit shows original escape state before rescue count and victory appear', () => {
+  const {level, images} = sample();
+  const m = new LixGameModel(level, images);
+  m.togglePause();
+  for (let n=0;n<350 && !m.units.some(u=>u.state==='exiting');n++) m.tick();
+  assert.equal(m.units[0].state, 'exiting');
+  assert.equal(m.saved,0);
+  assert.equal(m.done,false);
+  assert.ok(m.events.some(e=>e.type==='exit-started'));
+  for(let n=0;n<EXIT_ANIMATION_TICKS-1;n++) m.tick();
+  assert.equal(m.saved,0,'do not interrupt escape animation with win modal');
+  m.tick();
+  assert.equal(m.saved,1);
+  assert.equal(m.done,true);
+  assert.equal(m.won,true);
+  assert.ok(m.events.some(e=>e.type==='saved'));
+});
+test('basher removes an actual horizontal path through ordinary pixels', () => {
+  const {level, images} = sample();
+  level.skills.BASHER = 2;
+  level.tiles.push(item('wall','terrain',43,185));
+  images.set('wall.png',tile(22,39));
+  const m = new LixGameModel(level, images);
+  m.togglePause();
+  for(let n=0;n<13;n++)m.tick();
+  const u=m.units[0];
+  assert.equal(u.state,'walking');
+  assert.equal(m.terrain.solid(44,212),true);
+  assert.equal(m.assignSkill('basher',0),true);
+  assert.equal(m.remaining.basher,1);
+  for(let n=0;n<9;n++)m.tick();
+  assert.equal(m.terrain.solid(44,212),false);
+  assert.ok(m.events.some(e=>e.type==='bashed'));
+});
+test('digger removes vertical earth but leaves steel intact', () => {
+  const {level,images}=sample();
+  level.skills.DIGGER=2;
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let n=0;n<13;n++)m.tick();
+  const u=m.units[0]; const x=Math.round(u.x);
+  assert.equal(m.terrain.solid(x,224),true);
+  assert.equal(m.assignSkill('digger',0),true);
+  m.tick();
+  assert.equal(m.terrain.solid(x,224),false);
+  assert.equal(m.remaining.digger,1);
+  assert.ok(m.events.some(e=>e.type==='dug'));
+  const steelIndex=m.terrain.index(x,230);
+  m.terrain.steel[steelIndex]=1;
+  for(let n=0;n<25&&!m.done;n++)m.tick();
+  assert.equal(m.terrain.steel[steelIndex],1);
+  assert.equal(m.terrain.solid(x,230),true);
+});
+test('blocker stays in position and reverses a nearby walker', () => {
+  const {level,images}=sample();
+  level.skills.BLOCKER=1;
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let n=0;n<13;n++)m.tick();
+  const blocker=m.units[0];
+  const x=blocker.x;
+  assert.equal(m.assignSkill('blocker',0),true);
+  m.units.push({ ...blocker, x:blocker.x-10, vx:1, state:'walking',
+    grounded:true });
+  m.tick();
+  assert.equal(blocker.state,'blocker');
+  assert.equal(blocker.x,x);
+  assert.equal(m.units[1].vx,-1);
+  assert.ok(m.events.some(e=>e.type==='blocked'));
+});
+test('undo restores the last non-builder skill and original collision pixels', () => {
+  const {level,images}=sample();
+  level.skills.DIGGER=1;
+  const m=new LixGameModel(level,images);
+  m.togglePause();
+  for(let n=0;n<13;n++)m.tick();
+  const original=m.terrain.pixels.slice();
+  assert.equal(m.assignSkill('digger',0),true);
+  for(let n=0;n<5;n++)m.tick();
+  assert.equal(m.undoBuilder(),true);
+  assert.equal(m.remaining.digger,1);
+  assert.equal(m.assigned,0);
+  assert.equal(m.paused,true);
+  assert.deepEqual(m.terrain.pixels,original);
 });

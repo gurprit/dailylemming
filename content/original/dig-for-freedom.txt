@@ -1,0 +1,35 @@
+// A one-skill Digger introduction with separate top and bottom platforms.
+$AUTHOR Daily Lemming
+$ENGLISH Dig for Freedom
+$HINT_ENGLISH The exit is below you. Dig straight down to reach the lower passage.
+#SIZE_X 640
+#SIZE_Y 320
+#INITIAL 1
+#REQUIRED 1
+#SPAWN_INTERVAL 1
+#DIGGER 3
+
+:simon/hatch001.H: 32 64
+:simon/tapir/goal.G: 520 208
+
+:simon/tapir/064h: 0 160
+:simon/tapir/064h: 64 160
+:simon/tapir/064h: 128 160
+:simon/tapir/064h: 192 160
+:simon/tapir/064h: 256 160
+:simon/tapir/064h: 320 160
+:simon/tapir/064h: 384 160
+:simon/tapir/064h: 448 160
+:simon/tapir/064h: 512 160
+:simon/tapir/064h: 576 160
+
+:simon/tapir/064h: 0 256
+:simon/tapir/064h: 64 256
+:simon/tapir/064h: 128 256
+:simon/tapir/064h: 192 256
+:simon/tapir/064h: 256 256
+:simon/tapir/064h: 320 256
+:simon/tapir/064h: 384 256
+:simon/tapir/064h: 448 256
+:simon/tapir/064h: 512 256
+:simon/tapir/064h: 576 256
