@@ -101,3 +101,27 @@ The actual asset-based test searches 26 possible starting positions; **17 positi
 The original community challenge **6 Gaps, 5 Builders** by mobius remains available at `/play-lix.html?level=6gaps`. It is still experimental and has not been certified solvable under our updated physics. Separate local practice scores are stored per level, with the hard level's old record key preserved.
 
 The new introductory layout was authored for this app, not imported from the Lix Lovely pack. Underlying terrain, hatch, goal and water images originate from the upstream Lix CC0 collection. This is still a separate practice mode and does **not** replace the main shared daily game.
+
+
+## Character animations: the original Lix CC0 sprite sheet
+
+The playable **Little Bridge** practice level now renders the original Lix creature animations rather than the temporary hand-drawn block figure. The image is `data/images/lixsprites.png` from the pinned [LixD source](https://github.com/SimonN/LixD), distributed under CC0.
+
+- **Actual atlas:** 913 × 946 pixels, a Cutbit grid with 26 columns, 27 activity rows, and 34 × 34-pixel character frames.
+- **Working gameplay states:** walking, falling/spawning, builder.
+- **Other animated previews:** blocker, digger, basher, miner, climber, floater, jumper, exiting and more. These are **art previews, not implemented gameplay skills**.
+- **Animation gallery:** open `/sprites.html` to see original frames cycling, slow down/speed up playback, or pause and inspect them.
+- **Failure-safe:** the original hand-drawn placeholder renders if the sprite sheet is unavailable.
+- **Local / static deployment:** `npm run lix:vendor:first` downloads the original character PNG along with the existing terrain images. GitHub Actions bundles it for deployment; local dev has a pinned upstream fallback.
+
+No character animation changes the existing physics, builder assignment logic or streak scores.
+
+```bash
+git switch feat/lix-character-animations
+git pull --ff-only origin feat/lix-character-animations
+npm install
+npm run lix:vendor:first
+npm run dev
+```
+
+Open `http://localhost:5173/sprites.html` (or the local Vite port). Click back to Little Bridge and test the walking/falling/building transitions in `/play-lix.html`. This is the next **visual** milestone before extending the gameplay with blocker/basher/digger actions.
