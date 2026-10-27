@@ -247,3 +247,20 @@ npm run dev
 ```
 
 Open `http://localhost:5173/` (or the Vite port) to see the new main game. `/daily.html` contains the earlier prototype.
+
+## Shared daily Lix challenges
+
+The main page `/` now defaults to one deterministic **UTC daily challenge**, using the actual Lix-art gameplay engine rather than the earlier placeholder prototype. The default daily pool is intentionally limited to **seven existing real-PNG, route-verified Daily Lemming levels**. Their order is fixed; on consecutive UTC days the game cycles through Little Bridge, Tunnel Time, Dig for Freedom, Turnaround, Double Trouble, Bridge Brigade, then Secret Passage. After seven days this small starter pool repeats. As we verify more native Lix tutorials, the pool can be extended deliberately. None of the original CC0 Lix basic tutorial imports is misrepresented as verified or included in the shared challenge yet.
+
+Click `Choose a puzzle → Today's Daily Challenge` to return to the shared daily mode. Explicit `?level=lix-bashers` or another named level instead opens ordinary practice, which never changes the daily streak. The original pre-Lix daily prototype remains at `/daily.html` with separate saved data.
+
+Daily results are stored locally in `daily-lemming-lix-challenge-v1`, independent from the original prototype and ordinary practice. The first attempt is immutable for the day, later runs improve the best result, and consecutive UTC winning days create a streak. The game shows a shareable text summary. Existing tabs are paused and told to reload after the next 00:00 UTC reset. Daily level selection is source-controlled and tested in `tests/lix-daily-challenge.test.js`.
+
+```bash
+git switch master
+git pull --ff-only origin master
+npm install
+npm run lix:vendor:first
+npm test
+npm run dev
+```
