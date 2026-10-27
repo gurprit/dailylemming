@@ -30,6 +30,13 @@ export const LEVEL_OPTIONS = Object.freeze({
     source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-skills-and-exit/content/original/dig-for-freedom.txt',
     hint: 'Select Digger (🕳️), then tap your Lix near DIG HERE on the upper platform.'
   },
+  'secret-passage': {
+    name: 'Secret Passage', category: 'advanced', verified: true,
+    intro: 'Two abilities, one escape: mine diagonally through the upper shelf, then bash through a lower sandstone wall.',
+    credit: 'Original Daily Lemming two-skill puzzle using CC0 Lix artwork.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-targeting-miner/content/original/secret-passage.txt',
+    hint: 'Start with Miner at MINE HERE. After landing in the lower corridor, switch to Basher near BASH HERE.'
+  },
   pitfall: {
     name: 'Pitfall', category: 'community', verified: false,
     intro: 'An original Lix puzzle by Insane Steve. Real map and terrain, but many original skills are not implemented yet.',
