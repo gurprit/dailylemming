@@ -4,6 +4,7 @@ import { LixGameModel, TICK_MS } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
 import { gadgetDrawable } from './render.js';
 import { getPractice, savePractice, practiceLabel } from './practice.js';
+import { projectBuilder } from './preview.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -92,7 +93,11 @@ async function loadArt() {
   return result;
 }
 function drawBuilderPreview(u) {
-  if (!u.grounded || u.state !== 'walking' || !model.remaining.builder || !model.paused) return;
+  if (!model.paused || !model.remaining.builder ||
+    !['walking', 'builder'].includes(u.state)) return null;
+  if (u.state === 'walking' && !u.grounded) return null;
+  const projection = projectBuilder(model.terrain, u);
+  if (!projection) return null;
   ctx.save();
   ctx.globalAlpha = 0.32;
   ctx.fillStyle = '#ffdd93';
@@ -101,13 +106,20 @@ function drawBuilderPreview(u) {
   ctx.beginPath();
   ctx.arc(u.x, u.y - 10, 18, 0, Math.PI * 2);
   ctx.stroke();
-  // Projection follows the 12-step builder profile, not the old giant slope.
-  for (let step = 0; step < 12; step++) {
-    const x = u.x + u.vx * step * 4;
-    const y = u.y - step * 2 + 2;
-    ctx.fillRect(u.vx > 0 ? x : x - 10, y, 12, 2);
+  for (const brick of projection.bricks) {
+    ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+  }
+  if (projection.blocked) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ff8f86';
+    ctx.strokeStyle = '#fff1da';
+    ctx.lineWidth = 2;
+    const { x, y } = projection.blocked;
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillText('!', x - 2, y + 4);
   }
   ctx.restore();
+  return projection.blocked;
 }
 function paintCharacter(u) {
   if (['lost', 'saved'].includes(u.state)) return;
@@ -146,10 +158,16 @@ function draw() {
       ctx.fillText('EXIT', g.x + 4, Math.max(12, g.y - 7));
     }
   }
+  let obstacle = null;
   for (const u of model.units) {
-    drawBuilderPreview(u);
+    obstacle ||= drawBuilderPreview(u);
     paintCharacter(u);
   }
+  const warning = el('preview-warning');
+  warning.hidden = !obstacle;
+  if (obstacle) warning.textContent = obstacle.steel
+    ? '⚠ Steel above: a longer queued staircase may collide and turn your builder back.'
+    : '⚠ Overhead obstacle: this staircase may stop early and reverse direction.';
   if (model.paused && !model.done) {
     ctx.fillStyle = 'rgba(12,22,42,.56)';
     ctx.fillRect(0, 0, canvas.width, 46);
@@ -175,6 +193,7 @@ function updateHud() {
   el('pause').disabled = state.done;
   el('speed').textContent = '⏩ ' + speed + '× speed';
   el('step').disabled = !state.paused || state.done;
+  el('undo').disabled = !model.undoAvailable;
   el('builder').setAttribute('aria-pressed', String(state.builder > 0));
 }
 function finish() {
@@ -268,6 +287,18 @@ canvas.addEventListener('pointerdown', event => {
 el('builder').addEventListener('click', () => say('Builder selected: tap the little walker to create stairs.'));
 el('pause').addEventListener('click', () => { if (model) { model.togglePause(); updateHud(); } });
 el('restart').addEventListener('click', restart);
+function undo() {
+  if (!model?.undoBuilder()) return;
+  ended = false;
+  processedEvents = model.events.length;
+  accumulator = 0;
+  last = 0;
+  el('result').hidden = true;
+  say('Last builder undone. Skill, position and terrain restored. Press Resume when ready.');
+  updateHud();
+  draw();
+}
+el('undo').addEventListener('click', undo);
 el('step').addEventListener('click', () => {
   if (model?.stepOnce()) { updateHud(); draw(); }
 });
@@ -283,6 +314,10 @@ window.addEventListener('keydown', event => {
   if (!el('result').hidden) return;
   if (event.code === 'Space') { event.preventDefault(); model.togglePause(); updateHud(); }
   if (event.key.toLowerCase() === 'r') restart();
+  if (event.key.toLowerCase() === 'z' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    undo();
+  }
   if (event.key === '.' && model?.stepOnce()) { updateHud(); draw(); }
 });
 window.addEventListener('pagehide', () => cancelAnimationFrame(animation));
