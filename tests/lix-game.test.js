@@ -367,3 +367,21 @@ test('miner stops on steel without cutting through indestructible material',()=>
   assert.equal(m.terrain.solid(px,py),true);
   assert.ok(m.events.some(e=>e.type==='miner-steel'));
 });
+
+test('a stationary blocker is allowed to remain once the rescue quota is achieved', () => {
+  const {level, images} = sample();
+  level.numeric.INITIAL = 3;
+  level.numeric.REQUIRED = 2;
+  level.skills.BLOCKER = 1;
+  const game = new LixGameModel(level, images);
+  game.spawned = 3;
+  game.units = [
+    {x: 12, y:223, state:'blocker'},
+    {x: 125, y:223, state:'saved'},
+    {x: 126, y:223, state:'saved'}
+  ];
+  game.saved = 1;
+  assert.equal(game.readyToFinish, false);
+  game.saved = 2;
+  assert.equal(game.readyToFinish, true);
+});

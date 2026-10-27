@@ -37,6 +37,20 @@ export const LEVEL_OPTIONS = Object.freeze({
     source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-targeting-miner/content/original/secret-passage.txt',
     hint: 'Start with Miner at MINE HERE. After landing in the lower corridor, switch to Basher near BASH HERE.'
   },
+  turnaround: {
+    name: 'Turnaround', category: 'crowd', verified: true,
+    intro: 'Three little Lix are heading toward a dangerous edge. One must become a Blocker to redirect the other two towards freedom.',
+    credit: 'Original Daily Lemming Blocker tutorial, CC0 Lix artwork.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-dirt-particles-blockers/content/original/turnaround.txt',
+    hint: 'Choose Blocker and tap the first Lix near BLOCK HERE. Two others will follow and turn around.'
+  },
+  'bridge-brigade': {
+    name: 'Bridge Brigade', category: 'crowd', verified: true,
+    intro: 'Protect a small group with a Blocker, then use a Builder to cross the gap and reach the exit.',
+    credit: 'Original Daily Lemming crowd and bridge puzzle, using CC0 Lix tiles.',
+    source: 'https://github.com/gurprit/dailylemming/blob/feat/lix-dirt-particles-blockers/content/original/bridge-brigade.txt',
+    hint: 'First: Block the first Lix near BLOCK HERE. Then: Build near BUILD HERE to bridge the gap.'
+  },
   pitfall: {
     name: 'Pitfall', category: 'community', verified: false,
     intro: 'An original Lix puzzle by Insane Steve. Real map and terrain, but many original skills are not implemented yet.',

@@ -203,3 +203,27 @@ npm run dev
 ```
 
 Try `/play-lix.html?level=secret-passage` and move your pointer over a standing Lix to see the reticle.
+
+## v0.9: Dirt particles and Blocker crowd levels
+
+- The rendering layer now draws lightweight **2–3px sandstone dirt chips** whenever the engine emits a `dug` or `mined` event. Digger chips spray mostly upwards; Miner chips spray up/backwards. They arc down under gravity and fade within ~0.3–0.6 seconds. 160 particles maximum. They're visual-only, with no effect on physics or score; effects clear on Restart and Undo.
+- **Turnaround:** 3 Lix, 1 Blocker, 2 required rescues. A first Lix becomes a permanent Blocker near the left edge, turning the next two back towards the exit. Actual-image simulation confirms **26 successful placements** and a no-skill failure. The game ends promptly once the quota is reached, without waiting for the volunteering Blocker to disappear.
+- **Bridge Brigade:** a second 3-Lix puzzle. Block the first to redirect its friends, then build a staircase over the gap with the second. This teaches two skills and switches the selected skill from Blocker to Builder automatically. Real PNG simulation confirms **nine Builder starting positions** work and that neither skill alone solves the level.
+- Both new stages use original Daily Lemming layouts and official CC0 Lix artwork. They follow Secret Passage in the verified practice progression: **Little Bridge → Double Trouble → Tunnel Time → Dig for Freedom → Secret Passage → Turnaround → Bridge Brigade.**
+- Imported community levels are still explicitly experimental; the shared UTC daily puzzle and streak logic remain unchanged.
+
+To test:
+
+```bash
+git fetch origin
+git switch feat/lix-dirt-particles-blockers
+git pull --ff-only
+npm install
+npm run lix:vendor:first
+npm test
+npm run test:turnaround
+npm run test:bridge-brigade
+npm run dev
+```
+
+Open `/play-lix.html?level=turnaround` or `/play-lix.html?level=bridge-brigade`. To see the dirt particles, replay Dig for Freedom or Secret Passage.
