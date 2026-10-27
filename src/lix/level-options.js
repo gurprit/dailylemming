@@ -48,7 +48,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Original Lix Platformers tutorial. Assign platformer skills; browser physics remain an approximate adaptation.',
     credit: 'Original Lix level by Wuzzy/Simon, CC0 public-domain dedication.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/platformers.txt',
-    hint: 'Use platformer to guide your Lix toward the exit. Full winning-route verification is still pending.',
+    hint: 'Use platformer to guide your Lix toward the exit. Not yet solution-verified by our browser engine.',
     tutorialFile: 'platformers'
   },
   'lix-jumpers': {
@@ -56,7 +56,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Original Lix Jumpers tutorial. Assign jumper skills; browser physics remain an approximate adaptation.',
     credit: 'Original Lix level by geoo, CC0 public-domain dedication.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/jumpers.txt',
-    hint: 'Use jumper to guide your Lix toward the exit. Full winning-route verification is still pending.',
+    hint: 'Use jumper to guide your Lix toward the exit. Not yet solution-verified by our browser engine.',
     tutorialFile: 'jumpers'
   },
   'lix-runners': {
@@ -64,7 +64,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Original Lix Runners tutorial. Assign runner, climber and jumper skills; browser physics remain an approximate adaptation.',
     credit: 'Original Lix level by Simon, CC0 public-domain dedication.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/runners.txt',
-    hint: 'Use runner, climber and jumper to guide your Lix toward the exit. Full winning-route verification is still pending.',
+    hint: 'Use runner, climber and jumper to guide your Lix toward the exit. Not yet solution-verified by our browser engine.',
     tutorialFile: 'runners'
   },
   'lix-walkers-turn': {
@@ -72,7 +72,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Original Lix Walkers Turn tutorial. Assign walker skills; browser physics remain an approximate adaptation.',
     credit: 'Original Lix level by Wuzzy, CC0 public-domain dedication.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/walkers-turn.txt',
-    hint: 'Use walker to guide your Lix toward the exit. Full winning-route verification is still pending.',
+    hint: 'Use walker to guide your Lix toward the exit. Not yet solution-verified by our browser engine.',
     tutorialFile: 'walkers-turn'
   },
   'lix-climbers-floaters': {
@@ -80,7 +80,7 @@ export const LEVEL_OPTIONS = Object.freeze({
     intro: 'Original Lix Climbers and Floaters tutorial. Assign climber and floater skills; browser physics remain an approximate adaptation.',
     credit: 'Original Lix level by Rubix/Simon, CC0 public-domain dedication.',
     source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/climbers-floaters.txt',
-    hint: 'Use climber and floater to guide your Lix toward the exit. Full winning-route verification is still pending.',
+    hint: 'Use climber and floater to guide your Lix toward the exit. Not yet solution-verified by our browser engine.',
     tutorialFile: 'climbers-floaters'
   },
   'little-bridge': {
