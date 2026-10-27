@@ -2,6 +2,7 @@ import rawLevel from '../../content/lix/lovely/6gaps.txt?raw';
 import { parseLix, sourceAssets } from './parse.js';
 import { LixGameModel, TICK_MS } from './game.js';
 import { detectLixFrames, cutLixFrame } from './frames.js';
+import { gadgetDrawable } from './render.js';
 
 const SHA = 'f1e805048fe439a4a0e9cc650c613713ababac8b';
 const PREFIX = 'https://raw.githubusercontent.com/SimonN/LixD/' + SHA + '/images/';
@@ -115,11 +116,7 @@ function draw() {
   for (const g of model.baseGadgets) {
     if (!g.image) continue;
     // Animated hatches and liquids cycle through their clipped Cutbit frames.
-    const frames = g.frames || [];
-    const frame = frames.length > 1
-      ? frames[Math.floor(model.ticks / 5) % frames.length].canvas
-      : g.image;
-    ctx.drawImage(frame, g.x, g.y);
+    ctx.drawImage(gadgetDrawable(g, model.ticks), g.x, g.y);
     if (g.kind === 'goal') {
       ctx.fillStyle = '#98f4b6';
       ctx.font = 'bold 11px system-ui';
@@ -166,21 +163,34 @@ function finish() {
 }
 function loop(now) {
   if (!model) return;
-  if (!last) last = now;
-  const dt = Math.min(100, now - last);
-  last = now;
-  if (!model.paused && !model.done) {
-    accumulator += dt * speed;
-    let n = 0;
-    while (accumulator >= TICK_MS && !model.done && n++ < 10) {
-      model.tick();
-      accumulator -= TICK_MS;
+  try {
+    if (!last) last = now;
+    const dt = Math.min(100, now - last);
+    last = now;
+    if (!model.paused && !model.done) {
+      accumulator += dt * speed;
+      let n = 0;
+      while (accumulator >= TICK_MS && !model.done && n++ < 10) {
+        model.tick();
+        accumulator -= TICK_MS;
+      }
     }
+    updateHud();
+    draw();
+    if (model.done) finish();
+    animation = requestAnimationFrame(loop);
+  } catch (error) {
+    // Don't leave the status stuck at RUNNING when a render/physics error
+    // prevents requestAnimationFrame from scheduling another frame.
+    model.paused = true;
+    el('state').textContent = 'ERROR';
+    el('pause').disabled = true;
+    el('loading').textContent = 'Game stopped: ' + (error?.message || String(error))
+      + '. Please refresh or restart after fixing the error.';
+    el('loading').hidden = false;
+    say('The game encountered an error; details are shown on the game screen.');
+    console.error('Daily Lemming: game loop stopped', error);
   }
-  updateHud();
-  draw();
-  if (model.done) finish();
-  animation = requestAnimationFrame(loop);
 }
 function restart() {
   if (!model) return;
