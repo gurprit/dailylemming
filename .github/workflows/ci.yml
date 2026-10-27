@@ -20,6 +20,7 @@ jobs:
       - run: npm run test:real-lix
       - run: npm run test:community-lix
       - run: npm run test:official-tutorials
+      - run: npm run test:mystery-levels
       - run: npm run test:double-trouble
       - run: npm run test:tunnel-time
       - run: npm run test:dig-for-freedom
