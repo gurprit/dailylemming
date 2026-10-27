@@ -31,12 +31,19 @@ export class Game {
     this.acc = 0;
     this.last = 0;
     this.done = false;
-    this.paused = false;
+    // Start paused, so discovering the controls cannot consume a daily attempt.
+    this.paused = true;
+    this.started = false;
     this.running = true;
     this.emit();
   }
   setSkill(skill) { this.selected = skill; this.emit(); }
-  togglePause() { if (!this.done) this.paused = !this.paused; this.emit(); }
+  togglePause() {
+    if (this.done) return;
+    if (this.paused) this.started = true;
+    this.paused = !this.paused;
+    this.emit();
+  }
   toggleSpeed() { this.speed = this.speed === 1 ? 2 : 1; this.emit(); }
   stop() {
     this.running = false;
@@ -49,7 +56,8 @@ export class Game {
       saved: this.saved, lost: this.lost, total: this.level.total,
       required: this.level.required, spawned: this.spawned,
       seconds: this.seconds, limit: this.level.limit, skills: { ...this.skills },
-      used: this.used, paused: this.paused, speed: this.speed, done: this.done
+      used: this.used, paused: this.paused, started: this.started,
+      speed: this.speed, done: this.done
     });
   }
   handlePointer(event) {
@@ -263,10 +271,12 @@ export class Game {
       ctx.restore();
     }
     if (this.paused && !this.done) {
-      ctx.fillStyle = 'rgba(10,18,37,.65)'; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#f3faf9'; ctx.font = 'bold 34px system-ui';
-      ctx.textAlign = 'center'; ctx.fillText('PAUSED', W / 2, H / 2 - 2);
-      ctx.font = '16px system-ui'; ctx.fillText('Tap a little wanderer to assign a skill', W / 2, H / 2 + 28);
+      ctx.fillStyle = 'rgba(10,18,37,.25)'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f3faf9'; ctx.font = 'bold 28px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.started ? 'PAUSED' : 'READY TO RESCUE?', W / 2, 65);
+      ctx.font = '15px system-ui';
+      ctx.fillText(this.started ? 'Take your time, then resume below' : 'Choose a skill, then press Start below', W / 2, 92);
     }
   }
 }

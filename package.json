@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test"
+    "test": "node --test",
+    "lix:audit": "node scripts/audit-lix.mjs",
+    "lix:assets": "node scripts/audit-lix.mjs --assets"
   },
   "devDependencies": {
     "vite": "^6.3.0"
