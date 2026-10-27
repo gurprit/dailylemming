@@ -29,7 +29,11 @@ test('physics state selects only implemented animations and builder timing cycle
   assert.equal(activityForUnit({state:'falling'}),'faller');
   assert.equal(activityForUnit({state:'walking'}),'walker');
   assert.equal(activityForUnit({state:'builder'}),'builder');
-  assert.equal(activityForUnit({state:'blocker'}),null);
+  assert.equal(activityForUnit({state:'blocker'}),'blocker');
+  assert.equal(activityForUnit({state:'basher'}),'basher');
+  assert.equal(activityForUnit({state:'digger'}),'digger');
+  assert.equal(activityForUnit({state:'exiting'}),'exiter');
+  assert.equal(activityForUnit({state:'unsupported'}),null);
   assert.equal(frameColumnForUnit({state:'walking'},0,[1,3,5]),1);
   assert.equal(frameColumnForUnit({state:'walking'},2,[1,3,5]),5);
   assert.equal(frameColumnForUnit({state:'builder',buildTicks:1},0,[0,1,2,3]),2);
@@ -50,4 +54,14 @@ test('character renderer uses native bottom-of-frame foot anchor and mirror', ()
   assert.equal(image[3],1+9*35);
   assert.deepEqual(image.slice(-4),[-16,-26,34,34]);
   assert.equal(drawActivitySprite(context,atlas,'blocker',0),false);
+});
+
+test('the original exiter frames advance during escape instead of using global walk phase', () => {
+  const indices = Array.from({length:11}, (_,i)=>i);
+  const first = frameColumnForUnit({state:'exiting',exitTicks:0},100,indices);
+  const middle = frameColumnForUnit({state:'exiting',exitTicks:9},100,indices);
+  const final = frameColumnForUnit({state:'exiting',exitTicks:17},100,indices);
+  assert.equal(first,0);
+  assert.ok(middle > first && final > middle);
+  assert.equal(frameColumnForUnit({state:'exiting',exitTicks:0},200,indices),0);
 });
