@@ -450,6 +450,9 @@ function loop(now) {
 function restart() {
   if (!model) return;
   model.reset();
+  selectedSkill = ['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
+    : levelId === 'secret-passage' ? 'miner'
+    : Object.keys(SKILL_LABELS).find(skill => model.remaining[skill] > 0) || 'builder';
   accumulator = 0; last = 0; speed = 1; ended = false;
   processedEvents = 0;
   dirt.clear();
