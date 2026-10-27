@@ -73,6 +73,10 @@ export function drawActivitySprite(ctx, atlas, activity, tick, {
 }
 
 export function activityForUnit(unit) {
+  if (unit.state === 'exiting') return 'exiter';
+  if (unit.state === 'blocker') return 'blocker';
+  if (unit.state === 'basher') return 'basher';
+  if (unit.state === 'digger') return 'digger';
   if (unit.state === 'builder') return 'builder';
   if (unit.state === 'walking') return 'walker';
   if (unit.state === 'falling' || unit.state === 'spawning') return 'faller';
@@ -82,7 +86,10 @@ export function frameColumnForUnit(unit, tick, indices) {
   if (!indices?.length) return null;
   // Lix's builder animation advances once per physics tick; builder starts
   // around source frame 6. Walkers also advance on native 15Hz physics ticks.
-  const offset = unit.state === 'builder' ? (unit.buildTicks || 0) + 5
+  const offset = unit.state === 'exiting'
+    ? Math.min(indices.length - 1, Math.floor((unit.exitTicks || 0) * indices.length / 18))
+    : unit.state === 'builder' ? (unit.buildTicks || 0) + 5
+    : unit.state === 'basher' || unit.state === 'digger' ? (unit.actionTicks || 0)
     : Math.floor(Math.max(0, tick));
   return indices[((offset % indices.length) + indices.length) % indices.length];
 }
@@ -97,8 +104,13 @@ export function drawCharacterSprite(ctx, atlas, unit, tick) {
   const sx = 1 + col * (w + 1);
   const sy = 1 + row.row * (h + 1);
   ctx.save();
-  ctx.translate(Math.round(unit.x), Math.round(unit.y));
+  // The exiter jumps with a small arc while cycling through Lix's own
+  // exiter frames, rather than vanishing the instant the goal is touched.
+  const leap = unit.state === 'exiting'
+    ? Math.sin(Math.PI * Math.min(1, (unit.exitTicks || 0) / 18)) * 13 : 0;
+  ctx.translate(Math.round(unit.x), Math.round(unit.y - leap));
   ctx.scale(unit.vx < 0 ? -1 : 1, 1);
+  ctx.imageSmoothingEnabled = false;
   // Native Lix anchor: at the feet, 8px above the bottom of its sprite.
   ctx.drawImage(atlas.canvas, sx, sy, w, h,
     -(Math.floor(w / 2) - 1), -(h - 8), w, h);
