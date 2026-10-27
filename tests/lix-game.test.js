@@ -60,10 +60,10 @@ test('builder creates collision terrain and is limited by skill inventory', () =
   const x = u.x, y = u.y;
   assert.equal(game.assignBuilder(0), true);
   assert.equal(game.remaining.builder, 4);
-  for (let i = 0; i < 6; i++) game.tick();
+  for (let i = 0; i < 16; i++) game.tick();
   assert.equal(u.state, 'builder');
   assert.ok(u.x > x && u.y < y);
-  assert.ok(game.terrain.solid(Math.round(x + 3), Math.round(y - 3)));
+  assert.ok(game.terrain.solid(Math.round(x + 3), Math.round(y + 2)));
   assert.equal(game.assignBuilder(0), false);
   game.reset();
   assert.equal(game.remaining.builder, 5);
@@ -113,4 +113,48 @@ test('Lix sprite sheet dimensions do not push hatch spawn into the middle of map
   assert.equal(unit.state, 'walking');
   assert.equal(model.saved, 0);
   assert.equal(model.lost, 0);
+});
+
+test('builders cannot create mid-air platforms or consume skill while falling', () => {
+  const { level, images } = sample(false);
+  level.tiles = level.tiles.filter(t => t.kind !== 'terrain');
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let n = 0; n < 3; n++) model.tick();
+  assert.equal(model.units[0].state, 'spawning');
+  assert.equal(model.assignBuilder(0), false);
+  assert.equal(model.remaining.builder, 5);
+});
+test('walking off a gap enters a vertical fall instead of hovering over water', () => {
+  const { level, images } = sample(true);
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  let falling = false, x = null, oldY = null;
+  for (let i = 0; i < 180 && !model.done; i++) {
+    model.tick();
+    const u = model.units[0];
+    if (u?.state === 'falling') {
+      if (!falling) { falling = true; x = u.x; oldY = u.y; }
+      else {
+        assert.equal(u.x, x, 'a standard Lix fall has no horizontal motion');
+        assert.ok(u.y > oldY, 'the foot must descend every fall update');
+        break;
+      }
+    }
+  }
+  assert.equal(falling, true);
+});
+test('a builder places no more than 12 short steps and rises 2px per brick', () => {
+  const { level, images } = sample();
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  for (let i = 0; i < 12; i++) model.tick();
+  const u = model.units[0];
+  assert.equal(model.assignBuilder(0), true);
+  const startY = u.y;
+  for (let i = 0; i < 200; i++) model.tick();
+  const bricks = model.events.filter(e => e.type === 'brick');
+  assert.equal(bricks.length, 12);
+  assert.equal(bricks.at(-1).y, Math.round(startY - 24));
+  assert.equal(model.assigned, 1);
 });
