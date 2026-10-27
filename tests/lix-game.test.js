@@ -271,11 +271,11 @@ test('basher removes an actual horizontal path through ordinary pixels', () => {
   for(let n=0;n<13;n++)m.tick();
   const u=m.units[0];
   assert.equal(u.state,'walking');
-  assert.equal(m.terrain.solid(53,212),true);
+  assert.equal(m.terrain.solid(44,212),true);
   assert.equal(m.assignSkill('basher',0),true);
   assert.equal(m.remaining.basher,1);
   for(let n=0;n<9;n++)m.tick();
-  assert.equal(m.terrain.solid(53,212),false);
+  assert.equal(m.terrain.solid(44,212),false);
   assert.ok(m.events.some(e=>e.type==='bashed'));
 });
 test('digger removes vertical earth but leaves steel intact', () => {
