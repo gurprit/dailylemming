@@ -90,6 +90,27 @@ test('hazard checks use source filename instead of calling string methods on can
 
   assert.equal(typeof model.hazards[0].image, 'object');
   assert.equal(model.hazards[0].sourceImage, 'water.W');
-  assert.equal(model.inHazard({ x: 50, y: 198 }), true);
-  assert.equal(model.inHazard({ x: 20, y: 198 }), false);
+  assert.equal(model.inHazard({ x: 50, y: 206 }), true);
+  assert.equal(model.inHazard({ x: 20, y: 206 }), false);
+});
+
+test('Lix sprite sheet dimensions do not push hatch spawn into the middle of map', () => {
+  const { level, images } = sample();
+  const hatch = images.get('hatch.H.png');
+  hatch.canvas = { width: 500, height: 144 }; // multi-frame texture atlas
+  hatch.frames = [hatch.canvas];
+  const model = new LixGameModel(level, images);
+  model.togglePause();
+  model.tick();
+  const unit = model.units[0];
+  assert.equal(unit.x, 8 + 8); // per-frame width, not 500px atlas width
+  assert.equal(unit.state, 'spawning');
+  for (let i = 0; i < 50 && unit.state === 'spawning'; i++) {
+    const startX = unit.x;
+    model.tick();
+    assert.equal(unit.x, startX, 'hatch exit movement must be vertical until landing');
+  }
+  assert.equal(unit.state, 'walking');
+  assert.equal(model.saved, 0);
+  assert.equal(model.lost, 0);
 });
