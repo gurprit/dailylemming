@@ -115,5 +115,12 @@ console.log('Friendly tutorial real-assets win check: ' + JSON.stringify({
     skills: solution.result.used, seconds: solution.result.seconds
   }
 }));
-if (!solution || solution.result.used > 2)
-  throw new Error('Friendly puzzle has no verified one-builder rescue with real assets');
+if (!solution || solution.result.used !== 1 || wins.length < 15 || !wins.includes(166))
+  throw new Error('Friendly puzzle is not reliably solvable in a broad one-builder timing window');
+
+// Ensure the gap is a puzzle, not just a decorative hole anyone crosses.
+const noSkill = new LixGameModel(friendly, assets);
+noSkill.togglePause();
+for (let i = 0; i < 1500 && !noSkill.done; i++) noSkill.tick();
+if (!noSkill.done || noSkill.won || noSkill.saved)
+  throw new Error('Friendly puzzle should require a builder to cross its gap');
