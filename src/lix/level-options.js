@@ -2,6 +2,47 @@
 // Imported original levels require more original-Lix skills than our current
 // browser adapter implements; don't silently claim they are solvable.
 export const LEVEL_OPTIONS = Object.freeze({
+  'lix-builders': {
+    name: 'Builders', category: 'official-tutorial', verified: false,
+    intro: 'Bridge over obstacles using the original Lix Builders training map. This authentic tutorial is in browser-compatibility testing.',
+    credit: 'Original Lix tutorial by Simon, distributed under CC0.',
+    source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/builders.txt',
+    hint: 'Official Lix tutorial: choose Builder, then tap a grounded Lix. Some original physics are still being adapted.',
+    tutorialFile: 'builders'
+  },
+  'lix-bashers': {
+    name: 'Bashers', category: 'official-tutorial', verified: false,
+    intro: 'Tunnel through sandstone using the original Lix Bashers training map. This authentic tutorial is in browser-compatibility testing.',
+    credit: 'Original Lix tutorial by Simon, distributed under CC0.',
+    source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/bashers.txt',
+    hint: 'Official Lix tutorial: choose Basher, then tap a grounded Lix. Some original physics are still being adapted.',
+    tutorialFile: 'bashers'
+  },
+  'lix-diggers': {
+    name: 'Diggers', category: 'official-tutorial', verified: false,
+    intro: 'Dig through the floor in the original Lix Diggers training map. This authentic tutorial is in browser-compatibility testing.',
+    credit: 'Original Lix tutorial by Simon, distributed under CC0.',
+    source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/diggers.txt',
+    hint: 'Official Lix tutorial: choose Digger, then tap a grounded Lix. Some original physics are still being adapted.',
+    tutorialFile: 'diggers'
+  },
+  'lix-miners': {
+    name: 'Miners', category: 'official-tutorial', verified: false,
+    intro: 'Mine sloping tunnels in the original Lix Miners training map. This authentic tutorial is in browser-compatibility testing.',
+    credit: 'Original Lix tutorial by Simon/Wuzzy, distributed under CC0.',
+    source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/miners.txt',
+    hint: 'Official Lix tutorial: choose Miner, then tap a grounded Lix. Some original physics are still being adapted.',
+    tutorialFile: 'miners'
+  },
+  'lix-blockers': {
+    name: 'Blockers', category: 'official-tutorial', verified: false,
+    intro: 'Redirect crowds with the original Lix Blockers training map. This authentic tutorial is in browser-compatibility testing.',
+    credit: 'Original Lix tutorial by Simon, distributed under CC0.',
+    source: 'https://github.com/SimonN/LixD/blob/f1e805048fe439a4a0e9cc650c613713ababac8b/levels/tutorial/basic/blockers.txt',
+    hint: 'Official Lix tutorial: choose Blocker, then tap a grounded Lix. Some original physics are still being adapted.',
+    tutorialFile: 'blockers'
+  },
+
   'little-bridge': {
     name: 'Little Bridge', category: 'tutorial', verified: true,
     intro: 'One gap and one builder. A friendly introduction to the real Lix artwork.',
