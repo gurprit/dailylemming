@@ -46,6 +46,10 @@
  .daily-summary{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;padding:12px 15px;margin:7px 0 14px;background:#193b32;border:1px solid #579d76;border-radius:12px;color:#e6fff0;font-size:13px}
  .daily-summary strong{color:#92f3ae}
  .daily-summary[hidden]{display:none}
+  .level-browser{margin:12px 0 16px}
+ .level-browser summary{cursor:pointer;color:#90e8b0;font-size:13px;font-weight:750;padding:8px 0;user-select:none}
+ .level-browser summary:hover{text-decoration:underline}
+ .level-browser .level-select{margin:6px 0 0}
   .experiment-hint{min-height:22px}
  @media(max-width:660px){.experiment-buttons button{flex:1 1 42%}.experiment-buttons button#restart{flex:1 1 100%}}
  .experiment-hint{font-size:13px;line-height:1.6;color:#bccde4;margin:13px 3px 0}
@@ -76,8 +80,10 @@
  </section>
  <h1 id="level-title">Little Bridge</h1>
  <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
+ <details class="level-browser">
+  <summary>Explore other Lix puzzles and the verified daily challenge</summary>
  <label class="level-select" for="level-picker">
-  <span>Surprise me, or choose a level</span>
+  <span>Choose a mystery or a particular community level</span>
   <select id="level-picker" aria-label="Choose a mystery community level or verified daily challenge">
     <option value="__mystery__">🎲 Today's Mystery · shared community puzzle</option>
     <option value="__daily__">🏆 Verified Daily Challenge · streak</option>
@@ -95,6 +101,7 @@
     </optgroup>
   </select>
  </label>
+ </details>
  <p class="compat-warning" id="compat-warning" role="status" hidden></p>
  <section aria-label="Playable puzzle">
   <div class="experiment-stats">
