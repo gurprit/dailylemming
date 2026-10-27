@@ -1,97 +1,135 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101728">
-  <meta name="description" content="A new creature-rescue puzzle every day. Five minutes to save the wanderers.">
-  <title>Daily Lemming | One puzzle. Every day.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/styles.css">
-  <script type="module" src="/src/main.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101728">
+<meta name="description" content="Play Lix-inspired rescue puzzles using original CC0 Lix artwork in Daily Lemming.">
+<title>Daily Lemming | Play</title>
+<link rel="stylesheet" href="/src/styles.css">
+<style>
+ .experiment{max-width:1050px;margin:0 auto;padding:20px 20px 55px}
+ .experiment-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;padding:10px 0 25px}
+ .experiment-nav a{font-weight:700}
+ .experiment-nav small{color:#93a8c1}
+ .experiment h1{font-family:"Space Grotesk",system-ui,sans-serif;font-size:clamp(33px,5vw,60px);margin:4px 0 8px;letter-spacing:-2px}
+ .experiment .lead{color:#b5c6dd;line-height:1.6;margin:0 0 22px;max-width:720px}
+ .experiment .tag{color:#88efad;font-size:11px;font-weight:800;letter-spacing:1.6px}
+ .experiment-stats{display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px;padding:19px;background:#19253e;border:1px solid #425577;border-radius:16px 16px 0 0}
+ .experiment-stats span{display:block;color:#99acc9;letter-spacing:1px;font-size:10px;font-weight:700}
+ .experiment-stats b{display:block;font-size:22px;margin-top:4px}
+ .experiment-view{position:relative;background:#182642;border:1px solid #425577;border-top:0;min-height:280px;overflow:hidden}
+ .experiment-view canvas{display:block;width:100%;height:auto;aspect-ratio:auto;touch-action:manipulation;cursor:crosshair;image-rendering:pixelated}
+ .experiment-view .busy{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center;padding:20px;color:#d1f9df;background:#15203ae8}
+ .experiment-view .busy[hidden]{display:none}
+ .experiment-actions{padding:15px;background:#19253e;border:1px solid #425577;border-top:0;border-radius:0 0 16px 16px}
+ .experiment-buttons{display:flex;flex-wrap:wrap;gap:12px}
+ .experiment-buttons button{min-height:50px;padding:12px 16px;border-radius:10px;border:1px solid #53647f;background:#273852;color:#f0f7ff;font-weight:700;flex:1;cursor:pointer}
+ .experiment-buttons button[aria-pressed="true"]{background:#224f43;border:2px solid #8cebb1}
+ .experiment-buttons button[hidden]{display:none}
+ .experiment-buttons .skill-action{flex:1 1 140px;min-width:110px}
+ .experiment-buttons .skill-action[aria-pressed="true"]{background:#2d6651;border:2px solid #8cebb1}
+ .experiment-buttons .skill-action:disabled{opacity:.4}
+ .experiment-buttons button:disabled{opacity:.55;cursor:not-allowed}
+ .experiment-buttons button.primary{background:#86e7ae;color:#123448;border:0}
+ .experiment-buttons button:focus-visible{outline:3px solid #c3f9d5;outline-offset:3px}
+ .experiment-view canvas{user-select:none;-webkit-user-select:none}
+ .experiment-buttons button#step{border-color:#89aeac;background:#21433f;color:#ddfff0}
+ .experiment-buttons button#undo{border-color:#e5b06f;background:#3a3341;color:#ffe0ba}
+ .easy-mode #step,.easy-mode #speed{display:none}
+ .experiment-warning{font-size:13px;line-height:1.55;font-weight:700;padding:11px 12px;border-radius:9px;background:#5b332a;color:#ffe4ad;margin:12px 0 0}
+ .experiment-warning[hidden]{display:none}
+ .level-select{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 18px;color:#b5c6dd;font-size:13px;font-weight:700}
+ .level-select select{flex:1;min-width:220px;max-width:540px;background:#283851;color:#f4fff8;border:1px solid #536985;border-radius:9px;padding:11px;font:inherit;min-height:44px}
+ .compat-warning{border:1px solid #ac8b58;border-radius:10px;background:#413422;color:#ffe1b2;padding:12px 15px;font-size:13px;line-height:1.6;margin:10px 0 20px}
+ .compat-warning[hidden]{display:none}
+ .experiment-hint{min-height:22px}
+ @media(max-width:660px){.experiment-buttons button{flex:1 1 42%}.experiment-buttons button#restart{flex:1 1 100%}}
+ .experiment-hint{font-size:13px;line-height:1.6;color:#bccde4;margin:13px 3px 0}
+ .experiment-help{margin-top:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ .experiment-help article{background:#1a273f;border:1px solid #3f4f6e;border-radius:12px;padding:16px}
+ .experiment-help h2{font-size:16px;margin:0 0 8px}
+ .experiment-help p{font-size:13px;line-height:1.7;color:#afbdd3;margin:0}
+ .experiment-result{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:#0a1128dd;z-index:9}
+ .experiment-result[hidden]{display:none}
+ .experiment-result>div{width:min(430px,100%);background:#1d2b46;border:1px solid #62826e;border-radius:18px;padding:28px;text-align:center}
+ .experiment-result h2{font-size:29px;margin:8px 0 5px}
+ .experiment-result p{line-height:1.6;color:#bed0e1}
+ .experiment-result button{margin:6px 0;width:100%;min-height:46px;border-radius:9px;border:1px solid #4c6481;background:#2d405a;color:#f5fcfe;font-weight:800}
+ @media(max-width:660px){.experiment{padding:10px 10px 28px}.experiment-stats{padding:12px 6px}.experiment-stats b{font-size:18px}.experiment-help{grid-template-columns:1fr}.experiment-buttons button{flex:1 1 40%;font-size:12px}.experiment-view{min-height:175px}}
+</style>
+<script type="module" src="/src/lix/play.js"></script>
 </head>
 <body>
-  <div class="site">
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="Daily Lemming home"><span class="brand-symbol">✳</span> DAILY<span>LEMMING</span><span class="brand-dot">.</span></a>
-      <div class="topbar-right">
-        <span class="pill" id="today-label">UTC DAILY CHALLENGE</span>
-        <span class="streak"><span aria-hidden="true">🔥</span> <strong id="streak">0</strong> day streak</span>
-      </div>
-    </header>
-
-    <main>
-      <section class="intro">
-        <div class="eyebrow"><span class="live-dot"></span> ONE LEVEL. ONE DAY. EVERYONE.</div>
-        <h1>Little legs.<br><em>Big decisions.</em></h1>
-        <p>A fresh five-minute escape puzzle every day. Guide your tiny wanderers home, one ridiculous solution at a time.</p>
-      </section>
-      <section class="game-shell" aria-label="Today's escape puzzle">
-        <div class="game-head">
-          <div>
-            <div class="chapter" id="chapter">TODAY'S ESCAPE · #1</div>
-            <h2 id="level-title">Bridge at Dusk</h2>
-            <p id="level-subtitle">Mind the gap. A builder can make a path.</p>
-          </div>
-          <div class="difficulty" id="difficulty">EASY</div>
-        </div>
-        <div class="game-stats">
-          <div><small>RESCUED</small><strong><span id="saved">0</span><span class="stat-secondary" id="total">/8</span></strong></div>
-          <div><small>TO PASS</small><strong id="required">6</strong></div>
-          <div><small>TIME LEFT</small><strong id="time">02:30</strong></div>
-          <div><small>SKILLS USED</small><strong id="used">0</strong></div>
-        </div>
-        <div class="viewport">
-          <canvas id="game" width="880" height="360" role="img" aria-label="Side-scrolling rescue game: tap a moving creature to assign the selected skill"></canvas>
-          <span class="game-label">DAY <span id="day-tag">001</span></span>
-          <span class="build-label">PLAYABLE ALPHA</span>
-        </div>
-        <div class="landscape-tip" aria-live="polite">📱 For easier aiming, rotate your phone to landscape. You can pause while assigning skills.</div>
-        <div class="tools">
-          <div class="tools-top"><span>GIVE THEM A SKILL</span><small>Choose a skill, then tap a wanderer</small></div>
-          <div id="skills" class="skill-grid" aria-label="Available rescue skills"></div>
-          <div class="play-actions">
-            <button type="button" id="pause" class="play-button">⏸ Pause</button>
-            <button type="button" id="speed" class="play-button">⏩ 1× Speed</button>
-            <button type="button" id="restart" class="play-button">↻ Restart</button>
-          </div>
-          <p class="message" id="message" role="status">Get your little wanderers home!</p>
-        </div>
-      </section>
-      <section class="below-game">
-        <div class="below-card">
-          <div class="tiny-heading">🏆 YOUR DAILY RECORD</div>
-          <h3 id="record-title">A fresh start</h3>
-          <p id="record-copy">Your first completed run counts as today's first attempt. Replay as often as you like to improve your best.</p>
-        </div>
-        <div class="below-card">
-          <div class="tiny-heading">🕛 THE DAILY RESET</div>
-          <h3>Same puzzle. Every player.</h3>
-          <p>Today's challenge is the same for everyone and changes at 00:00 UTC. Come back tomorrow for another rescue.</p>
-        </div>
-      </section>
-      <section class="below-card" style="margin-top:20px">
-        <div class="tiny-heading">🟢 NEW · REAL LIX ART & PRACTICE LEVELS</div>
-        <h3>Build. Bridge. Bash. Escape!</h3>
-        <p>Seven verified practice levels now include proper crowd management: one brave Blocker redirects the others, then you combine Blocker and Builder to rescue the group. Mining and digging now fling little pixel-soil particles too. Practice never affects today's streak.</p>
-        <p style="margin-top:12px"><a href="./play-lix.html">Play the tutorial →</a> · <a href="./play-lix.html?level=double-trouble">Double Trouble</a> · <a href="./play-lix.html?level=tunnel-time">Tunnel Time</a> · <a href="./play-lix.html?level=dig-for-freedom">Dig for Freedom</a> · <a href="./play-lix.html?level=secret-passage">Secret Passage</a> · <a href="./play-lix.html?level=turnaround">Turnaround</a> · <a href="./play-lix.html?level=bridge-brigade">Bridge Brigade</a> · <a href="./play-lix.html?level=pitfall">Community maps</a></p>
-      </section>
-      <div class="credits">An independently made Lemmings-inspired experiment. Original placeholder artwork and levels. No official affiliation with the Lemmings game or its owners. <a href="https://github.com/gurprit/dailylemming">Source on GitHub</a>.</div>
-    </main>
+<main class="experiment">
+ <nav class="experiment-nav">
+  <a href="./index.html">✳ DAILY<span style="color:#86e7ae">LEMMING</span></a>
+  <small><a href="./daily.html">Original daily prototype</a> · <a href="./sprites.html">Animations</a> · <a href="./lab.html">Level Lab</a></small>
+ </nav>
+ <div class="tag" id="mode-tag">🌿 EASY PRACTICE · ONE LITTLE BRIDGE</div>
+ <h1 id="level-title">Little Bridge</h1>
+ <p class="lead" id="level-intro">One small gap. Three builders. No nasty steel ceiling. Build a little bridge and get your Lemming home.</p>
+ <label class="level-select" for="level-picker">
+  <span>Choose a level</span>
+  <select id="level-picker" aria-label="Choose a practice or imported Lix level">
+   <option value="little-bridge">🌱 Little Bridge · verified tutorial</option>
+   <option value="double-trouble">🌉 Double Trouble · verified next level</option>
+   <option value="tunnel-time">⛏️ Tunnel Time · verified Basher level</option>
+   <option value="dig-for-freedom">🕳️ Dig for Freedom · verified Digger level</option>
+   <option value="secret-passage">⛏ Secret Passage · verified two-skill level</option>
+   <option value="turnaround">🛑 Turnaround · verified Blocker crowd puzzle</option>
+   <option value="bridge-brigade">🌉 Bridge Brigade · verified Blocker + Builder</option>
+   <option value="pitfall">🧩 Pitfall · original Lix experiment</option>
+   <option value="building-block-maze">🏰 Building Block Maze · original Lix experiment</option>
+   <option value="6gaps">⚒️ 6 Gaps, 5 Builders · hard experiment</option>
+  </select>
+ </label>
+ <p class="compat-warning" id="compat-warning" role="status" hidden></p>
+ <section aria-label="Playable puzzle">
+  <div class="experiment-stats">
+   <div><span>RESCUED</span><b id="saved">0/1</b></div>
+   <div><span>SKILLS LEFT</span><b id="builders">3</b></div>
+   <div><span>TIME</span><b id="timer">00:00</b></div>
+   <div><span>STATE</span><b id="state">READY</b></div>
   </div>
-  <div class="overlay" id="result-overlay" hidden>
-    <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
-      <div class="result-symbol" id="result-symbol">✦</div>
-      <div class="eyebrow">TODAY'S ESCAPE</div>
-      <h2 id="result-title">They made it!</h2>
-      <p id="result-description"></p>
-      <div class="result-metrics"><div><small>RESCUED</small><strong id="result-saved">0/8</strong></div><div><small>SKILLS</small><strong id="result-used">0</strong></div><div><small>TIME</small><strong id="result-time">0s</strong></div></div>
-      <button id="share" class="primary-action">Share your result ↗</button>
-      <button id="again" class="secondary-action">Play again · Practice mode</button>
-      <button id="close" class="secondary-action">Close</button>
-    </div>
+  <div class="experiment-view">
+   <canvas id="playfield" width="512" height="288" role="img" aria-label="A walking creature, one small gap, a builder skill and exit"></canvas>
+   <div class="busy" id="loading" role="status">Loading original CC0 level graphics and building terrain collision map…</div>
   </div>
+  <div class="experiment-actions">
+   <div class="experiment-buttons">
+    <button id="skill-builder" class="skill-action" type="button" aria-pressed="true">🧱 Builder · 3</button>
+    <button id="skill-blocker" class="skill-action" type="button" hidden>🛑 Blocker</button>
+    <button id="skill-basher" class="skill-action" type="button" hidden>⛏️ Basher</button>
+    <button id="skill-digger" class="skill-action" type="button" hidden>🕳️ Digger</button>
+    <button id="skill-miner" class="skill-action" type="button" hidden>⛏ Miner</button>
+    <button id="pause" class="primary" type="button">▶ Start</button>
+    <button id="step" type="button" disabled title="Advance exactly one physics frame while paused">▸ Step frame</button>
+    <button id="undo" type="button" disabled title="Restore terrain and position before your last skill assignment">↶ Undo skill</button>
+    <button id="speed" type="button">⏩ 1× speed</button>
+    <button id="restart" type="button">↻ Restart</button>
+   </div>
+   <p id="preview-warning" class="experiment-warning" role="status" hidden></p>
+   <p id="message" class="experiment-hint" role="status">Press Start, select a skill, then tap a grounded Lix to assign it.</p>
+  </div>
+ </section>
+ <div class="experiment-help">
+  <article><h2>🏆 Your level record</h2><p id="practice-best">Your first rescue awaits</p><p style="margin-top:10px">Improve by using fewer builders, then by finishing faster. Practice is kept on this device and never affects daily streaks.</p></article>
+  <article><h2>How to play</h2><p>Press Start. As your Lemming approaches the gap, tap it near BUILD HERE to lay a staircase. On advanced levels, select Builder, Blocker, Basher, Digger or Miner and tap a grounded creature. Undo (Ctrl/Cmd+Z) restores the last skill. When a Lix reaches the exit, watch its escape animation before results appear. Press Space to pause, or R to restart.</p></article>
+  <article><h2>About this experiment</h2><p>Little Bridge, Double Trouble, Tunnel Time, Dig for Freedom, Secret Passage, Turnaround and Bridge Brigade are verified solvable. Pitfall, Building Block Maze and 6 Gaps load their authentic CC0 source layouts but remain unverified, because some original skills and precise physics are not yet supported. Real Lix source, tiles, colour-masked terrain and collisions are loaded. Terrain and triggers are imported from Lix; movement is closer to the original 15-updates-per-second physics, but has not been verified against a genuine Lix replay. Does not affect your daily streak. Run <code>npm run lix:vendor:first</code> locally to cache artwork; published builds include it.</p></article>
+ </div>
+ <p style="font-size:13px;color:#b5c6dd;margin:20px 0 5px"><span id="art-status">Loading Lix character sprites…</span> · <a href="./sprites.html">View all character animations</a></p>
+ <p class="credits"><span id="credit">Original introductory level by Daily Lemming. CC0 artwork from Lix.</span> <a id="source-link" href="https://github.com/gurprit/dailylemming/blob/feat/lix-physics-polish/content/original/little-bridge.txt">View level source</a></p>
+</main>
+<div id="result" class="experiment-result" hidden>
+ <div role="dialog" aria-modal="true" aria-labelledby="result-heading">
+  <div style="font-size:46px" id="result-icon">✦</div>
+  <h2 id="result-heading">Run finished!</h2>
+  <p id="result-summary"></p>
+  <button id="result-next" type="button" hidden style="background:#86e7ae;color:#123448;border:0">Next level: Double Trouble →</button>
+  <button id="result-retry" type="button">Try again</button>
+  <button id="result-close" type="button">Close</button>
+ </div>
+</div>
 </body>
 </html>
