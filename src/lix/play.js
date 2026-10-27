@@ -4,6 +4,8 @@ import doubleTroubleLevel from '../../content/original/double-trouble.txt?raw';
 import tunnelTimeLevel from '../../content/original/tunnel-time.txt?raw';
 import digForFreedomLevel from '../../content/original/dig-for-freedom.txt?raw';
 import secretPassageLevel from '../../content/original/secret-passage.txt?raw';
+import turnaroundLevel from '../../content/original/turnaround.txt?raw';
+import bridgeBrigadeLevel from '../../content/original/bridge-brigade.txt?raw';
 import pitfallLevel from '../../content/lix/lovely/pitfall.txt?raw';
 import mazeLevel from '../../content/lix/lovely/buildingblock.txt?raw';
 import { LEVEL_OPTIONS, resolveLevelId } from './level-options.js';
@@ -26,7 +28,8 @@ const ctx = canvas.getContext('2d');
 const levelId = resolveLevelId(new URLSearchParams(location.search).get('level'));
 const config = LEVEL_OPTIONS[levelId];
 const source = {
-  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, '6gaps': trickyLevel,
+  'little-bridge': friendlyLevel, 'double-trouble': doubleTroubleLevel, 'tunnel-time': tunnelTimeLevel, 'dig-for-freedom': digForFreedomLevel, 'secret-passage': secretPassageLevel, turnaround: turnaroundLevel,
+  'bridge-brigade': bridgeBrigadeLevel, '6gaps': trickyLevel,
   pitfall: pitfallLevel, 'building-block-maze': mazeLevel
 }[levelId];
 const sourcePath = config.verified
@@ -234,6 +237,24 @@ function draw() {
       ctx.restore();
     }
   }
+  if (levelId === 'turnaround' || levelId === 'bridge-brigade') {
+    ctx.save();
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#b1ffd1';
+    const hints = [{label:'BLOCK HERE', x:234, y:186}];
+    if (levelId === 'bridge-brigade') hints.push({label:'BUILD HERE', x:560, y:184});
+    for (const h of hints) {
+      ctx.fillText(h.label, h.x, h.y);
+      ctx.fillRect(h.x - 1, h.y + 6, 2, 12);
+      ctx.beginPath();
+      ctx.moveTo(h.x - 5, h.y + 16);
+      ctx.lineTo(h.x, h.y + 22);
+      ctx.lineTo(h.x + 5, h.y + 16);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   if (levelId === 'secret-passage') {
     ctx.save();
     ctx.font = 'bold 11px system-ui';
@@ -353,7 +374,9 @@ function finish() {
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
     : levelId === 'tunnel-time' ? 'dig-for-freedom'
-    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
+    : levelId === 'dig-for-freedom' ? 'secret-passage'
+    : levelId === 'secret-passage' ? 'turnaround'
+    : levelId === 'turnaround' ? 'bridge-brigade' : null;
   el('result-next').hidden = !(snap.won && next);
   el('result-next').textContent = next
     ? 'Next level: ' + LEVEL_OPTIONS[next].name + ' →' : '';
@@ -389,6 +412,11 @@ function loop(now) {
       if (event.type === 'drowned') say('The wanderer fell into danger. Try another route!');
       if (event.type === 'exit-started') say('Freedom! ✨ Watch your Lix leap through the exit…');
       if (event.type === 'blocked') say('The Blocker turned another Lix around!');
+      if (event.type === 'assigned' && event.detail === 'blocker'
+          && levelId === 'bridge-brigade' && model.remaining.builder > 0) {
+        selectedSkill = 'builder';
+        say('Blocker in place! Builder selected. Now guide the next Lix over the gap.');
+      }
       if (event.type === 'basher-steel' || event.type === 'digger-steel')
         say('That steel cannot be cut. Try another route.');
       if (event.type === 'basher-finished') say('The Basher has finished tunnelling.');
@@ -515,7 +543,9 @@ el('result-next').addEventListener('click', () => {
   const next = levelId === 'little-bridge' ? 'double-trouble'
     : levelId === 'double-trouble' ? 'tunnel-time'
     : levelId === 'tunnel-time' ? 'dig-for-freedom'
-    : levelId === 'dig-for-freedom' ? 'secret-passage' : null;
+    : levelId === 'dig-for-freedom' ? 'secret-passage'
+    : levelId === 'secret-passage' ? 'turnaround'
+    : levelId === 'turnaround' ? 'bridge-brigade' : null;
   if (next) window.location.href = './play-lix.html?level=' + next;
 });
 el('result-retry').addEventListener('click', restart);
@@ -547,7 +577,8 @@ async function boot() {
     spriteCache = terrainImages;
     characterAtlas = atlas;
     model = new LixGameModel(level, spriteCache);
-    selectedSkill = levelId === 'secret-passage' ? 'miner'
+    selectedSkill = ['turnaround','bridge-brigade'].includes(levelId) ? 'blocker'
+      : levelId === 'secret-passage' ? 'miner'
       : Object.keys(SKILL_LABELS)
         .find(skill => model.remaining[skill] > 0) || 'builder';
     el('art-status').textContent = characterAtlas
