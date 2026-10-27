@@ -1,8 +1,8 @@
 name: Publish GitHub Pages
 
+# GitHub Pages has not been enabled for this repository. Keep this as an
+# optional fallback, invoked manually after enabling Pages in repo Settings.
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
 
 permissions:
