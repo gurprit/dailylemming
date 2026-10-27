@@ -705,10 +705,12 @@ window.addEventListener('keydown', event => {
 });
 // Keep the tab honest when somebody plays across a 00:00 UTC reset.
 function checkDailyReset() {
-  if (!dailyMode || utcDay() === daily.day) return;
+  if (!(dailyMode || mysteryMode) || utcDay() === daily.day) return;
   if (model && !model.done) model.paused = true;
-  say('A new UTC daily puzzle is ready. Reload to play today\'s challenge!');
-  el('daily-date').textContent = 'NEW CHALLENGE AVAILABLE · RELOAD';
+  say(mysteryMode
+    ? 'A new mystery level is ready! Reload to discover your next puzzle.'
+    : 'A new verified daily challenge is ready! Reload to play.');
+  if (dailyMode) el('daily-date').textContent = 'NEW CHALLENGE AVAILABLE · RELOAD';
 }
 window.addEventListener('focus', checkDailyReset);
 const resetPoll = window.setInterval(checkDailyReset, 60_000);
@@ -763,7 +765,7 @@ async function boot() {
     warning.textContent = config.verified ? ''
       : config.category === 'official-tutorial'
         ? 'Authentic CC0 Lix beginner tutorial. Our browser physics differ from the original; this level loads but has not yet passed a full-solution test.'
-        : 'This imported level is experimental. Original physics and some abilities are still unavailable; a win is not guaranteed.';
+        : 'Authentic Lix community puzzle. Every listed skill is available in our browser adapter, but native physics and full winning solutions have not yet been verified. Try different approaches!';
     document.title = level.title + ' | Daily Lemming';
     say(config.hint);
     el('loading').hidden = true;
