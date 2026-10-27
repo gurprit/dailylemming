@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { PNG } from 'pngjs';
 import { detectLixFrames, cutLixFrame } from '../src/lix/frames.js';
+import { frameIsPresent } from '../src/lix/characters.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const asset = path.join(root, 'public/lix/characters/lixsprites.png');
@@ -26,11 +27,11 @@ for (let row = 0; row < layout.rows; row++) {
     // with the same grid colour; alpha presence is a conservative fallback.
     for (let i = 3; i < frame.data.length; i += 4)
       if (frame.data[i] >= 96) visiblePixels++;
-    frames.push({ index: col, visiblePixels });
+    frames.push({ index: col, visiblePixels, present: frameIsPresent(raw,layout,col,row) });
   }
   rows.push({
     row, activity: activityNames[row] || 'unknown',
-    framesWithPixels: frames.filter(f => f.visiblePixels > 0).length,
+    framesWithPixels: frames.filter(f => f.present).length,
     nonemptyFrames: frames.filter(f => f.visiblePixels > 0).map(f => f.index),
     counts: frames.map(f => f.visiblePixels)
   });
