@@ -211,6 +211,7 @@ function loop(now) {
       const event = model.events[processedEvents++];
       if (event.type === 'landed') say('Landed safely. Tap the walker to build a bridge.');
       if (event.type === 'builder-finished') say('Staircase finished. Another builder can be assigned.');
+      if (event.type === 'builder-continued') say('Queued builder activated, staircase continuing!');
       if (event.type === 'builder-blocked') say('Builder hit an obstacle and turned around.');
       if (event.type === 'drowned') say('The wanderer fell into danger. Try another route!');
     }
@@ -248,16 +249,19 @@ canvas.addEventListener('pointerdown', event => {
   const y = (event.clientY - rect.top) * canvas.height / rect.height;
   // At least 40 CSS pixels of hit target on phones, regardless of canvas scale.
   const radius = Math.max(27, 40 * canvas.width / rect.width);
-  const index = model.units.findIndex(u => u.state === 'walking'
+  const index = model.units.findIndex(u => ['walking', 'builder'].includes(u.state)
     && Math.hypot(x - u.x, y - (u.y - 10)) <= radius);
   if (index < 0) {
     say('Tap the walker when it is standing on terrain. You can pause and step forward to aim.');
     return;
   }
+  const wasBuilding = model.units[index]?.state === 'builder';
   if (model.assignBuilder(index)) {
-    say('Builder assigned! A staircase is being constructed.');
+    say(wasBuilding
+      ? 'Another builder queued! The staircase will continue without stopping.'
+      : 'Builder assigned! A staircase is being constructed.');
   } else {
-    say('Builders can only start from solid ground, not during a fall or another build.');
+    say('Start builders on solid ground, or tap an active builder to queue another staircase.');
   }
   updateHud();
 });
